@@ -1,0 +1,121 @@
+Objetivo: Criar uma aplicação web completa emNodejs com next para gerenciar o processo de desligamento de funcionários. O sistema deve permitir o registro de demissões e visualizar dados agregados em dashboards.
+
+Tecnologias a Utilizar:
+
+    Backend: Nodejs com o framework Next.
+
+    Banco de Dados: Postgress para simplicidade e facilidade de configuração. 
+
+    Frontend: React responsivo
+
+    Gráficos: Utilize a biblioteca https://ui.shadcn.com/
+
+Estrutura do Projeto e Modelos de Dados (Banco de Dados):
+
+Por favor, crie os seguintes modelos de dados com SQL
+
+    Empresa
+
+        id (Chave Primária, Inteiro)
+
+        nome (String, obrigatório, único)
+
+    Gestor
+
+        id (Chave Primária, Inteiro)
+
+        nome (String, obrigatório)
+
+        empresa_id (Chave Estrangeira para Empresa.id)
+
+        empresa (Relacionamento com o modelo Empresa)
+
+    Funcionario
+
+        id (Chave Primária, Inteiro)
+
+        nome (String, obrigatório)
+
+        cargo (String)
+
+        gestor_id (Chave Estrangeira para Gestor.id)
+
+        gestor (Relacionamento com o modelo Gestor)
+
+    Desligamento
+
+        id (Chave Primária, Inteiro)
+
+        data_desligamento (Data, obrigatório)
+
+        motivo (String, opcional)
+
+        funcionario_id (Chave Estrangeira para Funcionario.id)
+
+        empresa_id (Chave Estrangeira para Empresa.id)
+
+        gestor_id (Chave Estrangeira para Gestor.id)
+
+        funcionario (Relacionamento com o modelo Funcionario)
+
+        empresa (Relacionamento com o modelo Empresa)
+
+        gestor (Relacionamento com o modelo Gestor)
+
+Funcionalidades e Páginas da Aplicação:
+
+1. CRUD de Desligamentos:
+
+    Página Principal (/): Deve exibir uma lista/tabela com todos os desligamentos registrados. A tabela deve conter colunas para: Nome do Funcionário, Cargo, Nome do Gestor, Nome da Empresa e Data do Desligamento.
+
+    Página de Cadastro de Desligamento (/desligamento/novo):
+
+        Deve conter um formulário para registrar um novo desligamento.
+
+        O formulário deve ter campos para selecionar (usando menus dropdown) um funcionário, sua empresa e seu gestor.
+
+        Incluir um campo de data para a data_desligamento.
+
+        Após o envio, o sistema salva o novo registro no banco de dados e redireciona para a página principal.
+
+2. Endpoints de API para os Dashboards:
+Crie duas rotas de API que retornem dados em formato JSON para alimentar os gráficos:
+
+    /api/dados/desligamentos_por_gestor: Deve retornar um JSON com os nomes dos gestores e a contagem total de desligamentos associados a cada um. Exemplo: {"labels": ["Ana Silva", "João Costa"], "data": [5, 8]}.
+
+    /api/dados/desligamentos_por_empresa: Deve retornar um JSON com os nomes das empresas e a contagem total de desligamentos em cada uma. Exemplo: {"labels": ["Empresa A", "Empresa B"], "data": [10, 15]}.
+
+3. Página de Dashboard (/dashboard):
+
+    Esta página deve exibir os dados visuais.
+
+    Gráfico 1: Desligamentos por Gestor:
+
+        Use a biblioteca Chart.js para criar um gráfico de barras.
+
+        O eixo X deve mostrar o nome de cada Gestor.
+
+        O eixo Y deve mostrar a quantidade de funcionários desligados sob a responsabilidade daquele gestor.
+
+        O gráfico deve buscar os dados do endpoint /api/dados/desligamentos_por_gestor usando JavaScript (fetch API).
+
+    Gráfico 2: Desligamentos por Empresa:
+
+        Crie um segundo gráfico de barras (ou de pizza).
+
+        O eixo X deve mostrar o nome de cada Empresa.
+
+        O eixo Y deve mostrar a quantidade total de desligamentos naquela empresa.
+
+        O gráfico deve buscar os dados do endpoint /api/dados/desligamentos_por_empresa.
+
+Instruções Adicionais:
+
+    Crie também páginas simples para cadastrar Empresas, Gestores e Funcionários, para que o sistema possa ser populado com dados.
+
+    Gere o requirements.txt com todas as dependências sql 
+
+    Organize o código de forma clara, separando rotas, modelos e templates HTML em pastas diferentes.
+
+Por favor, gere a estrutura completa do projeto com o código inicial para todas essas funcionalidades.
+
