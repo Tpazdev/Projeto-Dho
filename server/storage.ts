@@ -38,10 +38,10 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-  async createEmpresa(insertEmpresa: InsertEmpresa): Promise<Empresa> {
+  async createEmpresa(data: InsertEmpresa): Promise<Empresa> {
     const [empresa] = await db
       .insert(empresas)
-      .values(insertEmpresa)
+      .values(data)
       .returning();
     return empresa;
   }
@@ -55,10 +55,10 @@ export class DatabaseStorage implements IStorage {
     return empresa || undefined;
   }
 
-  async createGestor(insertGestor: InsertGestor): Promise<Gestor> {
+  async createGestor(data: InsertGestor): Promise<Gestor> {
     const [gestor] = await db
       .insert(gestores)
-      .values(insertGestor)
+      .values(data)
       .returning();
     return gestor;
   }
@@ -72,10 +72,10 @@ export class DatabaseStorage implements IStorage {
     return gestor || undefined;
   }
 
-  async createFuncionario(insertFuncionario: InsertFuncionario): Promise<Funcionario> {
+  async createFuncionario(data: InsertFuncionario): Promise<Funcionario> {
     const [funcionario] = await db
       .insert(funcionarios)
-      .values(insertFuncionario)
+      .values(data)
       .returning();
     return funcionario;
   }
@@ -89,10 +89,10 @@ export class DatabaseStorage implements IStorage {
     return funcionario || undefined;
   }
 
-  async createDesligamento(insertDesligamento: InsertDesligamento): Promise<Desligamento> {
+  async createDesligamento(data: InsertDesligamento): Promise<Desligamento> {
     const [desligamento] = await db
       .insert(desligamentos)
-      .values(insertDesligamento)
+      .values(data)
       .returning();
     return desligamento;
   }

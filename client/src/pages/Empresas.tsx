@@ -1,19 +1,38 @@
 import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { CrudTable } from "@/components/CrudTable";
 import { AddDialog } from "@/components/AddDialog";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 export default function Empresas() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const mockEmpresas = [
-    { id: 1, nome: "Tech Solutions" },
-    { id: 2, nome: "Inovação Corp" },
-    { id: 3, nome: "Digital Ventures" },
-    { id: 4, nome: "Software House Brasil" },
-    { id: 5, nome: "Consultoria TI" },
-  ];
+  const { data: empresas = [], isLoading } = useQuery({
+    queryKey: ["/api/empresas"],
+  });
+
+  const mutation = useMutation({
+    mutationFn: async (data: Record<string, string>) => {
+      return await apiRequest("/api/empresas", "POST", data);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/empresas"] });
+      toast({
+        title: "Empresa adicionada",
+        description: `${variables.nome} foi adicionada com sucesso.`,
+      });
+      setDialogOpen(false);
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao adicionar empresa.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const columns = [
     { header: "ID", accessor: "id" as const },
@@ -30,14 +49,9 @@ export default function Empresas() {
     },
   ];
 
-  const handleSubmit = (data: Record<string, string>) => {
-    console.log("Nova empresa:", data);
-    toast({
-      title: "Empresa adicionada",
-      description: `${data.nome} foi adicionada com sucesso.`,
-    });
-    setDialogOpen(false);
-  };
+  if (isLoading) {
+    return <div className="text-center py-8">Carregando...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -50,7 +64,7 @@ export default function Empresas() {
 
       <CrudTable
         title="Empresas Cadastradas"
-        data={mockEmpresas}
+        data={empresas}
         columns={columns}
         onAddClick={() => setDialogOpen(true)}
         emptyMessage="Nenhuma empresa cadastrada"
@@ -62,7 +76,7 @@ export default function Empresas() {
         title="Adicionar Empresa"
         description="Preencha os dados para adicionar uma nova empresa"
         fields={fields}
-        onSubmit={handleSubmit}
+        onSubmit={(data) => mutation.mutate(data)}
       />
     </div>
   );

@@ -1,20 +1,53 @@
 import { UserX, Building2, UserCog, TrendingUp } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { StatCard } from "@/components/StatCard";
 import { DashboardCharts } from "@/components/DashboardCharts";
 
 export default function Dashboard() {
-  const mockGestoresData = [
-    { name: "Ana Santos", value: 8 },
-    { name: "João Costa", value: 5 },
-    { name: "Patricia Lima", value: 3 },
-    { name: "Roberto Alves", value: 7 },
-  ];
+  const { data: gestoresData } = useQuery({
+    queryKey: ["/api/dados/desligamentos_por_gestor"],
+  });
 
-  const mockEmpresasData = [
-    { name: "Tech Solutions", value: 15 },
-    { name: "Inovação Corp", value: 10 },
-    { name: "Digital Ventures", value: 8 },
-  ];
+  const { data: empresasData } = useQuery({
+    queryKey: ["/api/dados/desligamentos_por_empresa"],
+  });
+
+  const { data: desligamentos = [] } = useQuery({
+    queryKey: ["/api/desligamentos"],
+  });
+
+  const { data: empresas = [] } = useQuery({
+    queryKey: ["/api/empresas"],
+  });
+
+  const { data: gestores = [] } = useQuery({
+    queryKey: ["/api/gestores"],
+  });
+
+  const chartGestoresData = gestoresData
+    ? gestoresData.labels.map((label: string, i: number) => ({
+        name: label,
+        value: gestoresData.data[i],
+      }))
+    : [];
+
+  const chartEmpresasData = empresasData
+    ? empresasData.labels.map((label: string, i: number) => ({
+        name: label,
+        value: empresasData.data[i],
+      }))
+    : [];
+
+  const totalDesligamentos = desligamentos.length;
+  const totalEmpresas = empresas.length;
+  const totalGestores = gestores.length;
+
+  const now = new Date();
+  const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const desligamentosLastMonth = desligamentos.filter((d: any) => {
+    const date = new Date(d.dataDesligamento);
+    return date >= lastMonth && date < now;
+  }).length;
 
   return (
     <div className="space-y-6">
@@ -28,31 +61,33 @@ export default function Dashboard() {
       <div className="grid gap-4 md:grid-cols-4">
         <StatCard
           title="Total Desligamentos"
-          value={33}
+          value={totalDesligamentos}
           icon={UserX}
-          description="Último mês"
+          description="Total registrado"
         />
         <StatCard
           title="Empresas"
-          value={3}
+          value={totalEmpresas}
           icon={Building2}
           description="Ativas no sistema"
         />
         <StatCard
           title="Gestores"
-          value={12}
+          value={totalGestores}
           icon={UserCog}
           description="Cadastrados"
         />
         <StatCard
-          title="Média Mensal"
-          value="11"
+          title="Último Mês"
+          value={desligamentosLastMonth}
           icon={TrendingUp}
-          description="Últimos 3 meses"
+          description="Desligamentos"
         />
       </div>
 
-      <DashboardCharts gestoresData={mockGestoresData} empresasData={mockEmpresasData} />
+      {gestoresData && empresasData && (
+        <DashboardCharts gestoresData={chartGestoresData} empresasData={chartEmpresasData} />
+      )}
     </div>
   );
 }

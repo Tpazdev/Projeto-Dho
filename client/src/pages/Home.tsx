@@ -1,51 +1,13 @@
 import { Link } from "wouter";
 import { Plus } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { DesligamentosTable } from "@/components/DesligamentosTable";
 
 export default function Home() {
-  const mockDesligamentos = [
-    {
-      id: 1,
-      funcionarioNome: "Carlos Silva",
-      cargo: "Desenvolvedor Senior",
-      gestorNome: "Ana Santos",
-      empresaNome: "Tech Solutions",
-      dataDesligamento: "2024-01-15",
-    },
-    {
-      id: 2,
-      funcionarioNome: "Maria Oliveira",
-      cargo: "Gerente de Projetos",
-      gestorNome: "João Costa",
-      empresaNome: "Inovação Corp",
-      dataDesligamento: "2024-02-20",
-    },
-    {
-      id: 3,
-      funcionarioNome: "Pedro Santos",
-      cargo: "Analista de Sistemas",
-      gestorNome: "Ana Santos",
-      empresaNome: "Tech Solutions",
-      dataDesligamento: "2024-03-10",
-    },
-    {
-      id: 4,
-      funcionarioNome: "Juliana Costa",
-      cargo: "Designer UX",
-      gestorNome: "Patricia Lima",
-      empresaNome: "Digital Ventures",
-      dataDesligamento: "2024-03-25",
-    },
-    {
-      id: 5,
-      funcionarioNome: "Roberto Almeida",
-      cargo: "Engenheiro de Software",
-      gestorNome: "Ana Santos",
-      empresaNome: "Tech Solutions",
-      dataDesligamento: "2024-04-05",
-    },
-  ];
+  const { data: desligamentos = [], isLoading } = useQuery({
+    queryKey: ["/api/desligamentos"],
+  });
 
   return (
     <div className="space-y-6">
@@ -64,7 +26,11 @@ export default function Home() {
         </Link>
       </div>
 
-      <DesligamentosTable desligamentos={mockDesligamentos} />
+      {isLoading ? (
+        <div className="text-center text-muted-foreground py-8">Carregando...</div>
+      ) : (
+        <DesligamentosTable desligamentos={desligamentos} />
+      )}
     </div>
   );
 }

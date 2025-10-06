@@ -1,40 +1,51 @@
 import { useLocation } from "wouter";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { DesligamentoForm } from "@/components/DesligamentoForm";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 export default function NovoDesligamento() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  const mockEmpresas = [
-    { id: 1, nome: "Tech Solutions" },
-    { id: 2, nome: "Inovação Corp" },
-    { id: 3, nome: "Digital Ventures" },
-  ];
+  const { data: empresas = [], isLoading: loadingEmpresas } = useQuery({
+    queryKey: ["/api/empresas"],
+  });
 
-  const mockGestores = [
-    { id: 1, nome: "Ana Santos", empresaId: 1 },
-    { id: 2, nome: "João Costa", empresaId: 2 },
-    { id: 3, nome: "Patricia Lima", empresaId: 3 },
-    { id: 4, nome: "Roberto Alves", empresaId: 1 },
-  ];
+  const { data: gestores = [], isLoading: loadingGestores } = useQuery({
+    queryKey: ["/api/gestores"],
+  });
 
-  const mockFuncionarios = [
-    { id: 1, nome: "Carlos Silva", cargo: "Desenvolvedor Senior", gestorId: 1 },
-    { id: 2, nome: "Maria Oliveira", cargo: "Gerente de Projetos", gestorId: 2 },
-    { id: 3, nome: "Pedro Santos", cargo: "Analista de Sistemas", gestorId: 1 },
-    { id: 4, nome: "Juliana Costa", cargo: "Designer UX", gestorId: 3 },
-    { id: 5, nome: "Roberto Almeida", cargo: "Engenheiro de Software", gestorId: 4 },
-  ];
+  const { data: funcionarios = [], isLoading: loadingFuncionarios } = useQuery({
+    queryKey: ["/api/funcionarios"],
+  });
 
-  const handleSubmit = (data: any) => {
-    console.log("Desligamento registrado:", data);
-    toast({
-      title: "Desligamento registrado",
-      description: "O desligamento foi registrado com sucesso.",
-    });
-    setTimeout(() => setLocation("/"), 1000);
-  };
+  const mutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest("/api/desligamentos", "POST", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/desligamentos"] });
+      toast({
+        title: "Desligamento registrado",
+        description: "O desligamento foi registrado com sucesso.",
+      });
+      setTimeout(() => setLocation("/"), 1000);
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao registrar desligamento.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const isLoading = loadingEmpresas || loadingGestores || loadingFuncionarios;
+
+  if (isLoading) {
+    return <div className="text-center py-8">Carregando...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -46,10 +57,11 @@ export default function NovoDesligamento() {
       </div>
 
       <DesligamentoForm
-        empresas={mockEmpresas}
-        gestores={mockGestores}
-        funcionarios={mockFuncionarios}
-        onSubmit={handleSubmit}
+        empresas={empresas}
+        gestores={gestores}
+        funcionarios={funcionarios}
+        onSubmit={(data) => mutation.mutate(data)}
+        isLoading={mutation.isPending}
       />
     </div>
   );

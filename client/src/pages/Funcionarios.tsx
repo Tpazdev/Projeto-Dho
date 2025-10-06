@@ -1,26 +1,54 @@
 import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { CrudTable } from "@/components/CrudTable";
 import { AddDialog } from "@/components/AddDialog";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 export default function Funcionarios() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const mockGestores = [
-    { id: 1, nome: "Ana Santos" },
-    { id: 2, nome: "João Costa" },
-    { id: 3, nome: "Patricia Lima" },
-    { id: 4, nome: "Roberto Alves" },
-  ];
+  const { data: gestores = [] } = useQuery({
+    queryKey: ["/api/gestores"],
+  });
 
-  const mockFuncionarios = [
-    { id: 1, nome: "Carlos Silva", cargo: "Desenvolvedor Senior", gestorId: 1, gestorNome: "Ana Santos" },
-    { id: 2, nome: "Maria Oliveira", cargo: "Gerente de Projetos", gestorId: 2, gestorNome: "João Costa" },
-    { id: 3, nome: "Pedro Santos", cargo: "Analista de Sistemas", gestorId: 1, gestorNome: "Ana Santos" },
-    { id: 4, nome: "Juliana Costa", cargo: "Designer UX", gestorId: 3, gestorNome: "Patricia Lima" },
-    { id: 5, nome: "Roberto Almeida", cargo: "Engenheiro de Software", gestorId: 4, gestorNome: "Roberto Alves" },
-  ];
+  const { data: funcionarios = [], isLoading } = useQuery({
+    queryKey: ["/api/funcionarios"],
+  });
+
+  const mutation = useMutation({
+    mutationFn: async (data: Record<string, string>) => {
+      return await apiRequest("/api/funcionarios", "POST", {
+        nome: data.nome,
+        cargo: data.cargo,
+        gestorId: parseInt(data.gestorId),
+      });
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/funcionarios"] });
+      toast({
+        title: "Funcionário adicionado",
+        description: `${variables.nome} foi adicionado com sucesso.`,
+      });
+      setDialogOpen(false);
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao adicionar funcionário.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const funcionariosWithGestor = funcionarios.map((funcionario: any) => {
+    const gestor = gestores.find((g: any) => g.id === funcionario.gestorId);
+    return {
+      ...funcionario,
+      gestorNome: gestor?.nome || "N/A",
+    };
+  });
 
   const columns = [
     { header: "ID", accessor: "id" as const },
@@ -50,21 +78,16 @@ export default function Funcionarios() {
       type: "select" as const,
       placeholder: "Selecione um gestor",
       required: true,
-      options: mockGestores.map((g) => ({
+      options: gestores.map((g: any) => ({
         value: g.id.toString(),
         label: g.nome,
       })),
     },
   ];
 
-  const handleSubmit = (data: Record<string, string>) => {
-    console.log("Novo funcionário:", data);
-    toast({
-      title: "Funcionário adicionado",
-      description: `${data.nome} foi adicionado com sucesso.`,
-    });
-    setDialogOpen(false);
-  };
+  if (isLoading) {
+    return <div className="text-center py-8">Carregando...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -77,7 +100,7 @@ export default function Funcionarios() {
 
       <CrudTable
         title="Funcionários Cadastrados"
-        data={mockFuncionarios}
+        data={funcionariosWithGestor}
         columns={columns}
         onAddClick={() => setDialogOpen(true)}
         emptyMessage="Nenhum funcionário cadastrado"
@@ -89,7 +112,7 @@ export default function Funcionarios() {
         title="Adicionar Funcionário"
         description="Preencha os dados para adicionar um novo funcionário"
         fields={fields}
-        onSubmit={handleSubmit}
+        onSubmit={(data) => mutation.mutate(data)}
       />
     </div>
   );

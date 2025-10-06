@@ -1,25 +1,53 @@
 import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { CrudTable } from "@/components/CrudTable";
 import { AddDialog } from "@/components/AddDialog";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 export default function Gestores() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const mockEmpresas = [
-    { id: 1, nome: "Tech Solutions" },
-    { id: 2, nome: "Inovação Corp" },
-    { id: 3, nome: "Digital Ventures" },
-  ];
+  const { data: empresas = [] } = useQuery({
+    queryKey: ["/api/empresas"],
+  });
 
-  const mockGestores = [
-    { id: 1, nome: "Ana Santos", empresaId: 1, empresaNome: "Tech Solutions" },
-    { id: 2, nome: "João Costa", empresaId: 2, empresaNome: "Inovação Corp" },
-    { id: 3, nome: "Patricia Lima", empresaId: 3, empresaNome: "Digital Ventures" },
-    { id: 4, nome: "Roberto Alves", empresaId: 1, empresaNome: "Tech Solutions" },
-    { id: 5, nome: "Fernanda Silva", empresaId: 2, empresaNome: "Inovação Corp" },
-  ];
+  const { data: gestores = [], isLoading } = useQuery({
+    queryKey: ["/api/gestores"],
+  });
+
+  const mutation = useMutation({
+    mutationFn: async (data: Record<string, string>) => {
+      return await apiRequest("/api/gestores", "POST", {
+        nome: data.nome,
+        empresaId: parseInt(data.empresaId),
+      });
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/gestores"] });
+      toast({
+        title: "Gestor adicionado",
+        description: `${variables.nome} foi adicionado com sucesso.`,
+      });
+      setDialogOpen(false);
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao adicionar gestor.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const gestoresWithEmpresa = gestores.map((gestor: any) => {
+    const empresa = empresas.find((e: any) => e.id === gestor.empresaId);
+    return {
+      ...gestor,
+      empresaNome: empresa?.nome || "N/A",
+    };
+  });
 
   const columns = [
     { header: "ID", accessor: "id" as const },
@@ -41,21 +69,16 @@ export default function Gestores() {
       type: "select" as const,
       placeholder: "Selecione uma empresa",
       required: true,
-      options: mockEmpresas.map((e) => ({
+      options: empresas.map((e: any) => ({
         value: e.id.toString(),
         label: e.nome,
       })),
     },
   ];
 
-  const handleSubmit = (data: Record<string, string>) => {
-    console.log("Novo gestor:", data);
-    toast({
-      title: "Gestor adicionado",
-      description: `${data.nome} foi adicionado com sucesso.`,
-    });
-    setDialogOpen(false);
-  };
+  if (isLoading) {
+    return <div className="text-center py-8">Carregando...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -68,7 +91,7 @@ export default function Gestores() {
 
       <CrudTable
         title="Gestores Cadastrados"
-        data={mockGestores}
+        data={gestoresWithEmpresa}
         columns={columns}
         onAddClick={() => setDialogOpen(true)}
         emptyMessage="Nenhum gestor cadastrado"
@@ -80,7 +103,7 @@ export default function Gestores() {
         title="Adicionar Gestor"
         description="Preencha os dados para adicionar um novo gestor"
         fields={fields}
-        onSubmit={handleSubmit}
+        onSubmit={(data) => mutation.mutate(data)}
       />
     </div>
   );
