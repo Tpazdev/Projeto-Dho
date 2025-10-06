@@ -15,7 +15,7 @@ export default function Empresas() {
 
   const mutation = useMutation({
     mutationFn: async (data: Record<string, string>) => {
-      return await apiRequest("/api/empresas", "POST", data);
+      return await apiRequest("POST", "/api/empresas", data);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/empresas"] });

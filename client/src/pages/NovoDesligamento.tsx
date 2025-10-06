@@ -22,7 +22,7 @@ export default function NovoDesligamento() {
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest("/api/desligamentos", "POST", data);
+      return await apiRequest("POST", "/api/desligamentos", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/desligamentos"] });

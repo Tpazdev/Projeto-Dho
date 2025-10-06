@@ -19,7 +19,7 @@ export default function Funcionarios() {
 
   const mutation = useMutation({
     mutationFn: async (data: Record<string, string>) => {
-      return await apiRequest("/api/funcionarios", "POST", {
+      return await apiRequest("POST", "/api/funcionarios", {
         nome: data.nome,
         cargo: data.cargo,
         gestorId: parseInt(data.gestorId),

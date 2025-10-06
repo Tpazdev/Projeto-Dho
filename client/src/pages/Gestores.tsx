@@ -19,7 +19,7 @@ export default function Gestores() {
 
   const mutation = useMutation({
     mutationFn: async (data: Record<string, string>) => {
-      return await apiRequest("/api/gestores", "POST", {
+      return await apiRequest("POST", "/api/gestores", {
         nome: data.nome,
         empresaId: parseInt(data.empresaId),
       });
