@@ -1,0 +1,161 @@
+# Employee Termination Management System
+
+## Overview
+
+A comprehensive web application for managing employee termination processes in Portuguese (Brazilian). The system tracks terminations (desligamentos) across companies, managers (gestores), and employees (funcionários), providing dashboard analytics and detailed record-keeping capabilities.
+
+**Core Purpose**: Streamline HR workflows for employee termination tracking with data visualization and reporting features.
+
+**Tech Stack**:
+- Frontend: React + TypeScript with Vite
+- Backend: Express.js (Node.js)
+- Database: PostgreSQL via Neon serverless
+- ORM: Drizzle ORM
+- UI Framework: Shadcn UI with Radix UI primitives
+- Styling: Tailwind CSS
+- State Management: TanStack Query (React Query)
+- Routing: Wouter
+
+## User Preferences
+
+Preferred communication style: Simple, everyday language.
+
+## System Architecture
+
+### Frontend Architecture
+
+**Component Structure**:
+- **Design System**: Shadcn UI component library with customized "New York" style variant
+- **Routing**: Client-side routing using Wouter (lightweight alternative to React Router)
+- **State Management**: TanStack Query for server state with custom query client configuration
+- **Form Handling**: React Hook Form with Zod validation via @hookform/resolvers
+- **Theme System**: Custom dark/light mode provider with localStorage persistence
+
+**Key Design Decisions**:
+- Monorepo structure with shared TypeScript types between client and server (`shared/schema.ts`)
+- Path aliases configured for clean imports (`@/`, `@shared/`, `@assets/`)
+- Component organization: UI primitives in `/ui`, business components at root level
+- Responsive design with mobile-first breakpoints
+
+**UI/UX Approach**:
+- Professional corporate aesthetic prioritizing data clarity
+- Dark mode as primary theme (design_guidelines.md specifies dark-first approach)
+- Consistent spacing and typography using Inter font family
+- Chart visualizations for termination analytics
+
+### Backend Architecture
+
+**API Structure**:
+- RESTful endpoints under `/api` prefix
+- Express.js middleware for JSON parsing and request logging
+- Storage abstraction layer (`IStorage` interface in `server/storage.ts`)
+- Centralized error handling middleware
+
+**Key Endpoints**:
+- `/api/empresas` - Company management (GET, POST)
+- `/api/gestores` - Manager management (GET, POST)
+- `/api/funcionarios` - Employee management (GET, POST)
+- `/api/desligamentos` - Termination records (GET, POST)
+- `/api/dados/*` - Aggregated analytics endpoints
+
+**Database Layer**:
+- Drizzle ORM with type-safe schema definitions
+- Connection pooling via Neon serverless driver
+- Migration system using `drizzle-kit`
+- Schema-first approach with Zod validation generated from Drizzle schemas
+
+### Data Architecture
+
+**Database Schema** (PostgreSQL):
+
+1. **empresas** (Companies)
+   - `id`: Auto-incrementing primary key
+   - `nome`: Unique company name (text, required)
+
+2. **gestores** (Managers)
+   - `id`: Auto-incrementing primary key
+   - `nome`: Manager name (text, required)
+   - `empresaId`: Foreign key to empresas
+
+3. **funcionarios** (Employees)
+   - `id`: Auto-incrementing primary key
+   - `nome`: Employee name (text, required)
+   - `cargo`: Position/role (text, optional)
+   - `gestorId`: Foreign key to gestores
+
+4. **desligamentos** (Terminations)
+   - `id`: Auto-incrementing primary key
+   - `dataDesligamento`: Termination date (date, required)
+   - `motivo`: Termination reason (text, optional)
+   - `funcionarioId`: Foreign key to funcionarios
+   - `empresaId`: Foreign key to empresas
+   - `gestorId`: Foreign key to gestores
+
+**Design Patterns**:
+- Normalized relational structure with referential integrity
+- Denormalized views for dashboard queries (computed joins)
+- Type safety through Drizzle schema → Zod → TypeScript pipeline
+
+### Development Workflow
+
+**Build Process**:
+- `npm run dev`: Development mode with Vite HMR and tsx server watch
+- `npm run build`: Vite client build + esbuild server bundle
+- `npm run start`: Production server serving static assets
+- `npm run db:push`: Schema migration to database
+
+**Development Features**:
+- Vite middleware integration for HMR in development
+- Runtime error overlay via @replit/vite-plugin-runtime-error-modal
+- Source mapping for debugging
+- Auto-reload on server changes
+
+## External Dependencies
+
+### Third-Party Services
+
+1. **Neon Database** (PostgreSQL)
+   - Serverless PostgreSQL hosting
+   - WebSocket-based connection via `@neondatabase/serverless`
+   - Configured via `DATABASE_URL` environment variable
+   - Required for all database operations
+
+2. **Google Fonts**
+   - Inter font family loaded via CDN
+   - Used for all typography (UI and display text)
+
+### UI Component Libraries
+
+**Radix UI Primitives** (Headless components):
+- Dialog, Popover, Select, Dropdown Menu
+- Accordion, Tabs, Toast notifications
+- Checkbox, Radio Group, Switch
+- Tooltip, Hover Card, Context Menu
+- Navigation Menu, Menubar, Sidebar primitives
+
+**Charting Library**:
+- Recharts for data visualization
+- Bar charts for termination analytics
+- Custom chart container with theme integration
+
+### Development Dependencies
+
+**Build Tools**:
+- Vite: Frontend build tool and dev server
+- esbuild: Server-side bundling
+- tsx: TypeScript execution for development
+- PostCSS with Tailwind and Autoprefixer
+
+**Replit Integrations**:
+- `@replit/vite-plugin-cartographer`: Code mapping
+- `@replit/vite-plugin-dev-banner`: Development environment indicator
+- Custom runtime error modal for debugging
+
+### Utility Libraries
+
+- `clsx` + `tailwind-merge`: Conditional className utilities
+- `date-fns`: Date formatting and manipulation (pt-BR locale support)
+- `class-variance-authority`: Type-safe variant management for components
+- `cmdk`: Command palette component base
+- `embla-carousel-react`: Carousel functionality
+- `nanoid`: Unique ID generation
