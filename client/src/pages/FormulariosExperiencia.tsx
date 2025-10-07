@@ -3,11 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Calendar, User, AlertCircle } from "lucide-react";
+import { FileText, Calendar, User, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FormularioExperienciaForm } from "@/components/FormularioExperienciaForm";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 type FormularioExperienciaItem = {
   id: number;
@@ -26,22 +26,11 @@ type FormularioExperienciaItem = {
 };
 
 export default function FormulariosExperiencia() {
-  const [selectedFormulario, setSelectedFormulario] = useState<FormularioExperienciaItem | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [expandedId, setExpandedId] = useState<number | null>(null);
 
   const { data: formularios = [], isLoading } = useQuery<FormularioExperienciaItem[]>({
     queryKey: ["/api/formularios-experiencia"],
   });
-
-  const handlePreencherFormulario = (formulario: FormularioExperienciaItem) => {
-    setSelectedFormulario(formulario);
-    setDialogOpen(true);
-  };
-
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
-    setSelectedFormulario(null);
-  };
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -63,6 +52,10 @@ export default function FormulariosExperiencia() {
     return new Date(dataLimite) < new Date();
   };
 
+  const handleToggle = (id: number) => {
+    setExpandedId(expandedId === id ? null : id);
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -71,7 +64,7 @@ export default function FormulariosExperiencia() {
             Formulários de Experiência
           </h1>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="space-y-4">
           {[1, 2, 3].map((i) => (
             <Card key={i} className="animate-pulse">
               <CardHeader>
@@ -113,44 +106,81 @@ export default function FormulariosExperiencia() {
             <AlertCircle className="h-5 w-5 text-yellow-500" />
             Pendentes ({pendentes.length})
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="space-y-4">
             {pendentes.map((formulario) => {
               const vencido = isVencido(formulario.dataLimite);
+              const isExpanded = expandedId === formulario.id;
+              
               return (
-                <Card
+                <Collapsible
                   key={formulario.id}
-                  className={vencido ? "border-red-500/50" : ""}
-                  data-testid={`card-formulario-${formulario.id}`}
+                  open={isExpanded}
+                  onOpenChange={() => handleToggle(formulario.id)}
                 >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <CardTitle className="text-lg">{formulario.funcionarioNome}</CardTitle>
-                      {getStatusBadge(formulario.status)}
-                    </div>
-                    <CardDescription className="flex items-center gap-1">
-                      <User className="h-3 w-3" />
-                      Gestor: {formulario.gestorNome}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span className={vencido ? "text-red-500 font-semibold" : ""}>
-                        {vencido ? "Vencido em " : "Prazo: "}
-                        {format(new Date(formulario.dataLimite), "dd/MM/yyyy", { locale: ptBR })}
-                      </span>
-                    </div>
-                    <Button
-                      onClick={() => handlePreencherFormulario(formulario)}
-                      className="w-full"
-                      variant={vencido ? "destructive" : "default"}
-                      data-testid={`button-preencher-${formulario.id}`}
-                    >
-                      <FileText className="h-4 w-4 mr-2" />
-                      Preencher Avaliação
-                    </Button>
-                  </CardContent>
-                </Card>
+                  <Card
+                    className={vencido ? "border-red-500/50" : ""}
+                    data-testid={`card-formulario-${formulario.id}`}
+                  >
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3">
+                            <CardTitle className="text-lg">{formulario.funcionarioNome}</CardTitle>
+                            {getStatusBadge(formulario.status)}
+                          </div>
+                          <CardDescription className="flex items-center gap-1 mt-2">
+                            <User className="h-3 w-3" />
+                            Gestor: {formulario.gestorNome}
+                          </CardDescription>
+                        </div>
+                        <CollapsibleTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            data-testid={`button-toggle-${formulario.id}`}
+                          >
+                            {isExpanded ? (
+                              <ChevronUp className="h-4 w-4" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </CollapsibleTrigger>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span className={vencido ? "text-red-500 font-semibold" : ""}>
+                          {vencido ? "Vencido em " : "Prazo: "}
+                          {format(new Date(formulario.dataLimite), "dd/MM/yyyy", { locale: ptBR })}
+                        </span>
+                      </div>
+
+                      <CollapsibleContent>
+                        <div className="pt-4 border-t mt-4">
+                          <FormularioExperienciaForm
+                            formulario={formulario}
+                            onClose={() => setExpandedId(null)}
+                          />
+                        </div>
+                      </CollapsibleContent>
+
+                      {!isExpanded && (
+                        <CollapsibleTrigger asChild>
+                          <Button
+                            className="w-full"
+                            variant={vencido ? "destructive" : "default"}
+                            data-testid={`button-preencher-${formulario.id}`}
+                          >
+                            <FileText className="h-4 w-4 mr-2" />
+                            Preencher Avaliação
+                          </Button>
+                        </CollapsibleTrigger>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Collapsible>
               );
             })}
           </div>
@@ -162,47 +192,87 @@ export default function FormulariosExperiencia() {
           <h2 className="text-xl font-semibold mb-4" data-testid="text-section-preenchidos">
             Preenchidos ({preenchidos.length})
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {preenchidos.map((formulario) => (
-              <Card key={formulario.id} data-testid={`card-formulario-${formulario.id}`}>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <CardTitle className="text-lg">{formulario.funcionarioNome}</CardTitle>
-                    {getStatusBadge(formulario.status)}
-                  </div>
-                  <CardDescription className="flex items-center gap-1">
-                    <User className="h-3 w-3" />
-                    Gestor: {formulario.gestorNome}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span>
-                      Preenchido em:{" "}
-                      {formulario.dataPreenchimento
-                        ? format(new Date(formulario.dataPreenchimento), "dd/MM/yyyy", { locale: ptBR })
-                        : "-"}
-                    </span>
-                  </div>
-                  {formulario.desempenho && (
-                    <div className="text-sm">
-                      <span className="font-semibold">Desempenho: </span>
-                      {formulario.desempenho}/10
-                    </div>
-                  )}
-                  <Button
-                    onClick={() => handlePreencherFormulario(formulario)}
-                    variant="outline"
-                    className="w-full"
-                    data-testid={`button-visualizar-${formulario.id}`}
-                  >
-                    <FileText className="h-4 w-4 mr-2" />
-                    Ver Detalhes
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="space-y-4">
+            {preenchidos.map((formulario) => {
+              const isExpanded = expandedId === formulario.id;
+              
+              return (
+                <Collapsible
+                  key={formulario.id}
+                  open={isExpanded}
+                  onOpenChange={() => handleToggle(formulario.id)}
+                >
+                  <Card data-testid={`card-formulario-${formulario.id}`}>
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3">
+                            <CardTitle className="text-lg">{formulario.funcionarioNome}</CardTitle>
+                            {getStatusBadge(formulario.status)}
+                          </div>
+                          <CardDescription className="flex items-center gap-1 mt-2">
+                            <User className="h-3 w-3" />
+                            Gestor: {formulario.gestorNome}
+                          </CardDescription>
+                        </div>
+                        <CollapsibleTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            data-testid={`button-toggle-${formulario.id}`}
+                          >
+                            {isExpanded ? (
+                              <ChevronUp className="h-4 w-4" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </CollapsibleTrigger>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span>
+                          Preenchido em:{" "}
+                          {formulario.dataPreenchimento
+                            ? format(new Date(formulario.dataPreenchimento), "dd/MM/yyyy", { locale: ptBR })
+                            : "-"}
+                        </span>
+                      </div>
+                      {formulario.desempenho && (
+                        <div className="text-sm">
+                          <span className="font-semibold">Desempenho: </span>
+                          {formulario.desempenho}/10
+                        </div>
+                      )}
+
+                      <CollapsibleContent>
+                        <div className="pt-4 border-t mt-4">
+                          <FormularioExperienciaForm
+                            formulario={formulario}
+                            onClose={() => setExpandedId(null)}
+                          />
+                        </div>
+                      </CollapsibleContent>
+
+                      {!isExpanded && (
+                        <CollapsibleTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full"
+                            data-testid={`button-visualizar-${formulario.id}`}
+                          >
+                            <FileText className="h-4 w-4 mr-2" />
+                            Ver Detalhes
+                          </Button>
+                        </CollapsibleTrigger>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Collapsible>
+              );
+            })}
           </div>
         </div>
       )}
@@ -217,24 +287,6 @@ export default function FormulariosExperiencia() {
           </CardContent>
         </Card>
       )}
-
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {selectedFormulario?.status === "pendente"
-                ? "Preencher Avaliação de Experiência"
-                : "Detalhes da Avaliação de Experiência"}
-            </DialogTitle>
-            <DialogDescription>
-              Funcionário: {selectedFormulario?.funcionarioNome} | Gestor: {selectedFormulario?.gestorNome}
-            </DialogDescription>
-          </DialogHeader>
-          {selectedFormulario && (
-            <FormularioExperienciaForm formulario={selectedFormulario} onClose={handleCloseDialog} />
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
