@@ -19,6 +19,7 @@ export const funcionarios = pgTable("funcionarios", {
   nome: text("nome").notNull(),
   cargo: text("cargo"),
   gestorId: integer("gestor_id").notNull().references(() => gestores.id),
+  dataAdmissao: date("data_admissao"),
 });
 
 export const desligamentos = pgTable("desligamentos", {
@@ -46,6 +47,20 @@ export const documentosGestor = pgTable("documentos_gestor", {
   observacoes: text("observacoes"),
 });
 
+export const formulariosExperiencia = pgTable("formularios_experiencia", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  funcionarioId: integer("funcionario_id").notNull().references(() => funcionarios.id),
+  gestorId: integer("gestor_id").notNull().references(() => gestores.id),
+  dataLimite: date("data_limite").notNull(),
+  status: text("status").notNull().default("pendente"),
+  dataPreenchimento: date("data_preenchimento"),
+  desempenho: text("desempenho"),
+  pontosFortes: text("pontos_fortes"),
+  pontosMelhoria: text("pontos_melhoria"),
+  recomendacao: text("recomendacao"),
+  observacoes: text("observacoes"),
+});
+
 export const insertEmpresaSchema = createInsertSchema(empresas).omit({
   id: true,
 });
@@ -70,6 +85,10 @@ export const insertDocumentoGestorSchema = createInsertSchema(documentosGestor).
   id: true,
 });
 
+export const insertFormularioExperienciaSchema = createInsertSchema(formulariosExperiencia).omit({
+  id: true,
+});
+
 export type InsertEmpresa = z.infer<typeof insertEmpresaSchema>;
 export type Empresa = typeof empresas.$inferSelect;
 
@@ -87,3 +106,6 @@ export type DocumentoFuncionario = typeof documentosFuncionario.$inferSelect;
 
 export type InsertDocumentoGestor = z.infer<typeof insertDocumentoGestorSchema>;
 export type DocumentoGestor = typeof documentosGestor.$inferSelect;
+
+export type InsertFormularioExperiencia = z.infer<typeof insertFormularioExperienciaSchema>;
+export type FormularioExperiencia = typeof formulariosExperiencia.$inferSelect;
