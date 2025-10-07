@@ -220,7 +220,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/formularios-experiencia/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const formulario = await storage.updateFormularioExperiencia(id, req.body);
+      const data = req.body;
+
+      if (data.desempenho !== undefined) {
+        const desempenho = Number(data.desempenho);
+        if (isNaN(desempenho) || desempenho < 0 || desempenho > 10) {
+          return res.status(400).json({ error: "Desempenho deve ser um número entre 0 e 10" });
+        }
+        data.desempenho = desempenho;
+      }
+
+      if (data.recomendacao !== undefined) {
+        if (!["aprovado", "reprovado"].includes(data.recomendacao)) {
+          return res.status(400).json({ error: "Recomendação deve ser 'aprovado' ou 'reprovado'" });
+        }
+      }
+
+      if (data.desempenho !== undefined || data.pontosFortes !== undefined || data.pontosMelhoria !== undefined) {
+        data.status = "preenchido";
+        data.dataPreenchimento = new Date().toISOString().split("T")[0];
+      }
+
+      const formulario = await storage.updateFormularioExperiencia(id, data);
       res.json(formulario);
     } catch (error) {
       res.status(400).json({ error: "Erro ao atualizar formulário" });

@@ -54,7 +54,7 @@ export const formulariosExperiencia = pgTable("formularios_experiencia", {
   dataLimite: date("data_limite").notNull(),
   status: text("status").notNull().default("pendente"),
   dataPreenchimento: date("data_preenchimento"),
-  desempenho: text("desempenho"),
+  desempenho: integer("desempenho"),
   pontosFortes: text("pontos_fortes"),
   pontosMelhoria: text("pontos_melhoria"),
   recomendacao: text("recomendacao"),

@@ -61,7 +61,7 @@ export function FormularioExperienciaForm({ formulario, onClose }: FormularioExp
     mutationFn: async (data: FormularioFormData) => {
       const payload = {
         ...data,
-        status: data.recomendacao,
+        status: "preenchido",
         dataPreenchimento: new Date().toISOString().split("T")[0],
       };
       return await apiRequest("PATCH", `/api/formularios-experiencia/${formulario.id}`, payload);
