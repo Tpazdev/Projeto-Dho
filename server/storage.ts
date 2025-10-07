@@ -4,6 +4,7 @@ import {
   funcionarios,
   desligamentos,
   documentosFuncionario,
+  documentosGestor,
   type Empresa,
   type InsertEmpresa,
   type Gestor,
@@ -14,6 +15,8 @@ import {
   type InsertDesligamento,
   type DocumentoFuncionario,
   type InsertDocumentoFuncionario,
+  type DocumentoGestor,
+  type InsertDocumentoGestor,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql } from "drizzle-orm";
@@ -42,6 +45,10 @@ export interface IStorage {
   createDocumentoFuncionario(documento: InsertDocumentoFuncionario): Promise<DocumentoFuncionario>;
   getDocumentosByFuncionario(funcionarioId: number): Promise<DocumentoFuncionario[]>;
   deleteDocumentoFuncionario(id: number): Promise<void>;
+
+  createDocumentoGestor(documento: InsertDocumentoGestor): Promise<DocumentoGestor>;
+  getDocumentosByGestor(gestorId: number): Promise<DocumentoGestor[]>;
+  deleteDocumentoGestor(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -187,6 +194,25 @@ export class DatabaseStorage implements IStorage {
 
   async deleteDocumentoFuncionario(id: number): Promise<void> {
     await db.delete(documentosFuncionario).where(eq(documentosFuncionario.id, id));
+  }
+
+  async createDocumentoGestor(data: InsertDocumentoGestor): Promise<DocumentoGestor> {
+    const [documento] = await db
+      .insert(documentosGestor)
+      .values(data)
+      .returning();
+    return documento;
+  }
+
+  async getDocumentosByGestor(gestorId: number): Promise<DocumentoGestor[]> {
+    return await db
+      .select()
+      .from(documentosGestor)
+      .where(eq(documentosGestor.gestorId, gestorId));
+  }
+
+  async deleteDocumentoGestor(id: number): Promise<void> {
+    await db.delete(documentosGestor).where(eq(documentosGestor.id, id));
   }
 }
 
