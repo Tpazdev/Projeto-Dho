@@ -14,6 +14,7 @@ import NovoDesligamento from "@/pages/NovoDesligamento";
 import Empresas from "@/pages/Empresas";
 import Gestores from "@/pages/Gestores";
 import Funcionarios from "@/pages/Funcionarios";
+import FormulariosExperiencia from "@/pages/FormulariosExperiencia";
 
 function Router() {
   return (
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/empresas" component={Empresas} />
       <Route path="/gestores" component={Gestores} />
       <Route path="/funcionarios" component={Funcionarios} />
+      <Route path="/formularios-experiencia" component={FormulariosExperiencia} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Building2, UserCog, UserX } from "lucide-react";
+import { LayoutDashboard, Users, Building2, UserCog, UserX, FileText } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
   Sidebar,
@@ -21,6 +21,11 @@ const items = [
     title: "Desligamentos",
     url: "/",
     icon: UserX,
+  },
+  {
+    title: "Avaliações de Experiência",
+    url: "/formularios-experiencia",
+    icon: FileText,
   },
 ];
 
