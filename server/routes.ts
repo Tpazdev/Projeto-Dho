@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEmpresaSchema, insertGestorSchema, insertFuncionarioSchema, insertDesligamentoSchema, insertDocumentoFuncionarioSchema, insertDocumentoGestorSchema } from "@shared/schema";
+import { insertEmpresaSchema, insertGestorSchema, insertFuncionarioSchema, insertDesligamentoSchema, insertDocumentoFuncionarioSchema, insertDocumentoGestorSchema, insertFormularioExperienciaSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/empresas", async (req, res) => {
@@ -163,6 +163,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Erro ao deletar documento" });
+    }
+  });
+
+  app.get("/api/formularios-experiencia", async (req, res) => {
+    try {
+      const formularios = await storage.getFormulariosExperiencia();
+      res.json(formularios);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar formulários" });
+    }
+  });
+
+  app.get("/api/formularios-experiencia/pendentes", async (req, res) => {
+    try {
+      const formularios = await storage.getFormulariosExperienciaPendentes();
+      res.json(formularios);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar formulários pendentes" });
+    }
+  });
+
+  app.get("/api/formularios-experiencia/gestor/:gestorId", async (req, res) => {
+    try {
+      const gestorId = parseInt(req.params.gestorId);
+      const formularios = await storage.getFormulariosExperienciaByGestor(gestorId);
+      res.json(formularios);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar formulários do gestor" });
+    }
+  });
+
+  app.get("/api/formularios-experiencia/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const formulario = await storage.getFormularioExperiencia(id);
+      if (!formulario) {
+        return res.status(404).json({ error: "Formulário não encontrado" });
+      }
+      res.json(formulario);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar formulário" });
+    }
+  });
+
+  app.post("/api/formularios-experiencia", async (req, res) => {
+    try {
+      const validated = insertFormularioExperienciaSchema.parse(req.body);
+      const formulario = await storage.createFormularioExperiencia(validated);
+      res.json(formulario);
+    } catch (error) {
+      res.status(400).json({ error: "Dados inválidos" });
+    }
+  });
+
+  app.patch("/api/formularios-experiencia/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const formulario = await storage.updateFormularioExperiencia(id, req.body);
+      res.json(formulario);
+    } catch (error) {
+      res.status(400).json({ error: "Erro ao atualizar formulário" });
     }
   });
 
