@@ -5,6 +5,7 @@ import {
   desligamentos,
   documentosFuncionario,
   documentosGestor,
+  formulariosExperiencia,
   type Empresa,
   type InsertEmpresa,
   type Gestor,
@@ -17,6 +18,8 @@ import {
   type InsertDocumentoFuncionario,
   type DocumentoGestor,
   type InsertDocumentoGestor,
+  type FormularioExperiencia,
+  type InsertFormularioExperiencia,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql } from "drizzle-orm";
@@ -49,6 +52,13 @@ export interface IStorage {
   createDocumentoGestor(documento: InsertDocumentoGestor): Promise<DocumentoGestor>;
   getDocumentosByGestor(gestorId: number): Promise<DocumentoGestor[]>;
   deleteDocumentoGestor(id: number): Promise<void>;
+
+  createFormularioExperiencia(formulario: InsertFormularioExperiencia): Promise<FormularioExperiencia>;
+  getFormulariosExperiencia(): Promise<any[]>;
+  getFormularioExperiencia(id: number): Promise<FormularioExperiencia | undefined>;
+  getFormulariosExperienciaPendentes(): Promise<any[]>;
+  getFormulariosExperienciaByGestor(gestorId: number): Promise<any[]>;
+  updateFormularioExperiencia(id: number, data: Partial<InsertFormularioExperiencia>): Promise<FormularioExperiencia>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -213,6 +223,102 @@ export class DatabaseStorage implements IStorage {
 
   async deleteDocumentoGestor(id: number): Promise<void> {
     await db.delete(documentosGestor).where(eq(documentosGestor.id, id));
+  }
+
+  async createFormularioExperiencia(data: InsertFormularioExperiencia): Promise<FormularioExperiencia> {
+    const [formulario] = await db
+      .insert(formulariosExperiencia)
+      .values(data)
+      .returning();
+    return formulario;
+  }
+
+  async getFormulariosExperiencia(): Promise<any[]> {
+    const result = await db
+      .select({
+        id: formulariosExperiencia.id,
+        funcionarioId: formulariosExperiencia.funcionarioId,
+        funcionarioNome: funcionarios.nome,
+        gestorId: formulariosExperiencia.gestorId,
+        gestorNome: gestores.nome,
+        dataLimite: formulariosExperiencia.dataLimite,
+        status: formulariosExperiencia.status,
+        dataPreenchimento: formulariosExperiencia.dataPreenchimento,
+        desempenho: formulariosExperiencia.desempenho,
+        pontosFortes: formulariosExperiencia.pontosFortes,
+        pontosMelhoria: formulariosExperiencia.pontosMelhoria,
+        recomendacao: formulariosExperiencia.recomendacao,
+        observacoes: formulariosExperiencia.observacoes,
+      })
+      .from(formulariosExperiencia)
+      .innerJoin(funcionarios, eq(formulariosExperiencia.funcionarioId, funcionarios.id))
+      .innerJoin(gestores, eq(formulariosExperiencia.gestorId, gestores.id))
+      .orderBy(formulariosExperiencia.dataLimite);
+
+    return result;
+  }
+
+  async getFormularioExperiencia(id: number): Promise<FormularioExperiencia | undefined> {
+    const [formulario] = await db
+      .select()
+      .from(formulariosExperiencia)
+      .where(eq(formulariosExperiencia.id, id));
+    return formulario || undefined;
+  }
+
+  async getFormulariosExperienciaPendentes(): Promise<any[]> {
+    const result = await db
+      .select({
+        id: formulariosExperiencia.id,
+        funcionarioId: formulariosExperiencia.funcionarioId,
+        funcionarioNome: funcionarios.nome,
+        gestorId: formulariosExperiencia.gestorId,
+        gestorNome: gestores.nome,
+        dataLimite: formulariosExperiencia.dataLimite,
+        status: formulariosExperiencia.status,
+      })
+      .from(formulariosExperiencia)
+      .innerJoin(funcionarios, eq(formulariosExperiencia.funcionarioId, funcionarios.id))
+      .innerJoin(gestores, eq(formulariosExperiencia.gestorId, gestores.id))
+      .where(eq(formulariosExperiencia.status, "pendente"))
+      .orderBy(formulariosExperiencia.dataLimite);
+
+    return result;
+  }
+
+  async getFormulariosExperienciaByGestor(gestorId: number): Promise<any[]> {
+    const result = await db
+      .select({
+        id: formulariosExperiencia.id,
+        funcionarioId: formulariosExperiencia.funcionarioId,
+        funcionarioNome: funcionarios.nome,
+        gestorId: formulariosExperiencia.gestorId,
+        gestorNome: gestores.nome,
+        dataLimite: formulariosExperiencia.dataLimite,
+        status: formulariosExperiencia.status,
+        dataPreenchimento: formulariosExperiencia.dataPreenchimento,
+        desempenho: formulariosExperiencia.desempenho,
+        pontosFortes: formulariosExperiencia.pontosFortes,
+        pontosMelhoria: formulariosExperiencia.pontosMelhoria,
+        recomendacao: formulariosExperiencia.recomendacao,
+        observacoes: formulariosExperiencia.observacoes,
+      })
+      .from(formulariosExperiencia)
+      .innerJoin(funcionarios, eq(formulariosExperiencia.funcionarioId, funcionarios.id))
+      .innerJoin(gestores, eq(formulariosExperiencia.gestorId, gestores.id))
+      .where(eq(formulariosExperiencia.gestorId, gestorId))
+      .orderBy(formulariosExperiencia.dataLimite);
+
+    return result;
+  }
+
+  async updateFormularioExperiencia(id: number, data: Partial<InsertFormularioExperiencia>): Promise<FormularioExperiencia> {
+    const [formulario] = await db
+      .update(formulariosExperiencia)
+      .set(data)
+      .where(eq(formulariosExperiencia.id, id))
+      .returning();
+    return formulario;
   }
 }
 
