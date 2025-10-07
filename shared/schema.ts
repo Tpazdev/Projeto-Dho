@@ -30,6 +30,14 @@ export const desligamentos = pgTable("desligamentos", {
   gestorId: integer("gestor_id").notNull().references(() => gestores.id),
 });
 
+export const documentosFuncionario = pgTable("documentos_funcionario", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  funcionarioId: integer("funcionario_id").notNull().references(() => funcionarios.id),
+  tipoDocumento: text("tipo_documento").notNull(),
+  numeroDocumento: text("numero_documento").notNull(),
+  observacoes: text("observacoes"),
+});
+
 export const insertEmpresaSchema = createInsertSchema(empresas).omit({
   id: true,
 });
@@ -46,6 +54,10 @@ export const insertDesligamentoSchema = createInsertSchema(desligamentos).omit({
   id: true,
 });
 
+export const insertDocumentoFuncionarioSchema = createInsertSchema(documentosFuncionario).omit({
+  id: true,
+});
+
 export type InsertEmpresa = z.infer<typeof insertEmpresaSchema>;
 export type Empresa = typeof empresas.$inferSelect;
 
@@ -57,3 +69,6 @@ export type Funcionario = typeof funcionarios.$inferSelect;
 
 export type InsertDesligamento = z.infer<typeof insertDesligamentoSchema>;
 export type Desligamento = typeof desligamentos.$inferSelect;
+
+export type InsertDocumentoFuncionario = z.infer<typeof insertDocumentoFuncionarioSchema>;
+export type DocumentoFuncionario = typeof documentosFuncionario.$inferSelect;

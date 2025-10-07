@@ -21,6 +21,7 @@ interface CrudTableProps<T extends { id: number }> {
   columns: Column<T>[];
   onAddClick: () => void;
   emptyMessage?: string;
+  actions?: (item: T) => React.ReactNode;
 }
 
 export function CrudTable<T extends { id: number }>({
@@ -29,6 +30,7 @@ export function CrudTable<T extends { id: number }>({
   columns,
   onAddClick,
   emptyMessage = "Nenhum registro encontrado",
+  actions,
 }: CrudTableProps<T>) {
   return (
     <Card>
@@ -47,12 +49,13 @@ export function CrudTable<T extends { id: number }>({
                 {columns.map((column, index) => (
                   <TableHead key={index}>{column.header}</TableHead>
                 ))}
+                {actions && <TableHead>Ações</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
               {data.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={columns.length} className="text-center text-muted-foreground">
+                  <TableCell colSpan={columns.length + (actions ? 1 : 0)} className="text-center text-muted-foreground">
                     {emptyMessage}
                   </TableCell>
                 </TableRow>
@@ -66,6 +69,7 @@ export function CrudTable<T extends { id: number }>({
                           : String(item[column.accessor])}
                       </TableCell>
                     ))}
+                    {actions && <TableCell>{actions(item)}</TableCell>}
                   </TableRow>
                 ))
               )}

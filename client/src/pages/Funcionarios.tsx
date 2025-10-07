@@ -2,11 +2,16 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { CrudTable } from "@/components/CrudTable";
 import { AddDialog } from "@/components/AddDialog";
+import { FuncionarioDetalhesDialog } from "@/components/FuncionarioDetalhesDialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Button } from "@/components/ui/button";
+import { FileText } from "lucide-react";
 
 export default function Funcionarios() {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [detalhesDialogOpen, setDetalhesDialogOpen] = useState(false);
+  const [funcionarioSelecionado, setFuncionarioSelecionado] = useState<any>(null);
   const { toast } = useToast();
 
   const { data: gestores = [] } = useQuery({
@@ -85,6 +90,11 @@ export default function Funcionarios() {
     },
   ];
 
+  const handleVerDetalhes = (funcionario: any) => {
+    setFuncionarioSelecionado(funcionario);
+    setDetalhesDialogOpen(true);
+  };
+
   if (isLoading) {
     return <div className="text-center py-8">Carregando...</div>;
   }
@@ -104,6 +114,17 @@ export default function Funcionarios() {
         columns={columns}
         onAddClick={() => setDialogOpen(true)}
         emptyMessage="Nenhum funcionário cadastrado"
+        actions={(funcionario) => (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleVerDetalhes(funcionario)}
+            data-testid={`button-detalhes-${funcionario.id}`}
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            Ver Detalhes
+          </Button>
+        )}
       />
 
       <AddDialog
@@ -113,6 +134,12 @@ export default function Funcionarios() {
         description="Preencha os dados para adicionar um novo funcionário"
         fields={fields}
         onSubmit={(data) => mutation.mutate(data)}
+      />
+
+      <FuncionarioDetalhesDialog
+        open={detalhesDialogOpen}
+        onOpenChange={setDetalhesDialogOpen}
+        funcionario={funcionarioSelecionado}
       />
     </div>
   );

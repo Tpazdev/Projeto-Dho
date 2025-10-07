@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEmpresaSchema, insertGestorSchema, insertFuncionarioSchema, insertDesligamentoSchema } from "@shared/schema";
+import { insertEmpresaSchema, insertGestorSchema, insertFuncionarioSchema, insertDesligamentoSchema, insertDocumentoFuncionarioSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/empresas", async (req, res) => {
@@ -95,6 +95,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(data);
     } catch (error) {
       res.status(500).json({ error: "Erro ao buscar dados" });
+    }
+  });
+
+  app.get("/api/funcionarios/:id/documentos", async (req, res) => {
+    try {
+      const funcionarioId = parseInt(req.params.id);
+      const documentos = await storage.getDocumentosByFuncionario(funcionarioId);
+      res.json(documentos);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar documentos" });
+    }
+  });
+
+  app.post("/api/funcionarios/:id/documentos", async (req, res) => {
+    try {
+      const funcionarioId = parseInt(req.params.id);
+      const validated = insertDocumentoFuncionarioSchema.parse({
+        ...req.body,
+        funcionarioId,
+      });
+      const documento = await storage.createDocumentoFuncionario(validated);
+      res.json(documento);
+    } catch (error) {
+      res.status(400).json({ error: "Dados inválidos" });
+    }
+  });
+
+  app.delete("/api/documentos/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteDocumentoFuncionario(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao deletar documento" });
     }
   });
 
