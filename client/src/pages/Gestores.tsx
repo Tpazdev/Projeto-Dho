@@ -100,7 +100,7 @@ export default function Gestores() {
         columns={columns}
         onAddClick={() => setDialogOpen(true)}
         emptyMessage="Nenhum gestor cadastrado"
-        customActions={(row) => (
+        actions={(row) => (
           <Button
             variant="outline"
             size="sm"
