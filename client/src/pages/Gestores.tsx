@@ -2,11 +2,16 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { CrudTable } from "@/components/CrudTable";
 import { AddDialog } from "@/components/AddDialog";
+import { GestorDetalhesDialog } from "@/components/GestorDetalhesDialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Button } from "@/components/ui/button";
+import { Eye } from "lucide-react";
 
 export default function Gestores() {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [detalhesDialogOpen, setDetalhesDialogOpen] = useState(false);
+  const [gestorSelecionado, setGestorSelecionado] = useState<any>(null);
   const { toast } = useToast();
 
   const { data: empresas = [] } = useQuery({
@@ -95,6 +100,20 @@ export default function Gestores() {
         columns={columns}
         onAddClick={() => setDialogOpen(true)}
         emptyMessage="Nenhum gestor cadastrado"
+        customActions={(row) => (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setGestorSelecionado(row);
+              setDetalhesDialogOpen(true);
+            }}
+            data-testid={`button-ver-detalhes-${row.id}`}
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            Ver Detalhes
+          </Button>
+        )}
       />
 
       <AddDialog
@@ -104,6 +123,12 @@ export default function Gestores() {
         description="Preencha os dados para adicionar um novo gestor"
         fields={fields}
         onSubmit={(data) => mutation.mutate(data)}
+      />
+
+      <GestorDetalhesDialog
+        open={detalhesDialogOpen}
+        onOpenChange={setDetalhesDialogOpen}
+        gestor={gestorSelecionado}
       />
     </div>
   );
