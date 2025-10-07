@@ -31,7 +31,7 @@ import {
   type InsertRespostaClima,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, and } from "drizzle-orm";
 
 export interface IStorage {
   createEmpresa(empresa: InsertEmpresa): Promise<Empresa>;
@@ -443,8 +443,10 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(respostasClima)
-      .where(eq(respostasClima.funcionarioId, funcionarioId))
-      .where(eq(respostasClima.pesquisaId, pesquisaId));
+      .where(and(
+        eq(respostasClima.funcionarioId, funcionarioId),
+        eq(respostasClima.pesquisaId, pesquisaId)
+      ));
   }
 
   async getAnalisePesquisa(pesquisaId: number): Promise<any> {

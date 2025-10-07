@@ -92,45 +92,35 @@ export const respostasClima = pgTable("respostas_clima", {
   dataResposta: date("data_resposta").notNull(),
 });
 
-export const insertEmpresaSchema = createInsertSchema(empresas).omit({
-  id: true,
-});
+const baseEmpresaSchema = createInsertSchema(empresas);
+export const insertEmpresaSchema = baseEmpresaSchema.omit({ id: true });
 
-export const insertGestorSchema = createInsertSchema(gestores).omit({
-  id: true,
-});
+const baseGestorSchema = createInsertSchema(gestores);
+export const insertGestorSchema = baseGestorSchema.omit({ id: true });
 
-export const insertFuncionarioSchema = createInsertSchema(funcionarios).omit({
-  id: true,
-});
+const baseFuncionarioSchema = createInsertSchema(funcionarios);
+export const insertFuncionarioSchema = baseFuncionarioSchema.omit({ id: true });
 
-export const insertDesligamentoSchema = createInsertSchema(desligamentos).omit({
-  id: true,
-});
+const baseDesligamentoSchema = createInsertSchema(desligamentos);
+export const insertDesligamentoSchema = baseDesligamentoSchema.omit({ id: true });
 
-export const insertDocumentoFuncionarioSchema = createInsertSchema(documentosFuncionario).omit({
-  id: true,
-});
+const baseDocumentoFuncionarioSchema = createInsertSchema(documentosFuncionario);
+export const insertDocumentoFuncionarioSchema = baseDocumentoFuncionarioSchema.omit({ id: true });
 
-export const insertDocumentoGestorSchema = createInsertSchema(documentosGestor).omit({
-  id: true,
-});
+const baseDocumentoGestorSchema = createInsertSchema(documentosGestor);
+export const insertDocumentoGestorSchema = baseDocumentoGestorSchema.omit({ id: true });
 
-export const insertFormularioExperienciaSchema = createInsertSchema(formulariosExperiencia).omit({
-  id: true,
-});
+const baseFormularioExperienciaSchema = createInsertSchema(formulariosExperiencia);
+export const insertFormularioExperienciaSchema = baseFormularioExperienciaSchema.omit({ id: true });
 
-export const insertPesquisaClimaSchema = createInsertSchema(pesquisasClima).omit({
-  id: true,
-});
+const basePesquisaClimaSchema = createInsertSchema(pesquisasClima);
+export const insertPesquisaClimaSchema = basePesquisaClimaSchema.omit({ id: true });
 
-export const insertPerguntaClimaSchema = createInsertSchema(perguntasClima).omit({
-  id: true,
-});
+const basePerguntaClimaSchema = createInsertSchema(perguntasClima);
+export const insertPerguntaClimaSchema = basePerguntaClimaSchema.omit({ id: true });
 
-export const insertRespostaClimaSchema = createInsertSchema(respostasClima).omit({
-  id: true,
-});
+const baseRespostaClimaSchema = createInsertSchema(respostasClima);
+export const insertRespostaClimaSchema = baseRespostaClimaSchema.omit({ id: true });
 
 export type InsertEmpresa = z.infer<typeof insertEmpresaSchema>;
 export type Empresa = typeof empresas.$inferSelect;
