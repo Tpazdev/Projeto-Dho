@@ -15,6 +15,10 @@ import Empresas from "@/pages/Empresas";
 import Gestores from "@/pages/Gestores";
 import Funcionarios from "@/pages/Funcionarios";
 import FormulariosExperiencia from "@/pages/FormulariosExperiencia";
+import Ambiencia from "@/pages/Ambiencia";
+import AmbienciaPerguntas from "@/pages/AmbienciaPerguntas";
+import AmbienciaResponder from "@/pages/AmbienciaResponder";
+import AmbienciaAnalise from "@/pages/AmbienciaAnalise";
 
 function Router() {
   return (
@@ -26,6 +30,10 @@ function Router() {
       <Route path="/gestores" component={Gestores} />
       <Route path="/funcionarios" component={Funcionarios} />
       <Route path="/formularios-experiencia" component={FormulariosExperiencia} />
+      <Route path="/ambiencia" component={Ambiencia} />
+      <Route path="/ambiencia/:id/perguntas" component={AmbienciaPerguntas} />
+      <Route path="/ambiencia/:id/analise" component={AmbienciaAnalise} />
+      <Route path="/ambiencia/responder" component={AmbienciaResponder} />
       <Route component={NotFound} />
     </Switch>
   );

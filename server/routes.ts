@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEmpresaSchema, insertGestorSchema, insertFuncionarioSchema, insertDesligamentoSchema, insertDocumentoFuncionarioSchema, insertDocumentoGestorSchema, insertFormularioExperienciaSchema } from "@shared/schema";
+import { insertEmpresaSchema, insertGestorSchema, insertFuncionarioSchema, insertDesligamentoSchema, insertDocumentoFuncionarioSchema, insertDocumentoGestorSchema, insertFormularioExperienciaSchema, insertPesquisaClimaSchema, insertPerguntaClimaSchema, insertRespostaClimaSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/empresas", async (req, res) => {
@@ -245,6 +245,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(formulario);
     } catch (error) {
       res.status(400).json({ error: "Erro ao atualizar formulário" });
+    }
+  });
+
+  app.get("/api/pesquisas-clima", async (req, res) => {
+    try {
+      const pesquisas = await storage.getPesquisasClima();
+      res.json(pesquisas);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar pesquisas" });
+    }
+  });
+
+  app.get("/api/pesquisas-clima/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const pesquisa = await storage.getPesquisaClima(id);
+      if (!pesquisa) {
+        return res.status(404).json({ error: "Pesquisa não encontrada" });
+      }
+      res.json(pesquisa);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar pesquisa" });
+    }
+  });
+
+  app.post("/api/pesquisas-clima", async (req, res) => {
+    try {
+      const validated = insertPesquisaClimaSchema.parse(req.body);
+      const pesquisa = await storage.createPesquisaClima(validated);
+      res.json(pesquisa);
+    } catch (error) {
+      res.status(400).json({ error: "Dados inválidos" });
+    }
+  });
+
+  app.patch("/api/pesquisas-clima/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const pesquisa = await storage.updatePesquisaClima(id, req.body);
+      res.json(pesquisa);
+    } catch (error) {
+      res.status(400).json({ error: "Erro ao atualizar pesquisa" });
+    }
+  });
+
+  app.delete("/api/pesquisas-clima/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deletePesquisaClima(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao deletar pesquisa" });
+    }
+  });
+
+  app.get("/api/pesquisas-clima/:id/perguntas", async (req, res) => {
+    try {
+      const pesquisaId = parseInt(req.params.id);
+      const perguntas = await storage.getPerguntasByPesquisa(pesquisaId);
+      res.json(perguntas);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar perguntas" });
+    }
+  });
+
+  app.post("/api/pesquisas-clima/:id/perguntas", async (req, res) => {
+    try {
+      const pesquisaId = parseInt(req.params.id);
+      const validated = insertPerguntaClimaSchema.parse({
+        ...req.body,
+        pesquisaId,
+      });
+      const pergunta = await storage.createPerguntaClima(validated);
+      res.json(pergunta);
+    } catch (error) {
+      res.status(400).json({ error: "Dados inválidos" });
+    }
+  });
+
+  app.patch("/api/perguntas-clima/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const pergunta = await storage.updatePerguntaClima(id, req.body);
+      res.json(pergunta);
+    } catch (error) {
+      res.status(400).json({ error: "Erro ao atualizar pergunta" });
+    }
+  });
+
+  app.delete("/api/perguntas-clima/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deletePerguntaClima(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao deletar pergunta" });
+    }
+  });
+
+  app.get("/api/pesquisas-clima/:id/respostas", async (req, res) => {
+    try {
+      const pesquisaId = parseInt(req.params.id);
+      const respostas = await storage.getRespostasByPesquisa(pesquisaId);
+      res.json(respostas);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar respostas" });
+    }
+  });
+
+  app.post("/api/pesquisas-clima/:id/respostas", async (req, res) => {
+    try {
+      const pesquisaId = parseInt(req.params.id);
+      const validated = insertRespostaClimaSchema.parse({
+        ...req.body,
+        pesquisaId,
+        dataResposta: new Date().toISOString().split("T")[0],
+      });
+      const resposta = await storage.createRespostaClima(validated);
+      res.json(resposta);
+    } catch (error) {
+      res.status(400).json({ error: "Dados inválidos" });
+    }
+  });
+
+  app.get("/api/pesquisas-clima/:id/analise", async (req, res) => {
+    try {
+      const pesquisaId = parseInt(req.params.id);
+      const analise = await storage.getAnalisePesquisa(pesquisaId);
+      res.json(analise);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar análise" });
     }
   });
 

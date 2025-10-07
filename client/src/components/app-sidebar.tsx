@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Building2, UserCog, UserX, FileText } from "lucide-react";
+import { LayoutDashboard, Users, Building2, UserCog, UserX, FileText, BarChart } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
   Sidebar,
@@ -25,6 +25,16 @@ const items = [
   {
     title: "Avaliações de Experiência",
     url: "/formularios-experiencia",
+    icon: FileText,
+  },
+  {
+    title: "Ambiencia - Clima",
+    url: "/ambiencia",
+    icon: BarChart,
+  },
+  {
+    title: "Responder Pesquisas",
+    url: "/ambiencia/responder",
     icon: FileText,
   },
 ];

@@ -6,6 +6,9 @@ import {
   documentosFuncionario,
   documentosGestor,
   formulariosExperiencia,
+  pesquisasClima,
+  perguntasClima,
+  respostasClima,
   type Empresa,
   type InsertEmpresa,
   type Gestor,
@@ -20,6 +23,12 @@ import {
   type InsertDocumentoGestor,
   type FormularioExperiencia,
   type InsertFormularioExperiencia,
+  type PesquisaClima,
+  type InsertPesquisaClima,
+  type PerguntaClima,
+  type InsertPerguntaClima,
+  type RespostaClima,
+  type InsertRespostaClima,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql } from "drizzle-orm";
@@ -59,6 +68,22 @@ export interface IStorage {
   getFormulariosExperienciaPendentes(): Promise<any[]>;
   getFormulariosExperienciaByGestor(gestorId: number): Promise<any[]>;
   updateFormularioExperiencia(id: number, data: Partial<InsertFormularioExperiencia>): Promise<FormularioExperiencia>;
+
+  createPesquisaClima(pesquisa: InsertPesquisaClima): Promise<PesquisaClima>;
+  getPesquisasClima(): Promise<PesquisaClima[]>;
+  getPesquisaClima(id: number): Promise<PesquisaClima | undefined>;
+  updatePesquisaClima(id: number, data: Partial<InsertPesquisaClima>): Promise<PesquisaClima>;
+  deletePesquisaClima(id: number): Promise<void>;
+
+  createPerguntaClima(pergunta: InsertPerguntaClima): Promise<PerguntaClima>;
+  getPerguntasByPesquisa(pesquisaId: number): Promise<PerguntaClima[]>;
+  updatePerguntaClima(id: number, data: Partial<InsertPerguntaClima>): Promise<PerguntaClima>;
+  deletePerguntaClima(id: number): Promise<void>;
+
+  createRespostaClima(resposta: InsertRespostaClima): Promise<RespostaClima>;
+  getRespostasByPesquisa(pesquisaId: number): Promise<any[]>;
+  getRespostasByFuncionario(funcionarioId: number, pesquisaId: number): Promise<RespostaClima[]>;
+  getAnalisePesquisa(pesquisaId: number): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -319,6 +344,160 @@ export class DatabaseStorage implements IStorage {
       .where(eq(formulariosExperiencia.id, id))
       .returning();
     return formulario;
+  }
+
+  async createPesquisaClima(data: InsertPesquisaClima): Promise<PesquisaClima> {
+    const [pesquisa] = await db
+      .insert(pesquisasClima)
+      .values(data)
+      .returning();
+    return pesquisa;
+  }
+
+  async getPesquisasClima(): Promise<PesquisaClima[]> {
+    return await db.select().from(pesquisasClima).orderBy(pesquisasClima.dataInicio);
+  }
+
+  async getPesquisaClima(id: number): Promise<PesquisaClima | undefined> {
+    const [pesquisa] = await db.select().from(pesquisasClima).where(eq(pesquisasClima.id, id));
+    return pesquisa || undefined;
+  }
+
+  async updatePesquisaClima(id: number, data: Partial<InsertPesquisaClima>): Promise<PesquisaClima> {
+    const [pesquisa] = await db
+      .update(pesquisasClima)
+      .set(data)
+      .where(eq(pesquisasClima.id, id))
+      .returning();
+    return pesquisa;
+  }
+
+  async deletePesquisaClima(id: number): Promise<void> {
+    await db.delete(respostasClima).where(eq(respostasClima.pesquisaId, id));
+    await db.delete(perguntasClima).where(eq(perguntasClima.pesquisaId, id));
+    await db.delete(pesquisasClima).where(eq(pesquisasClima.id, id));
+  }
+
+  async createPerguntaClima(data: InsertPerguntaClima): Promise<PerguntaClima> {
+    const [pergunta] = await db
+      .insert(perguntasClima)
+      .values(data)
+      .returning();
+    return pergunta;
+  }
+
+  async getPerguntasByPesquisa(pesquisaId: number): Promise<PerguntaClima[]> {
+    return await db
+      .select()
+      .from(perguntasClima)
+      .where(eq(perguntasClima.pesquisaId, pesquisaId))
+      .orderBy(perguntasClima.ordem);
+  }
+
+  async updatePerguntaClima(id: number, data: Partial<InsertPerguntaClima>): Promise<PerguntaClima> {
+    const [pergunta] = await db
+      .update(perguntasClima)
+      .set(data)
+      .where(eq(perguntasClima.id, id))
+      .returning();
+    return pergunta;
+  }
+
+  async deletePerguntaClima(id: number): Promise<void> {
+    await db.delete(respostasClima).where(eq(respostasClima.perguntaId, id));
+    await db.delete(perguntasClima).where(eq(perguntasClima.id, id));
+  }
+
+  async createRespostaClima(data: InsertRespostaClima): Promise<RespostaClima> {
+    const [resposta] = await db
+      .insert(respostasClima)
+      .values(data)
+      .returning();
+    return resposta;
+  }
+
+  async getRespostasByPesquisa(pesquisaId: number): Promise<any[]> {
+    const result = await db
+      .select({
+        id: respostasClima.id,
+        pesquisaId: respostasClima.pesquisaId,
+        perguntaId: respostasClima.perguntaId,
+        funcionarioId: respostasClima.funcionarioId,
+        funcionarioNome: funcionarios.nome,
+        valorEscala: respostasClima.valorEscala,
+        textoResposta: respostasClima.textoResposta,
+        dataResposta: respostasClima.dataResposta,
+        perguntaTexto: perguntasClima.texto,
+        perguntaTipo: perguntasClima.tipo,
+      })
+      .from(respostasClima)
+      .leftJoin(funcionarios, eq(respostasClima.funcionarioId, funcionarios.id))
+      .innerJoin(perguntasClima, eq(respostasClima.perguntaId, perguntasClima.id))
+      .where(eq(respostasClima.pesquisaId, pesquisaId))
+      .orderBy(respostasClima.dataResposta);
+
+    return result;
+  }
+
+  async getRespostasByFuncionario(funcionarioId: number, pesquisaId: number): Promise<RespostaClima[]> {
+    return await db
+      .select()
+      .from(respostasClima)
+      .where(eq(respostasClima.funcionarioId, funcionarioId))
+      .where(eq(respostasClima.pesquisaId, pesquisaId));
+  }
+
+  async getAnalisePesquisa(pesquisaId: number): Promise<any> {
+    const perguntas = await this.getPerguntasByPesquisa(pesquisaId);
+    const respostas = await this.getRespostasByPesquisa(pesquisaId);
+
+    const totalRespondentes = new Set(respostas.map(r => r.funcionarioId).filter(id => id !== null)).size;
+
+    const analise = perguntas.map(pergunta => {
+      const respostasPergunta = respostas.filter(r => r.perguntaId === pergunta.id);
+      
+      if (pergunta.tipo === 'escala') {
+        const valores = respostasPergunta.map(r => r.valorEscala).filter(v => v !== null) as number[];
+        const media = valores.length > 0 ? valores.reduce((a, b) => a + b, 0) / valores.length : 0;
+        
+        return {
+          pergunta: pergunta.texto,
+          tipo: pergunta.tipo,
+          totalRespostas: valores.length,
+          media: Math.round(media * 10) / 10,
+          valores,
+        };
+      } else if (pergunta.tipo === 'multipla_escolha') {
+        const opcoes: { [key: string]: number } = {};
+        respostasPergunta.forEach(r => {
+          if (r.textoResposta) {
+            opcoes[r.textoResposta] = (opcoes[r.textoResposta] || 0) + 1;
+          }
+        });
+        
+        return {
+          pergunta: pergunta.texto,
+          tipo: pergunta.tipo,
+          totalRespostas: respostasPergunta.length,
+          opcoes,
+        };
+      } else {
+        return {
+          pergunta: pergunta.texto,
+          tipo: pergunta.tipo,
+          totalRespostas: respostasPergunta.length,
+          respostas: respostasPergunta.map(r => ({
+            texto: r.textoResposta,
+            funcionario: r.funcionarioNome,
+          })),
+        };
+      }
+    });
+
+    return {
+      totalRespondentes,
+      analise,
+    };
   }
 }
 
