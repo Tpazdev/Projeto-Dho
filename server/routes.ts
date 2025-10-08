@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEmpresaSchema, insertGestorSchema, insertFuncionarioSchema, insertDesligamentoSchema, insertDocumentoFuncionarioSchema, insertDocumentoGestorSchema, insertFormularioExperienciaSchema, insertPesquisaClimaSchema, insertPerguntaClimaSchema, insertRespostaClimaSchema, insertTreinamentoSchema, insertTreinamentoParticipanteSchema } from "@shared/schema";
+import { insertEmpresaSchema, insertGestorSchema, insertFuncionarioSchema, insertDesligamentoSchema, insertDocumentoFuncionarioSchema, insertDocumentoGestorSchema, insertFormularioExperienciaSchema, insertPesquisaClimaSchema, insertPerguntaClimaSchema, insertRespostaClimaSchema, insertTreinamentoSchema, insertTreinamentoParticipanteSchema, insertPdiSchema, insertPdiMetaSchema, insertPdiCompetenciaSchema, insertPdiAcaoSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/empresas", async (req, res) => {
@@ -473,6 +473,190 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Erro ao deletar participante" });
+    }
+  });
+
+  app.get("/api/pdis", async (req, res) => {
+    try {
+      const pdis = await storage.getPdis();
+      res.json(pdis);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar PDIs" });
+    }
+  });
+
+  app.get("/api/pdis/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const pdi = await storage.getPdi(id);
+      if (!pdi) {
+        return res.status(404).json({ error: "PDI não encontrado" });
+      }
+      res.json(pdi);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar PDI" });
+    }
+  });
+
+  app.post("/api/pdis", async (req, res) => {
+    try {
+      const validated = insertPdiSchema.parse(req.body);
+      const pdi = await storage.createPdi(validated);
+      res.json(pdi);
+    } catch (error) {
+      res.status(400).json({ error: "Dados inválidos" });
+    }
+  });
+
+  app.patch("/api/pdis/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const pdi = await storage.updatePdi(id, req.body);
+      res.json(pdi);
+    } catch (error) {
+      res.status(400).json({ error: "Erro ao atualizar PDI" });
+    }
+  });
+
+  app.delete("/api/pdis/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deletePdi(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao deletar PDI" });
+    }
+  });
+
+  app.get("/api/pdis/:id/metas", async (req, res) => {
+    try {
+      const pdiId = parseInt(req.params.id);
+      const metas = await storage.getMetasByPdi(pdiId);
+      res.json(metas);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar metas" });
+    }
+  });
+
+  app.post("/api/pdis/:id/metas", async (req, res) => {
+    try {
+      const pdiId = parseInt(req.params.id);
+      const validated = insertPdiMetaSchema.parse({
+        ...req.body,
+        pdiId,
+      });
+      const meta = await storage.createPdiMeta(validated);
+      res.json(meta);
+    } catch (error) {
+      res.status(400).json({ error: "Dados inválidos" });
+    }
+  });
+
+  app.patch("/api/pdi-metas/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const meta = await storage.updatePdiMeta(id, req.body);
+      res.json(meta);
+    } catch (error) {
+      res.status(400).json({ error: "Erro ao atualizar meta" });
+    }
+  });
+
+  app.delete("/api/pdi-metas/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deletePdiMeta(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao deletar meta" });
+    }
+  });
+
+  app.get("/api/pdis/:id/competencias", async (req, res) => {
+    try {
+      const pdiId = parseInt(req.params.id);
+      const competencias = await storage.getCompetenciasByPdi(pdiId);
+      res.json(competencias);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar competências" });
+    }
+  });
+
+  app.post("/api/pdis/:id/competencias", async (req, res) => {
+    try {
+      const pdiId = parseInt(req.params.id);
+      const validated = insertPdiCompetenciaSchema.parse({
+        ...req.body,
+        pdiId,
+      });
+      const competencia = await storage.createPdiCompetencia(validated);
+      res.json(competencia);
+    } catch (error) {
+      res.status(400).json({ error: "Dados inválidos" });
+    }
+  });
+
+  app.patch("/api/pdi-competencias/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const competencia = await storage.updatePdiCompetencia(id, req.body);
+      res.json(competencia);
+    } catch (error) {
+      res.status(400).json({ error: "Erro ao atualizar competência" });
+    }
+  });
+
+  app.delete("/api/pdi-competencias/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deletePdiCompetencia(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao deletar competência" });
+    }
+  });
+
+  app.get("/api/pdis/:id/acoes", async (req, res) => {
+    try {
+      const pdiId = parseInt(req.params.id);
+      const acoes = await storage.getAcoesByPdi(pdiId);
+      res.json(acoes);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar ações" });
+    }
+  });
+
+  app.post("/api/pdis/:id/acoes", async (req, res) => {
+    try {
+      const pdiId = parseInt(req.params.id);
+      const validated = insertPdiAcaoSchema.parse({
+        ...req.body,
+        pdiId,
+      });
+      const acao = await storage.createPdiAcao(validated);
+      res.json(acao);
+    } catch (error) {
+      res.status(400).json({ error: "Dados inválidos" });
+    }
+  });
+
+  app.patch("/api/pdi-acoes/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const acao = await storage.updatePdiAcao(id, req.body);
+      res.json(acao);
+    } catch (error) {
+      res.status(400).json({ error: "Erro ao atualizar ação" });
+    }
+  });
+
+  app.delete("/api/pdi-acoes/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deletePdiAcao(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao deletar ação" });
     }
   });
 
