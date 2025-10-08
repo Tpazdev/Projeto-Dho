@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEmpresaSchema, insertGestorSchema, insertFuncionarioSchema, insertDesligamentoSchema, insertDocumentoFuncionarioSchema, insertDocumentoGestorSchema, insertFormularioExperienciaSchema, insertPesquisaClimaSchema, insertPerguntaClimaSchema, insertRespostaClimaSchema } from "@shared/schema";
+import { insertEmpresaSchema, insertGestorSchema, insertFuncionarioSchema, insertDesligamentoSchema, insertDocumentoFuncionarioSchema, insertDocumentoGestorSchema, insertFormularioExperienciaSchema, insertPesquisaClimaSchema, insertPerguntaClimaSchema, insertRespostaClimaSchema, insertTreinamentoSchema, insertTreinamentoParticipanteSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/empresas", async (req, res) => {
@@ -376,6 +376,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(analise);
     } catch (error) {
       res.status(500).json({ error: "Erro ao buscar análise" });
+    }
+  });
+
+  app.get("/api/treinamentos", async (req, res) => {
+    try {
+      const treinamentos = await storage.getTreinamentos();
+      res.json(treinamentos);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar treinamentos" });
+    }
+  });
+
+  app.get("/api/treinamentos/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const treinamento = await storage.getTreinamento(id);
+      if (!treinamento) {
+        return res.status(404).json({ error: "Treinamento não encontrado" });
+      }
+      res.json(treinamento);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar treinamento" });
+    }
+  });
+
+  app.post("/api/treinamentos", async (req, res) => {
+    try {
+      const validated = insertTreinamentoSchema.parse(req.body);
+      const treinamento = await storage.createTreinamento(validated);
+      res.json(treinamento);
+    } catch (error) {
+      res.status(400).json({ error: "Dados inválidos" });
+    }
+  });
+
+  app.patch("/api/treinamentos/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const treinamento = await storage.updateTreinamento(id, req.body);
+      res.json(treinamento);
+    } catch (error) {
+      res.status(400).json({ error: "Erro ao atualizar treinamento" });
+    }
+  });
+
+  app.delete("/api/treinamentos/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteTreinamento(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao deletar treinamento" });
+    }
+  });
+
+  app.get("/api/treinamentos/:id/participantes", async (req, res) => {
+    try {
+      const treinamentoId = parseInt(req.params.id);
+      const participantes = await storage.getParticipantesByTreinamento(treinamentoId);
+      res.json(participantes);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar participantes" });
+    }
+  });
+
+  app.post("/api/treinamentos/:id/participantes", async (req, res) => {
+    try {
+      const treinamentoId = parseInt(req.params.id);
+      const validated = insertTreinamentoParticipanteSchema.parse({
+        ...req.body,
+        treinamentoId,
+        dataInscricao: new Date().toISOString().split("T")[0],
+      });
+      const participante = await storage.addParticipante(validated);
+      res.json(participante);
+    } catch (error) {
+      res.status(400).json({ error: "Dados inválidos" });
+    }
+  });
+
+  app.patch("/api/participantes/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const participante = await storage.updateParticipante(id, req.body);
+      res.json(participante);
+    } catch (error) {
+      res.status(400).json({ error: "Erro ao atualizar participante" });
+    }
+  });
+
+  app.delete("/api/participantes/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.removeParticipante(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao deletar participante" });
     }
   });
 
