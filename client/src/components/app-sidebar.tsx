@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Building2, UserCog, UserX, FileText, BarChart } from "lucide-react";
+import { LayoutDashboard, Users, Building2, UserCog, UserX, FileText, BarChart, GraduationCap } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
   Sidebar,
@@ -26,6 +26,11 @@ const items = [
     title: "Avaliações de Experiência",
     url: "/formularios-experiencia",
     icon: FileText,
+  },
+  {
+    title: "Treinamentos",
+    url: "/treinamentos",
+    icon: GraduationCap,
   },
   {
     title: "Ambiencia - Clima",

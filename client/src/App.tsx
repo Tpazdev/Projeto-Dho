@@ -19,6 +19,8 @@ import Ambiencia from "@/pages/Ambiencia";
 import AmbienciaPerguntas from "@/pages/AmbienciaPerguntas";
 import AmbienciaResponder from "@/pages/AmbienciaResponder";
 import AmbienciaAnalise from "@/pages/AmbienciaAnalise";
+import Treinamentos from "@/pages/Treinamentos";
+import TreinamentoDetalhes from "@/pages/TreinamentoDetalhes";
 
 function Router() {
   return (
@@ -34,6 +36,8 @@ function Router() {
       <Route path="/ambiencia/:id/perguntas" component={AmbienciaPerguntas} />
       <Route path="/ambiencia/:id/analise" component={AmbienciaAnalise} />
       <Route path="/ambiencia/responder" component={AmbienciaResponder} />
+      <Route path="/treinamentos" component={Treinamentos} />
+      <Route path="/treinamentos/:id" component={TreinamentoDetalhes} />
       <Route component={NotFound} />
     </Switch>
   );
