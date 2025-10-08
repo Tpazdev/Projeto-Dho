@@ -9,6 +9,8 @@ import {
   pesquisasClima,
   perguntasClima,
   respostasClima,
+  treinamentos,
+  treinamentoParticipantes,
   type Empresa,
   type InsertEmpresa,
   type Gestor,
@@ -29,6 +31,10 @@ import {
   type InsertPerguntaClima,
   type RespostaClima,
   type InsertRespostaClima,
+  type Treinamento,
+  type InsertTreinamento,
+  type TreinamentoParticipante,
+  type InsertTreinamentoParticipante,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql, and } from "drizzle-orm";
@@ -84,6 +90,17 @@ export interface IStorage {
   getRespostasByPesquisa(pesquisaId: number): Promise<any[]>;
   getRespostasByFuncionario(funcionarioId: number, pesquisaId: number): Promise<RespostaClima[]>;
   getAnalisePesquisa(pesquisaId: number): Promise<any>;
+
+  createTreinamento(treinamento: InsertTreinamento): Promise<Treinamento>;
+  getTreinamentos(): Promise<any[]>;
+  getTreinamento(id: number): Promise<any | undefined>;
+  updateTreinamento(id: number, data: Partial<InsertTreinamento>): Promise<Treinamento>;
+  deleteTreinamento(id: number): Promise<void>;
+
+  addParticipante(participante: InsertTreinamentoParticipante): Promise<TreinamentoParticipante>;
+  getParticipantesByTreinamento(treinamentoId: number): Promise<any[]>;
+  updateParticipante(id: number, data: Partial<InsertTreinamentoParticipante>): Promise<TreinamentoParticipante>;
+  removeParticipante(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -500,6 +517,111 @@ export class DatabaseStorage implements IStorage {
       totalRespondentes,
       analise,
     };
+  }
+
+  async createTreinamento(data: InsertTreinamento): Promise<Treinamento> {
+    const [treinamento] = await db
+      .insert(treinamentos)
+      .values(data)
+      .returning();
+    return treinamento;
+  }
+
+  async getTreinamentos(): Promise<any[]> {
+    const result = await db
+      .select({
+        id: treinamentos.id,
+        titulo: treinamentos.titulo,
+        tipo: treinamentos.tipo,
+        descricao: treinamentos.descricao,
+        gestorId: treinamentos.gestorId,
+        gestorNome: gestores.nome,
+        dataInicio: treinamentos.dataInicio,
+        dataFim: treinamentos.dataFim,
+        cargaHoraria: treinamentos.cargaHoraria,
+        status: treinamentos.status,
+      })
+      .from(treinamentos)
+      .leftJoin(gestores, eq(treinamentos.gestorId, gestores.id))
+      .orderBy(treinamentos.dataInicio);
+    
+    return result;
+  }
+
+  async getTreinamento(id: number): Promise<any | undefined> {
+    const [result] = await db
+      .select({
+        id: treinamentos.id,
+        titulo: treinamentos.titulo,
+        tipo: treinamentos.tipo,
+        descricao: treinamentos.descricao,
+        gestorId: treinamentos.gestorId,
+        gestorNome: gestores.nome,
+        dataInicio: treinamentos.dataInicio,
+        dataFim: treinamentos.dataFim,
+        cargaHoraria: treinamentos.cargaHoraria,
+        status: treinamentos.status,
+      })
+      .from(treinamentos)
+      .leftJoin(gestores, eq(treinamentos.gestorId, gestores.id))
+      .where(eq(treinamentos.id, id));
+    
+    return result || undefined;
+  }
+
+  async updateTreinamento(id: number, data: Partial<InsertTreinamento>): Promise<Treinamento> {
+    const [updated] = await db
+      .update(treinamentos)
+      .set(data)
+      .where(eq(treinamentos.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteTreinamento(id: number): Promise<void> {
+    await db.delete(treinamentos).where(eq(treinamentos.id, id));
+  }
+
+  async addParticipante(data: InsertTreinamentoParticipante): Promise<TreinamentoParticipante> {
+    const [participante] = await db
+      .insert(treinamentoParticipantes)
+      .values(data)
+      .returning();
+    return participante;
+  }
+
+  async getParticipantesByTreinamento(treinamentoId: number): Promise<any[]> {
+    const result = await db
+      .select({
+        id: treinamentoParticipantes.id,
+        treinamentoId: treinamentoParticipantes.treinamentoId,
+        funcionarioId: treinamentoParticipantes.funcionarioId,
+        funcionarioNome: funcionarios.nome,
+        funcionarioCargo: funcionarios.cargo,
+        status: treinamentoParticipantes.status,
+        dataInscricao: treinamentoParticipantes.dataInscricao,
+        dataConclusao: treinamentoParticipantes.dataConclusao,
+        avaliacaoNota: treinamentoParticipantes.avaliacaoNota,
+        observacoes: treinamentoParticipantes.observacoes,
+      })
+      .from(treinamentoParticipantes)
+      .leftJoin(funcionarios, eq(treinamentoParticipantes.funcionarioId, funcionarios.id))
+      .where(eq(treinamentoParticipantes.treinamentoId, treinamentoId));
+    
+    return result;
+  }
+
+  async updateParticipante(id: number, data: Partial<InsertTreinamentoParticipante>): Promise<TreinamentoParticipante> {
+    const [updated] = await db
+      .update(treinamentoParticipantes)
+      .set(data)
+      .where(eq(treinamentoParticipantes.id, id))
+      .returning();
+    return updated;
+  }
+
+  async removeParticipante(id: number): Promise<void> {
+    await db.delete(treinamentoParticipantes).where(eq(treinamentoParticipantes.id, id));
   }
 }
 

@@ -92,6 +92,29 @@ export const respostasClima = pgTable("respostas_clima", {
   dataResposta: date("data_resposta").notNull(),
 });
 
+export const treinamentos = pgTable("treinamentos", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  titulo: text("titulo").notNull(),
+  tipo: text("tipo").notNull(),
+  descricao: text("descricao"),
+  gestorId: integer("gestor_id").notNull().references(() => gestores.id),
+  dataInicio: date("data_inicio").notNull(),
+  dataFim: date("data_fim").notNull(),
+  cargaHoraria: integer("carga_horaria"),
+  status: text("status").notNull().default("planejado"),
+});
+
+export const treinamentoParticipantes = pgTable("treinamento_participantes", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  treinamentoId: integer("treinamento_id").notNull().references(() => treinamentos.id),
+  funcionarioId: integer("funcionario_id").notNull().references(() => funcionarios.id),
+  status: text("status").notNull().default("inscrito"),
+  dataInscricao: date("data_inscricao").notNull(),
+  dataConclusao: date("data_conclusao"),
+  avaliacaoNota: integer("avaliacao_nota"),
+  observacoes: text("observacoes"),
+});
+
 const baseEmpresaSchema = createInsertSchema(empresas);
 export const insertEmpresaSchema = baseEmpresaSchema.omit({ id: true });
 
@@ -122,6 +145,12 @@ export const insertPerguntaClimaSchema = basePerguntaClimaSchema.omit({ id: true
 const baseRespostaClimaSchema = createInsertSchema(respostasClima);
 export const insertRespostaClimaSchema = baseRespostaClimaSchema.omit({ id: true });
 
+const baseTreinamentoSchema = createInsertSchema(treinamentos);
+export const insertTreinamentoSchema = baseTreinamentoSchema.omit({ id: true });
+
+const baseTreinamentoParticipanteSchema = createInsertSchema(treinamentoParticipantes);
+export const insertTreinamentoParticipanteSchema = baseTreinamentoParticipanteSchema.omit({ id: true });
+
 export type InsertEmpresa = z.infer<typeof insertEmpresaSchema>;
 export type Empresa = typeof empresas.$inferSelect;
 
@@ -151,3 +180,9 @@ export type PerguntaClima = typeof perguntasClima.$inferSelect;
 
 export type InsertRespostaClima = z.infer<typeof insertRespostaClimaSchema>;
 export type RespostaClima = typeof respostasClima.$inferSelect;
+
+export type InsertTreinamento = z.infer<typeof insertTreinamentoSchema>;
+export type Treinamento = typeof treinamentos.$inferSelect;
+
+export type InsertTreinamentoParticipante = z.infer<typeof insertTreinamentoParticipanteSchema>;
+export type TreinamentoParticipante = typeof treinamentoParticipantes.$inferSelect;
