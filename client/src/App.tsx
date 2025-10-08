@@ -21,6 +21,8 @@ import AmbienciaResponder from "@/pages/AmbienciaResponder";
 import AmbienciaAnalise from "@/pages/AmbienciaAnalise";
 import Treinamentos from "@/pages/Treinamentos";
 import TreinamentoDetalhes from "@/pages/TreinamentoDetalhes";
+import PDI from "@/pages/PDI";
+import PDIDetalhes from "@/pages/PDIDetalhes";
 
 function Router() {
   return (
@@ -38,6 +40,8 @@ function Router() {
       <Route path="/ambiencia/responder" component={AmbienciaResponder} />
       <Route path="/treinamentos" component={Treinamentos} />
       <Route path="/treinamentos/:id" component={TreinamentoDetalhes} />
+      <Route path="/pdi" component={PDI} />
+      <Route path="/pdi/:id" component={PDIDetalhes} />
       <Route component={NotFound} />
     </Switch>
   );

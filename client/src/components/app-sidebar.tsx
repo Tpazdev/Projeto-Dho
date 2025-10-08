@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Building2, UserCog, UserX, FileText, BarChart, GraduationCap } from "lucide-react";
+import { LayoutDashboard, Users, Building2, UserCog, UserX, FileText, BarChart, GraduationCap, Target } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
   Sidebar,
@@ -31,6 +31,11 @@ const items = [
     title: "Treinamentos",
     url: "/treinamentos",
     icon: GraduationCap,
+  },
+  {
+    title: "PDI",
+    url: "/pdi",
+    icon: Target,
   },
   {
     title: "Ambiencia - Clima",
