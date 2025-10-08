@@ -103,6 +103,7 @@ export default function PDIDetalhes() {
   const metaForm = useForm<z.infer<typeof metaFormSchema>>({
     resolver: zodResolver(metaFormSchema),
     defaultValues: {
+      pdiId: Number(id),
       descricao: "",
       prazo: "",
       status: "pendente",
@@ -113,6 +114,7 @@ export default function PDIDetalhes() {
   const competenciaForm = useForm<z.infer<typeof competenciaFormSchema>>({
     resolver: zodResolver(competenciaFormSchema),
     defaultValues: {
+      pdiId: Number(id),
       competencia: "",
       nivelAtual: 1,
       nivelDesejado: 10,
@@ -123,6 +125,7 @@ export default function PDIDetalhes() {
   const acaoForm = useForm<z.infer<typeof acaoFormSchema>>({
     resolver: zodResolver(acaoFormSchema),
     defaultValues: {
+      pdiId: Number(id),
       acao: "",
       tipo: "",
       prazo: "",
@@ -133,11 +136,7 @@ export default function PDIDetalhes() {
 
   const onSubmitMeta = async (data: z.infer<typeof metaFormSchema>) => {
     try {
-      await apiRequest(`/api/pdis/${id}/metas`, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
-      });
+      await apiRequest("POST", `/api/pdis/${id}/metas`, data);
 
       await queryClient.invalidateQueries({ queryKey: ["/api/pdis", id, "metas"] });
       toast({ title: "Sucesso", description: "Meta adicionada com sucesso" });
@@ -150,11 +149,7 @@ export default function PDIDetalhes() {
 
   const onSubmitCompetencia = async (data: z.infer<typeof competenciaFormSchema>) => {
     try {
-      await apiRequest(`/api/pdis/${id}/competencias`, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
-      });
+      await apiRequest("POST", `/api/pdis/${id}/competencias`, data);
 
       await queryClient.invalidateQueries({ queryKey: ["/api/pdis", id, "competencias"] });
       toast({ title: "Sucesso", description: "Competência adicionada com sucesso" });
@@ -167,11 +162,7 @@ export default function PDIDetalhes() {
 
   const onSubmitAcao = async (data: z.infer<typeof acaoFormSchema>) => {
     try {
-      await apiRequest(`/api/pdis/${id}/acoes`, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
-      });
+      await apiRequest("POST", `/api/pdis/${id}/acoes`, data);
 
       await queryClient.invalidateQueries({ queryKey: ["/api/pdis", id, "acoes"] });
       toast({ title: "Sucesso", description: "Ação adicionada com sucesso" });
@@ -188,11 +179,7 @@ export default function PDIDetalhes() {
                       type === "competencia" ? `/api/pdi-competencias/${itemId}` :
                       `/api/pdi-acoes/${itemId}`;
       
-      await apiRequest(endpoint, {
-        method: "PATCH",
-        body: JSON.stringify({ status: newStatus }),
-        headers: { "Content-Type": "application/json" },
-      });
+      await apiRequest("PATCH", endpoint, { status: newStatus });
 
       await queryClient.invalidateQueries({ queryKey: ["/api/pdis", id, type === "meta" ? "metas" : type === "competencia" ? "competencias" : "acoes"] });
       toast({ title: "Sucesso", description: "Status atualizado" });
@@ -207,9 +194,7 @@ export default function PDIDetalhes() {
                       type === "competencia" ? `/api/pdi-competencias/${itemId}` :
                       `/api/pdi-acoes/${itemId}`;
       
-      await apiRequest(endpoint, {
-        method: "DELETE",
-      });
+      await apiRequest("DELETE", endpoint);
 
       await queryClient.invalidateQueries({ queryKey: ["/api/pdis", id, type === "meta" ? "metas" : type === "competencia" ? "competencias" : "acoes"] });
       toast({ title: "Sucesso", description: `${type === "meta" ? "Meta" : type === "competencia" ? "Competência" : "Ação"} removida` });

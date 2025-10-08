@@ -2,9 +2,9 @@
 
 ## Overview
 
-A comprehensive web application for managing employee termination processes, experience evaluations, climate surveys, and training/development programs in Portuguese (Brazilian). The system tracks terminations (desligamentos) across companies, managers (gestores), and employees (funcionários), providing dashboard analytics and detailed record-keeping capabilities.
+A comprehensive web application for managing employee termination processes, experience evaluations, climate surveys, training/development programs, and Individual Development Plans (PDI) in Portuguese (Brazilian). The system tracks terminations (desligamentos) across companies, managers (gestores), and employees (funcionários), providing dashboard analytics and detailed record-keeping capabilities.
 
-**Core Purpose**: Streamline HR workflows for employee termination tracking, probation period evaluations, climate assessment, and training management with data visualization and reporting features.
+**Core Purpose**: Streamline HR workflows for employee termination tracking, probation period evaluations, climate assessment, training management, and individual development planning with data visualization and reporting features.
 
 **Tech Stack**:
 - Frontend: React + TypeScript with Vite
@@ -57,6 +57,13 @@ Preferred communication style: Simple, everyday language.
 - `/api/funcionarios` - Employee management (GET, POST)
 - `/api/desligamentos` - Termination records (GET, POST)
 - `/api/dados/*` - Aggregated analytics endpoints
+- `/api/pdis` - Individual Development Plans (GET, POST)
+- `/api/pdis/:id/metas` - PDI goals management (GET, POST)
+- `/api/pdis/:id/competencias` - PDI competencies management (GET, POST)
+- `/api/pdis/:id/acoes` - PDI actions management (GET, POST)
+- `/api/pdi-metas/:id` - Update/delete PDI goals (PATCH, DELETE)
+- `/api/pdi-competencias/:id` - Update/delete PDI competencies (PATCH, DELETE)
+- `/api/pdi-acoes/:id` - Update/delete PDI actions (PATCH, DELETE)
 
 **Database Layer**:
 - Drizzle ORM with type-safe schema definitions
@@ -149,6 +156,39 @@ Preferred communication style: Simple, everyday language.
     - `dataConclusao`: Completion date (date, optional)
     - `avaliacaoNota`: Final grade 0-10 (integer, optional)
     - `observacoes`: Evaluation notes (text, optional)
+
+11. **pdis** (Individual Development Plans)
+    - `id`: Auto-incrementing primary key
+    - `funcionarioId`: Foreign key to funcionarios
+    - `gestorId`: Foreign key to gestores
+    - `dataInicio`, `dataFim`: Plan period (dates, required)
+    - `status`: Plan status (em_elaboracao, em_andamento, concluido)
+    - `observacoes`: General notes (text, optional)
+
+12. **pdiMetas** (PDI Goals)
+    - `id`: Auto-incrementing primary key
+    - `pdiId`: Foreign key to pdis
+    - `descricao`: Goal description (text, required)
+    - `prazo`: Deadline (date, required)
+    - `status`: Goal status (pendente, em_andamento, concluido)
+    - `resultado`: Outcome description (text, optional)
+
+13. **pdiCompetencias** (PDI Competencies)
+    - `id`: Auto-incrementing primary key
+    - `pdiId`: Foreign key to pdis
+    - `competencia`: Competency name (text, required)
+    - `nivelAtual`: Current proficiency level 1-10 (integer, required)
+    - `nivelDesejado`: Target proficiency level 1-10 (integer, required)
+    - `observacoes`: Development notes (text, optional)
+
+14. **pdiAcoes** (PDI Development Actions)
+    - `id`: Auto-incrementing primary key
+    - `pdiId`: Foreign key to pdis
+    - `acao`: Action description (text, required)
+    - `tipo`: Action type (treinamento, mentoria, projeto, leitura, curso, outro)
+    - `prazo`: Deadline (date, required)
+    - `status`: Action status (pendente, em_andamento, concluido)
+    - `resultado`: Outcome description (text, optional)
 
 **Design Patterns**:
 - Normalized relational structure with referential integrity

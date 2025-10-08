@@ -20,11 +20,11 @@ import { ptBR } from "date-fns/locale";
 import { Link } from "wouter";
 
 const formSchema = insertPdiSchema.extend({
-  funcionarioId: z.number(),
-  gestorId: z.number(),
-  dataInicio: z.string(),
-  dataFim: z.string(),
-});
+  funcionarioId: z.number().min(1, "Funcionário é obrigatório"),
+  gestorId: z.number().min(1, "Gestor é obrigatório"),
+  dataInicio: z.string().min(1, "Data de início é obrigatória"),
+  dataFim: z.string().min(1, "Data de fim é obrigatória"),
+}).required();
 
 const statusLabels = {
   em_elaboracao: "Em Elaboração",
@@ -59,8 +59,6 @@ export default function PDI() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      funcionarioId: undefined,
-      gestorId: undefined,
       dataInicio: "",
       dataFim: "",
       status: "em_elaboracao",
@@ -70,11 +68,7 @@ export default function PDI() {
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
-      await apiRequest("/api/pdis", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
-      });
+      await apiRequest("POST", "/api/pdis", data);
 
       await queryClient.invalidateQueries({ queryKey: ["/api/pdis"] });
       toast({
@@ -87,7 +81,7 @@ export default function PDI() {
       toast({
         variant: "destructive",
         title: "Erro",
-        description: "Erro ao criar PDI",
+        description: error instanceof Error ? error.message : "Erro ao criar PDI",
       });
     }
   };
