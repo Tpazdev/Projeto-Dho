@@ -115,6 +115,44 @@ export const treinamentoParticipantes = pgTable("treinamento_participantes", {
   observacoes: text("observacoes"),
 });
 
+export const pdis = pgTable("pdis", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  funcionarioId: integer("funcionario_id").notNull().references(() => funcionarios.id),
+  gestorId: integer("gestor_id").notNull().references(() => gestores.id),
+  dataInicio: date("data_inicio").notNull(),
+  dataFim: date("data_fim").notNull(),
+  status: text("status").notNull().default("em_elaboracao"),
+  observacoes: text("observacoes"),
+});
+
+export const pdiMetas = pgTable("pdi_metas", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  pdiId: integer("pdi_id").notNull().references(() => pdis.id),
+  descricao: text("descricao").notNull(),
+  prazo: date("prazo").notNull(),
+  status: text("status").notNull().default("pendente"),
+  resultado: text("resultado"),
+});
+
+export const pdiCompetencias = pgTable("pdi_competencias", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  pdiId: integer("pdi_id").notNull().references(() => pdis.id),
+  competencia: text("competencia").notNull(),
+  nivelAtual: integer("nivel_atual").notNull(),
+  nivelDesejado: integer("nivel_desejado").notNull(),
+  observacoes: text("observacoes"),
+});
+
+export const pdiAcoes = pgTable("pdi_acoes", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  pdiId: integer("pdi_id").notNull().references(() => pdis.id),
+  acao: text("acao").notNull(),
+  tipo: text("tipo").notNull(),
+  prazo: date("prazo").notNull(),
+  status: text("status").notNull().default("pendente"),
+  resultado: text("resultado"),
+});
+
 const baseEmpresaSchema = createInsertSchema(empresas);
 export const insertEmpresaSchema = baseEmpresaSchema.omit({ id: true });
 
@@ -151,6 +189,18 @@ export const insertTreinamentoSchema = baseTreinamentoSchema.omit({ id: true });
 const baseTreinamentoParticipanteSchema = createInsertSchema(treinamentoParticipantes);
 export const insertTreinamentoParticipanteSchema = baseTreinamentoParticipanteSchema.omit({ id: true });
 
+const basePdiSchema = createInsertSchema(pdis);
+export const insertPdiSchema = basePdiSchema.omit({ id: true });
+
+const basePdiMetaSchema = createInsertSchema(pdiMetas);
+export const insertPdiMetaSchema = basePdiMetaSchema.omit({ id: true });
+
+const basePdiCompetenciaSchema = createInsertSchema(pdiCompetencias);
+export const insertPdiCompetenciaSchema = basePdiCompetenciaSchema.omit({ id: true });
+
+const basePdiAcaoSchema = createInsertSchema(pdiAcoes);
+export const insertPdiAcaoSchema = basePdiAcaoSchema.omit({ id: true });
+
 export type InsertEmpresa = z.infer<typeof insertEmpresaSchema>;
 export type Empresa = typeof empresas.$inferSelect;
 
@@ -186,3 +236,15 @@ export type Treinamento = typeof treinamentos.$inferSelect;
 
 export type InsertTreinamentoParticipante = z.infer<typeof insertTreinamentoParticipanteSchema>;
 export type TreinamentoParticipante = typeof treinamentoParticipantes.$inferSelect;
+
+export type InsertPdi = z.infer<typeof insertPdiSchema>;
+export type Pdi = typeof pdis.$inferSelect;
+
+export type InsertPdiMeta = z.infer<typeof insertPdiMetaSchema>;
+export type PdiMeta = typeof pdiMetas.$inferSelect;
+
+export type InsertPdiCompetencia = z.infer<typeof insertPdiCompetenciaSchema>;
+export type PdiCompetencia = typeof pdiCompetencias.$inferSelect;
+
+export type InsertPdiAcao = z.infer<typeof insertPdiAcaoSchema>;
+export type PdiAcao = typeof pdiAcoes.$inferSelect;
