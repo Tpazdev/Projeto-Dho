@@ -2,9 +2,9 @@
 
 ## Overview
 
-A comprehensive web application for managing employee termination processes in Portuguese (Brazilian). The system tracks terminations (desligamentos) across companies, managers (gestores), and employees (funcionários), providing dashboard analytics and detailed record-keeping capabilities.
+A comprehensive web application for managing employee termination processes, experience evaluations, climate surveys, and training/development programs in Portuguese (Brazilian). The system tracks terminations (desligamentos) across companies, managers (gestores), and employees (funcionários), providing dashboard analytics and detailed record-keeping capabilities.
 
-**Core Purpose**: Streamline HR workflows for employee termination tracking with data visualization and reporting features.
+**Core Purpose**: Streamline HR workflows for employee termination tracking, probation period evaluations, climate assessment, and training management with data visualization and reporting features.
 
 **Tech Stack**:
 - Frontend: React + TypeScript with Vite
@@ -90,6 +90,65 @@ Preferred communication style: Simple, everyday language.
    - `funcionarioId`: Foreign key to funcionarios
    - `empresaId`: Foreign key to empresas
    - `gestorId`: Foreign key to gestores
+
+5. **formulariosExperiencia** (Experience Evaluation Forms)
+   - `id`: Auto-incrementing primary key
+   - `funcionarioId`: Foreign key to funcionarios
+   - `gestorId`: Foreign key to gestores
+   - `dataLimite`: Deadline for completion (date, required)
+   - `status`: Form status (pendente, preenchido, aprovado, reprovado)
+   - `dataPreenchimento`: Completion date (date, optional)
+   - `desempenho`: Performance rating 0-10 (integer, optional)
+   - `pontosFortes`, `pontosMelhoria`: Evaluation text fields
+   - `recomendacao`: Final recommendation (text, optional)
+   - `observacoes`: Additional observations (text, optional)
+
+6. **pesquisasClima** (Climate Surveys)
+   - `id`: Auto-incrementing primary key
+   - `titulo`: Survey title (text, required)
+   - `descricao`: Description (text, optional)
+   - `dataInicio`, `dataFim`: Survey period (dates, required)
+   - `status`: Survey status (ativa, encerrada)
+   - `anonima`: Boolean flag for anonymity (integer)
+   - `empresaId`: Foreign key to empresas (optional)
+
+7. **perguntasClima** (Climate Survey Questions)
+   - `id`: Auto-incrementing primary key
+   - `pesquisaId`: Foreign key to pesquisasClima
+   - `texto`: Question text (text, required)
+   - `tipo`: Question type (escala, multipla_escolha, texto_livre)
+   - `opcoes`: Array of options for multiple choice (text[])
+   - `ordem`: Display order (integer)
+   - `obrigatoria`: Required flag (integer)
+
+8. **respostasClima** (Climate Survey Responses)
+   - `id`: Auto-incrementing primary key
+   - `pesquisaId`: Foreign key to pesquisasClima
+   - `perguntaId`: Foreign key to perguntasClima
+   - `funcionarioId`: Foreign key to funcionarios (nullable for anonymous)
+   - `valorEscala`: Scale value 1-10 (integer, optional)
+   - `textoResposta`: Text response (text, optional)
+   - `dataResposta`: Response date (date, required)
+
+9. **treinamentos** (Training Programs)
+   - `id`: Auto-incrementing primary key
+   - `titulo`: Training title (text, required)
+   - `tipo`: Training type (onboarding, tecnico, comportamental)
+   - `descricao`: Description (text, optional)
+   - `gestorId`: Foreign key to gestores (responsible manager)
+   - `dataInicio`, `dataFim`: Training period (dates, required)
+   - `cargaHoraria`: Total hours (integer, optional)
+   - `status`: Training status (planejado, em_andamento, concluido)
+
+10. **treinamentoParticipantes** (Training Participants)
+    - `id`: Auto-incrementing primary key
+    - `treinamentoId`: Foreign key to treinamentos
+    - `funcionarioId`: Foreign key to funcionarios
+    - `status`: Participant status (inscrito, em_progresso, concluido, reprovado)
+    - `dataInscricao`: Enrollment date (date, required)
+    - `dataConclusao`: Completion date (date, optional)
+    - `avaliacaoNota`: Final grade 0-10 (integer, optional)
+    - `observacoes`: Evaluation notes (text, optional)
 
 **Design Patterns**:
 - Normalized relational structure with referential integrity
