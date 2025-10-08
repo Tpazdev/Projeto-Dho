@@ -11,6 +11,10 @@ import {
   respostasClima,
   treinamentos,
   treinamentoParticipantes,
+  pdis,
+  pdiMetas,
+  pdiCompetencias,
+  pdiAcoes,
   type Empresa,
   type InsertEmpresa,
   type Gestor,
@@ -35,6 +39,14 @@ import {
   type InsertTreinamento,
   type TreinamentoParticipante,
   type InsertTreinamentoParticipante,
+  type Pdi,
+  type InsertPdi,
+  type PdiMeta,
+  type InsertPdiMeta,
+  type PdiCompetencia,
+  type InsertPdiCompetencia,
+  type PdiAcao,
+  type InsertPdiAcao,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql, and } from "drizzle-orm";
@@ -101,6 +113,27 @@ export interface IStorage {
   getParticipantesByTreinamento(treinamentoId: number): Promise<any[]>;
   updateParticipante(id: number, data: Partial<InsertTreinamentoParticipante>): Promise<TreinamentoParticipante>;
   removeParticipante(id: number): Promise<void>;
+
+  createPdi(pdi: InsertPdi): Promise<Pdi>;
+  getPdis(): Promise<any[]>;
+  getPdi(id: number): Promise<any | undefined>;
+  updatePdi(id: number, data: Partial<InsertPdi>): Promise<Pdi>;
+  deletePdi(id: number): Promise<void>;
+
+  createPdiMeta(meta: InsertPdiMeta): Promise<PdiMeta>;
+  getMetasByPdi(pdiId: number): Promise<PdiMeta[]>;
+  updatePdiMeta(id: number, data: Partial<InsertPdiMeta>): Promise<PdiMeta>;
+  deletePdiMeta(id: number): Promise<void>;
+
+  createPdiCompetencia(competencia: InsertPdiCompetencia): Promise<PdiCompetencia>;
+  getCompetenciasByPdi(pdiId: number): Promise<PdiCompetencia[]>;
+  updatePdiCompetencia(id: number, data: Partial<InsertPdiCompetencia>): Promise<PdiCompetencia>;
+  deletePdiCompetencia(id: number): Promise<void>;
+
+  createPdiAcao(acao: InsertPdiAcao): Promise<PdiAcao>;
+  getAcoesByPdi(pdiId: number): Promise<PdiAcao[]>;
+  updatePdiAcao(id: number, data: Partial<InsertPdiAcao>): Promise<PdiAcao>;
+  deletePdiAcao(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -622,6 +655,157 @@ export class DatabaseStorage implements IStorage {
 
   async removeParticipante(id: number): Promise<void> {
     await db.delete(treinamentoParticipantes).where(eq(treinamentoParticipantes.id, id));
+  }
+
+  async createPdi(data: InsertPdi): Promise<Pdi> {
+    const [pdi] = await db
+      .insert(pdis)
+      .values(data)
+      .returning();
+    return pdi;
+  }
+
+  async getPdis(): Promise<any[]> {
+    const result = await db
+      .select({
+        id: pdis.id,
+        funcionarioId: pdis.funcionarioId,
+        funcionarioNome: funcionarios.nome,
+        funcionarioCargo: funcionarios.cargo,
+        gestorId: pdis.gestorId,
+        gestorNome: gestores.nome,
+        dataInicio: pdis.dataInicio,
+        dataFim: pdis.dataFim,
+        status: pdis.status,
+        observacoes: pdis.observacoes,
+      })
+      .from(pdis)
+      .leftJoin(funcionarios, eq(pdis.funcionarioId, funcionarios.id))
+      .leftJoin(gestores, eq(pdis.gestorId, gestores.id))
+      .orderBy(pdis.dataInicio);
+    
+    return result;
+  }
+
+  async getPdi(id: number): Promise<any | undefined> {
+    const [result] = await db
+      .select({
+        id: pdis.id,
+        funcionarioId: pdis.funcionarioId,
+        funcionarioNome: funcionarios.nome,
+        funcionarioCargo: funcionarios.cargo,
+        gestorId: pdis.gestorId,
+        gestorNome: gestores.nome,
+        dataInicio: pdis.dataInicio,
+        dataFim: pdis.dataFim,
+        status: pdis.status,
+        observacoes: pdis.observacoes,
+      })
+      .from(pdis)
+      .leftJoin(funcionarios, eq(pdis.funcionarioId, funcionarios.id))
+      .leftJoin(gestores, eq(pdis.gestorId, gestores.id))
+      .where(eq(pdis.id, id));
+    
+    return result || undefined;
+  }
+
+  async updatePdi(id: number, data: Partial<InsertPdi>): Promise<Pdi> {
+    const [updated] = await db
+      .update(pdis)
+      .set(data)
+      .where(eq(pdis.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deletePdi(id: number): Promise<void> {
+    await db.delete(pdis).where(eq(pdis.id, id));
+  }
+
+  async createPdiMeta(data: InsertPdiMeta): Promise<PdiMeta> {
+    const [meta] = await db
+      .insert(pdiMetas)
+      .values(data)
+      .returning();
+    return meta;
+  }
+
+  async getMetasByPdi(pdiId: number): Promise<PdiMeta[]> {
+    return await db
+      .select()
+      .from(pdiMetas)
+      .where(eq(pdiMetas.pdiId, pdiId))
+      .orderBy(pdiMetas.prazo);
+  }
+
+  async updatePdiMeta(id: number, data: Partial<InsertPdiMeta>): Promise<PdiMeta> {
+    const [updated] = await db
+      .update(pdiMetas)
+      .set(data)
+      .where(eq(pdiMetas.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deletePdiMeta(id: number): Promise<void> {
+    await db.delete(pdiMetas).where(eq(pdiMetas.id, id));
+  }
+
+  async createPdiCompetencia(data: InsertPdiCompetencia): Promise<PdiCompetencia> {
+    const [competencia] = await db
+      .insert(pdiCompetencias)
+      .values(data)
+      .returning();
+    return competencia;
+  }
+
+  async getCompetenciasByPdi(pdiId: number): Promise<PdiCompetencia[]> {
+    return await db
+      .select()
+      .from(pdiCompetencias)
+      .where(eq(pdiCompetencias.pdiId, pdiId));
+  }
+
+  async updatePdiCompetencia(id: number, data: Partial<InsertPdiCompetencia>): Promise<PdiCompetencia> {
+    const [updated] = await db
+      .update(pdiCompetencias)
+      .set(data)
+      .where(eq(pdiCompetencias.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deletePdiCompetencia(id: number): Promise<void> {
+    await db.delete(pdiCompetencias).where(eq(pdiCompetencias.id, id));
+  }
+
+  async createPdiAcao(data: InsertPdiAcao): Promise<PdiAcao> {
+    const [acao] = await db
+      .insert(pdiAcoes)
+      .values(data)
+      .returning();
+    return acao;
+  }
+
+  async getAcoesByPdi(pdiId: number): Promise<PdiAcao[]> {
+    return await db
+      .select()
+      .from(pdiAcoes)
+      .where(eq(pdiAcoes.pdiId, pdiId))
+      .orderBy(pdiAcoes.prazo);
+  }
+
+  async updatePdiAcao(id: number, data: Partial<InsertPdiAcao>): Promise<PdiAcao> {
+    const [updated] = await db
+      .update(pdiAcoes)
+      .set(data)
+      .where(eq(pdiAcoes.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deletePdiAcao(id: number): Promise<void> {
+    await db.delete(pdiAcoes).where(eq(pdiAcoes.id, id));
   }
 }
 
