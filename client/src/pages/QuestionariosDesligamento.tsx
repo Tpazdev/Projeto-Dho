@@ -20,10 +20,10 @@ export default function QuestionariosDesligamento() {
   const [novoQuestionario, setNovoQuestionario] = useState({
     titulo: "",
     descricao: "",
-    tipo: "funcionario" as "funcionario" | "gestor",
+    tipoDesligamento: "funcionario" as "funcionario" | "gestor",
   });
   const [novaPergunta, setNovaPergunta] = useState({
-    texto: "",
+    pergunta: "",
     tipo: "texto_livre" as "escala" | "multipla_escolha" | "texto_livre",
     obrigatoria: 1,
     ordem: 1,
@@ -40,15 +40,17 @@ export default function QuestionariosDesligamento() {
 
   const criarQuestionarioMutation = useMutation({
     mutationFn: async (data: typeof novoQuestionario) => {
-      return await apiRequest("/api/questionarios-desligamento", {
-        method: "POST",
-        body: JSON.stringify({ ...data, dataCriacao: new Date().toISOString().split('T')[0] }),
-      });
+      const response = await apiRequest(
+        "POST",
+        "/api/questionarios-desligamento",
+        { ...data, dataCriacao: new Date().toISOString().split('T')[0], ativo: 1 }
+      );
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/questionarios-desligamento"] });
       setDialogOpen(false);
-      setNovoQuestionario({ titulo: "", descricao: "", tipo: "funcionario" });
+      setNovoQuestionario({ titulo: "", descricao: "", tipoDesligamento: "funcionario" });
       toast({
         title: "Questionário criado",
         description: "O questionário foi criado com sucesso",
@@ -65,9 +67,8 @@ export default function QuestionariosDesligamento() {
 
   const deletarQuestionarioMutation = useMutation({
     mutationFn: async (id: number) => {
-      return await apiRequest(`/api/questionarios-desligamento/${id}`, {
-        method: "DELETE",
-      });
+      const response = await apiRequest("DELETE", `/api/questionarios-desligamento/${id}`);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/questionarios-desligamento"] });
@@ -80,14 +81,16 @@ export default function QuestionariosDesligamento() {
 
   const criarPerguntaMutation = useMutation({
     mutationFn: async (data: typeof novaPergunta) => {
-      return await apiRequest(`/api/questionarios-desligamento/${selectedQuestionario}/perguntas`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      const response = await apiRequest(
+        "POST",
+        `/api/questionarios-desligamento/${selectedQuestionario}/perguntas`,
+        data
+      );
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/questionarios-desligamento", selectedQuestionario, "perguntas"] });
-      setNovaPergunta({ texto: "", tipo: "texto_livre", obrigatoria: 1, ordem: (perguntas.length || 0) + 1 });
+      setNovaPergunta({ pergunta: "", tipo: "texto_livre", obrigatoria: 1, ordem: (perguntas.length || 0) + 1 });
       toast({
         title: "Pergunta adicionada",
         description: "A pergunta foi adicionada ao questionário",
@@ -97,9 +100,8 @@ export default function QuestionariosDesligamento() {
 
   const deletarPerguntaMutation = useMutation({
     mutationFn: async (id: number) => {
-      return await apiRequest(`/api/perguntas-desligamento/${id}`, {
-        method: "DELETE",
-      });
+      const response = await apiRequest("DELETE", `/api/perguntas-desligamento/${id}`);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/questionarios-desligamento", selectedQuestionario, "perguntas"] });
@@ -123,7 +125,7 @@ export default function QuestionariosDesligamento() {
   };
 
   const handleAdicionarPergunta = () => {
-    if (!novaPergunta.texto.trim()) {
+    if (!novaPergunta.pergunta.trim()) {
       toast({
         title: "Erro",
         description: "O texto da pergunta é obrigatório",
@@ -188,9 +190,9 @@ export default function QuestionariosDesligamento() {
                 <div>
                   <Label htmlFor="tipo">Tipo</Label>
                   <Select
-                    value={novoQuestionario.tipo}
+                    value={novoQuestionario.tipoDesligamento}
                     onValueChange={(value: "funcionario" | "gestor") => 
-                      setNovoQuestionario({ ...novoQuestionario, tipo: value })
+                      setNovoQuestionario({ ...novoQuestionario, tipoDesligamento: value })
                     }
                   >
                     <SelectTrigger id="tipo" data-testid="select-tipo-questionario">
@@ -235,7 +237,7 @@ export default function QuestionariosDesligamento() {
                     </CardDescription>
                     <div className="flex gap-4 mt-3">
                       <span className="text-sm text-muted-foreground">
-                        Tipo: <span className="font-medium">{questionario.tipo === "funcionario" ? "Funcionário" : "Gestor"}</span>
+                        Tipo: <span className="font-medium">{questionario.tipoDesligamento === "funcionario" ? "Funcionário" : "Gestor"}</span>
                       </span>
                       <span className="text-sm text-muted-foreground">
                         Criado em: <span className="font-medium">{new Date(questionario.dataCriacao).toLocaleDateString('pt-BR')}</span>
@@ -296,8 +298,8 @@ export default function QuestionariosDesligamento() {
                   <Textarea
                     id="texto-pergunta"
                     data-testid="input-texto-pergunta"
-                    value={novaPergunta.texto}
-                    onChange={(e) => setNovaPergunta({ ...novaPergunta, texto: e.target.value })}
+                    value={novaPergunta.pergunta}
+                    onChange={(e) => setNovaPergunta({ ...novaPergunta, pergunta: e.target.value })}
                     placeholder="Digite a pergunta..."
                     rows={2}
                   />
@@ -357,7 +359,7 @@ export default function QuestionariosDesligamento() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-sm">#{index + 1}</span>
-                        <span className="text-sm">{pergunta.texto}</span>
+                        <span className="text-sm">{pergunta.pergunta}</span>
                       </div>
                       <div className="flex gap-4 mt-2">
                         <span className="text-xs text-muted-foreground">
