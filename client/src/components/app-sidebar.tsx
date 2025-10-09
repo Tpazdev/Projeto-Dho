@@ -30,12 +30,12 @@ const items = [
     icon: UserX,
     subItems: [
       {
-        title: "Por Funcionário",
+        title: "Entrevista de desligamento – por parte do colaborador",
         url: "/desligamentos/funcionario",
         icon: UserMinus,
       },
       {
-        title: "Por Gestor",
+        title: "Entrevista de desligamento – por parte da empresa",
         url: "/desligamentos/gestor",
         icon: UserCog,
       },

@@ -201,8 +201,8 @@ export function DesligamentoForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="funcionario">Por Funcionário</SelectItem>
-                        <SelectItem value="gestor">Por Gestor/Empresa</SelectItem>
+                        <SelectItem value="funcionario">Entrevista de desligamento – por parte do colaborador</SelectItem>
+                        <SelectItem value="gestor">Entrevista de desligamento – por parte da empresa</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

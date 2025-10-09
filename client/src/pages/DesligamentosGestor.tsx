@@ -28,9 +28,9 @@ export default function DesligamentosGestor() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Desligamentos por Gestor</h1>
+          <h1 className="text-3xl font-bold">Entrevista de desligamento – por parte da empresa</h1>
           <p className="text-muted-foreground mt-1">
-            Desligamentos iniciados pelo gestor/empresa (demissão, término de contrato, etc.)
+            Desligamentos iniciados pela empresa (demissão, término de contrato, etc.)
           </p>
         </div>
         <Link href="/desligamento/novo">

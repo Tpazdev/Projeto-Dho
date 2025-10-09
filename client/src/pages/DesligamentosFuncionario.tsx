@@ -28,9 +28,9 @@ export default function DesligamentosFuncionario() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Desligamentos por Funcionário</h1>
+          <h1 className="text-3xl font-bold">Entrevista de desligamento – por parte do colaborador</h1>
           <p className="text-muted-foreground mt-1">
-            Desligamentos iniciados pelo funcionário (pedido de demissão, abandono, etc.)
+            Desligamentos iniciados pelo colaborador (pedido de demissão, abandono, etc.)
           </p>
         </div>
         <Link href="/desligamento/novo">

@@ -3,6 +3,12 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { DesligamentoForm } from "@/components/DesligamentoForm";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { insertDesligamentoSchema } from "@shared/schema";
+import { z } from "zod";
+
+type DesligamentoFormData = z.infer<typeof insertDesligamentoSchema> & {
+  dataDesligamento: string;
+};
 
 export default function NovoDesligamento() {
   const [, setLocation] = useLocation();
@@ -21,7 +27,7 @@ export default function NovoDesligamento() {
   });
 
   const mutation = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: DesligamentoFormData) => {
       return await apiRequest("POST", "/api/desligamentos", data);
     },
     onSuccess: () => {
