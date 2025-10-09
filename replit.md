@@ -28,7 +28,10 @@ The system uses a PostgreSQL database, managed with Drizzle ORM for type-safe sc
 
 - **Neon Database**: Serverless PostgreSQL hosting for all database operations.
 - **Google Fonts**: Inter font family for consistent typography.
-- **Microsoft Forms**: Integrated for company-initiated termination questionnaires, generating and displaying links for employee responses.
+- **Microsoft Forms**: Integrated for termination questionnaires with separate forms for different termination types:
+  - **Employee-initiated terminations**: https://forms.office.com/pages/responsepage.aspx?id=fKhs6GEk4keMILRXyHexKD9hUGoTJTBAh3e6AfxsqZRUN1NMOEdNUjRLNk9aVFQ0UEFVOVRMMTFJWSQlQCN0PWcu&route=shorturl
+  - **Company-initiated terminations**: https://forms.office.com/pages/responsepage.aspx?id=fKhs6GEk4keMILRXyHexKD9hUGoTJTBAh3e6AfxsqZRUMkJPVzBTM1VCN0VNVFg5QjZJTFZPV1YwSyQlQCN0PWcu&route=shorturl
+  - System automatically provides the appropriate link based on termination type via dialog interface with copy/open options
 
 ### UI Component Libraries
 

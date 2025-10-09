@@ -672,8 +672,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Funcionário não encontrado" });
       }
 
-      // Link do Microsoft Forms para desligamento por parte da empresa
+      // Links do Microsoft Forms
       const linkFormGestor = "https://forms.office.com/pages/responsepage.aspx?id=fKhs6GEk4keMILRXyHexKD9hUGoTJTBAh3e6AfxsqZRUMkJPVzBTM1VCN0VNVFg5QjZJTFZPV1YwSyQlQCN0PWcu&route=shorturl";
+      const linkFormFuncionario = "https://forms.office.com/pages/responsepage.aspx?id=fKhs6GEk4keMILRXyHexKD9hUGoTJTBAh3e6AfxsqZRUN1NMOEdNUjRLNk9aVFQ0UEFVOVRMMTFJWSQlQCN0PWcu&route=shorturl";
+
+      const link = tipoDesligamento === "gestor" ? linkFormGestor : linkFormFuncionario;
 
       // TODO: Implementar integração de email (Gmail, SendGrid, Resend, etc.)
       // Por enquanto, apenas registra a solicitação no console
@@ -681,26 +684,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Funcionário: ${funcionario.nome}`);
       console.log(`Email: ${email}`);
       console.log(`Tipo: ${tipoDesligamento}`);
-      
-      if (tipoDesligamento === "gestor") {
-        console.log(`Link do formulário: ${linkFormGestor}`);
-        console.log(`\nMensagem a ser enviada:`);
-        console.log(`Prezado(a) ${funcionario.nome},`);
-        console.log(`\nPor favor, acesse o link abaixo para responder o questionário de desligamento:`);
-        console.log(linkFormGestor);
-      }
-      
+      console.log(`Link do formulário: ${link}`);
+      console.log(`\nMensagem a ser enviada:`);
+      console.log(`Prezado(a) ${funcionario.nome},`);
+      console.log(`\nPor favor, acesse o link abaixo para responder o questionário de desligamento:`);
+      console.log(link);
       console.log(`Data: ${new Date().toISOString()}`);
 
       // Simula sucesso
       res.json({
         success: true,
-        message: tipoDesligamento === "gestor" 
-          ? "Questionário preparado para envio com link do Microsoft Forms"
-          : "Questionário preparado para envio",
+        message: "Questionário preparado para envio com link do Microsoft Forms",
         funcionario: funcionario.nome,
         email,
-        link: tipoDesligamento === "gestor" ? linkFormGestor : undefined,
+        link,
       });
     } catch (error) {
       console.error("Erro ao enviar questionário:", error);

@@ -64,7 +64,7 @@ export function EnviarQuestionario({ tipoDesligamento }: EnviarQuestionarioProps
       return { ...(await response.json()), funcionarioNome };
     },
     onSuccess: (data) => {
-      if (tipoDesligamento === "gestor" && data.link) {
+      if (data.link) {
         setCurrentLink(data.link);
         setCurrentFuncionario(data.funcionarioNome);
         setLinkDialogOpen(true);
