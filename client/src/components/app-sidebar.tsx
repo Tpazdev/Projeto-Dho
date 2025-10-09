@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Building2, UserCog, UserX, FileText, BarChart, GraduationCap, Target, ChevronRight, UserMinus, ClipboardList } from "lucide-react";
+import { LayoutDashboard, Users, Building2, UserCog, UserX, FileText, BarChart, GraduationCap, Target, ChevronRight, UserMinus, ClipboardList, Calendar } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
   Sidebar,
@@ -48,8 +48,19 @@ const items = [
   },
   {
     title: "Avaliações de Experiência",
-    url: "/formularios-experiencia",
     icon: FileText,
+    subItems: [
+      {
+        title: "01° Período",
+        url: "/formularios-experiencia/primeiro-periodo",
+        icon: Calendar,
+      },
+      {
+        title: "02° Período",
+        url: "/formularios-experiencia/segundo-periodo",
+        icon: Calendar,
+      },
+    ],
   },
   {
     title: "Treinamentos",

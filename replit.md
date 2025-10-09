@@ -8,6 +8,19 @@ A comprehensive web application designed to streamline HR workflows in Portugues
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Updates
+
+### Experience Evaluation Period Management (October 2025)
+- **Two-Period Structure**: Avaliações de Experiência now organized into two separate periods:
+  - **01° Período**: First evaluation period for probationary employees
+  - **02° Período**: Second evaluation period for probationary employees
+- **Database Enhancement**: Added `periodo` field to formulariosExperiencia table (default: "1")
+- **Navigation**: Collapsible sidebar menu with two sub-items for easy access to each period
+- **Filtering**: Each period shows only its relevant evaluation forms
+- **Dedicated Routes**:
+  - `/formularios-experiencia/primeiro-periodo` - First period evaluations
+  - `/formularios-experiencia/segundo-periodo` - Second period evaluations
+
 ## System Architecture
 
 ### Frontend Architecture

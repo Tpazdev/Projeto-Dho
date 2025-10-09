@@ -52,6 +52,7 @@ export const formulariosExperiencia = pgTable("formularios_experiencia", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   funcionarioId: integer("funcionario_id").notNull().references(() => funcionarios.id),
   gestorId: integer("gestor_id").notNull().references(() => gestores.id),
+  periodo: text("periodo").notNull().default("1"),
   dataLimite: date("data_limite").notNull(),
   status: text("status").notNull().default("pendente"),
   dataPreenchimento: date("data_preenchimento"),

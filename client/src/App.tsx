@@ -38,6 +38,8 @@ function Router() {
       <Route path="/empresas" component={Empresas} />
       <Route path="/gestores" component={Gestores} />
       <Route path="/funcionarios" component={Funcionarios} />
+      <Route path="/formularios-experiencia/primeiro-periodo" component={() => <FormulariosExperiencia periodo="1" />} />
+      <Route path="/formularios-experiencia/segundo-periodo" component={() => <FormulariosExperiencia periodo="2" />} />
       <Route path="/formularios-experiencia" component={FormulariosExperiencia} />
       <Route path="/ambiencia" component={Ambiencia} />
       <Route path="/ambiencia/:id/perguntas" component={AmbienciaPerguntas} />

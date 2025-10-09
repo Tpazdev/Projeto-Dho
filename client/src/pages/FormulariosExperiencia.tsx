@@ -15,6 +15,7 @@ type FormularioExperienciaItem = {
   funcionarioNome: string;
   gestorId: number;
   gestorNome: string;
+  periodo: string;
   dataLimite: string;
   status: "pendente" | "preenchido" | "aprovado" | "reprovado";
   dataPreenchimento?: string | null;
@@ -25,12 +26,20 @@ type FormularioExperienciaItem = {
   observacoes?: string | null;
 };
 
-export default function FormulariosExperiencia() {
+interface FormulariosExperienciaProps {
+  periodo?: string;
+}
+
+export default function FormulariosExperiencia({ periodo }: FormulariosExperienciaProps = {}) {
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
-  const { data: formularios = [], isLoading } = useQuery<FormularioExperienciaItem[]>({
+  const { data: allFormularios = [], isLoading } = useQuery<FormularioExperienciaItem[]>({
     queryKey: ["/api/formularios-experiencia"],
   });
+
+  const formularios = periodo 
+    ? allFormularios.filter(f => f.periodo === periodo)
+    : allFormularios;
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -56,12 +65,18 @@ export default function FormulariosExperiencia() {
     setExpandedId(expandedId === id ? null : id);
   };
 
+  const getPeriodoTitulo = () => {
+    if (periodo === "1") return "Formulários de Experiência - 01° Período";
+    if (periodo === "2") return "Formulários de Experiência - 02° Período";
+    return "Formulários de Experiência";
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold" data-testid="text-page-title">
-            Formulários de Experiência
+            {getPeriodoTitulo()}
           </h1>
         </div>
         <div className="space-y-4">
@@ -92,10 +107,10 @@ export default function FormulariosExperiencia() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold" data-testid="text-page-title">
-            Formulários de Experiência
+            {getPeriodoTitulo()}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Avaliações de período de experiência dos funcionários
+            {periodo ? `Avaliações do ${periodo === "1" ? "primeiro" : "segundo"} período de experiência` : "Avaliações de período de experiência dos funcionários"}
           </p>
         </div>
       </div>
