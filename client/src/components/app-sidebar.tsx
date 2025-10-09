@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Building2, UserCog, UserX, FileText, BarChart, GraduationCap, Target } from "lucide-react";
+import { LayoutDashboard, Users, Building2, UserCog, UserX, FileText, BarChart, GraduationCap, Target, ChevronRight, UserMinus } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
   Sidebar,
@@ -9,7 +9,15 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 const items = [
   {
@@ -19,8 +27,19 @@ const items = [
   },
   {
     title: "Desligamentos",
-    url: "/",
     icon: UserX,
+    subItems: [
+      {
+        title: "Por Funcionário",
+        url: "/desligamentos/funcionario",
+        icon: UserMinus,
+      },
+      {
+        title: "Por Gestor",
+        url: "/desligamentos/gestor",
+        icon: UserCog,
+      },
+    ],
   },
   {
     title: "Avaliações de Experiência",
@@ -77,20 +96,58 @@ export function AppSidebar() {
           <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    className={location === item.url ? "bg-sidebar-accent" : ""}
-                    data-testid={`link-${item.title.toLowerCase()}`}
-                  >
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {items.map((item) => {
+                // Se o item tem subItems, renderiza um menu expansível
+                if (item.subItems) {
+                  return (
+                    <Collapsible key={item.title} asChild defaultOpen className="group/collapsible">
+                      <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton tooltip={item.title} data-testid={`link-${item.title.toLowerCase()}`}>
+                            <item.icon />
+                            <span>{item.title}</span>
+                            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <SidebarMenuSub>
+                            {item.subItems.map((subItem) => (
+                              <SidebarMenuSubItem key={subItem.title}>
+                                <SidebarMenuSubButton
+                                  asChild
+                                  className={location === subItem.url ? "bg-sidebar-accent" : ""}
+                                  data-testid={`link-${subItem.title.toLowerCase().replace(/\s+/g, '-')}`}
+                                >
+                                  <Link href={subItem.url}>
+                                    <subItem.icon />
+                                    <span>{subItem.title}</span>
+                                  </Link>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            ))}
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      </SidebarMenuItem>
+                    </Collapsible>
+                  );
+                }
+                
+                // Caso contrário, renderiza um item normal
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      className={location === item.url ? "bg-sidebar-accent" : ""}
+                      data-testid={`link-${item.title.toLowerCase()}`}
+                    >
+                      <Link href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

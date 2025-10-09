@@ -58,6 +58,7 @@ export function DesligamentoForm({
     defaultValues: {
       dataDesligamento: "",
       motivo: "",
+      tipoDesligamento: "gestor",
       funcionarioId: 0,
       empresaId: 0,
       gestorId: 0,
@@ -177,6 +178,31 @@ export function DesligamentoForm({
                             {funcionario.nome} - {funcionario.cargo}
                           </SelectItem>
                         ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="tipoDesligamento"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tipo de Desligamento *</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger data-testid="select-tipo-desligamento">
+                          <SelectValue placeholder="Selecione o tipo" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="funcionario">Por Funcionário</SelectItem>
+                        <SelectItem value="gestor">Por Gestor/Empresa</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

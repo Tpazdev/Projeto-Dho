@@ -26,6 +26,7 @@ export const desligamentos = pgTable("desligamentos", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   dataDesligamento: date("data_desligamento").notNull(),
   motivo: text("motivo"),
+  tipoDesligamento: text("tipo_desligamento").notNull().default("gestor"), // "funcionario" ou "gestor"
   funcionarioId: integer("funcionario_id").notNull().references(() => funcionarios.id),
   empresaId: integer("empresa_id").notNull().references(() => empresas.id),
   gestorId: integer("gestor_id").notNull().references(() => gestores.id),

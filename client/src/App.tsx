@@ -11,6 +11,8 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import Dashboard from "@/pages/Dashboard";
 import NovoDesligamento from "@/pages/NovoDesligamento";
+import DesligamentosFuncionario from "@/pages/DesligamentosFuncionario";
+import DesligamentosGestor from "@/pages/DesligamentosGestor";
 import Empresas from "@/pages/Empresas";
 import Gestores from "@/pages/Gestores";
 import Funcionarios from "@/pages/Funcionarios";
@@ -30,6 +32,8 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/desligamento/novo" component={NovoDesligamento} />
+      <Route path="/desligamentos/funcionario" component={DesligamentosFuncionario} />
+      <Route path="/desligamentos/gestor" component={DesligamentosGestor} />
       <Route path="/empresas" component={Empresas} />
       <Route path="/gestores" component={Gestores} />
       <Route path="/funcionarios" component={Funcionarios} />

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DesligamentosTable } from "@/components/DesligamentosTable";
 
 export default function Home() {
-  const { data: desligamentos = [], isLoading } = useQuery({
+  const { data: desligamentos = [], isLoading } = useQuery<any[]>({
     queryKey: ["/api/desligamentos"],
   });
 
