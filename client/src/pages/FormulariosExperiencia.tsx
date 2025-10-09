@@ -7,6 +7,7 @@ import { FileText, Calendar, User, AlertCircle, ChevronDown, ChevronUp } from "l
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { FormularioExperienciaForm } from "@/components/FormularioExperienciaForm";
+import { EnviarFormularioExperiencia } from "@/components/EnviarFormularioExperiencia";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 type FormularioExperienciaItem = {
@@ -171,6 +172,15 @@ export default function FormulariosExperiencia({ periodo }: FormulariosExperienc
                           {format(new Date(formulario.dataLimite), "dd/MM/yyyy", { locale: ptBR })}
                         </span>
                       </div>
+
+                      {!isExpanded && (
+                        <EnviarFormularioExperiencia
+                          formularioId={formulario.id}
+                          gestorNome={formulario.gestorNome}
+                          funcionarioNome={formulario.funcionarioNome}
+                          periodo={formulario.periodo}
+                        />
+                      )}
 
                       <CollapsibleContent>
                         <div className="pt-4 border-t mt-4">

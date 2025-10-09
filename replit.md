@@ -12,14 +12,19 @@ Preferred communication style: Simple, everyday language.
 
 ### Experience Evaluation Period Management (October 2025)
 - **Two-Period Structure**: Avaliações de Experiência now organized into two separate periods:
-  - **01° Período**: First evaluation period for probationary employees
-  - **02° Período**: Second evaluation period for probationary employees
+  - **01° Período**: First evaluation period for probationary employees (30 days)
+  - **02° Período**: Second evaluation period for probationary employees (60 days)
 - **Database Enhancement**: Added `periodo` field to formulariosExperiencia table (default: "1")
 - **Navigation**: Collapsible sidebar menu with two sub-items for easy access to each period
 - **Filtering**: Each period shows only its relevant evaluation forms
 - **Dedicated Routes**:
   - `/formularios-experiencia/primeiro-periodo` - First period evaluations
   - `/formularios-experiencia/segundo-periodo` - Second period evaluations
+- **Microsoft Forms Integration**: 
+  - "Enviar Formulário ao Gestor" button on each pending evaluation form
+  - Dialog interface with manager/employee context and period information
+  - Single Microsoft Forms URL for all evaluation periods: https://forms.office.com/pages/responsepage.aspx?id=fKhs6GEk4keMILRXyHexKD9hUGoTJTBAh3e6AfxsqZRUREcxQzk3SUJNMkFYMVVKWE04R1IzRjJNUSQlQCN0PWcu&route=shorturl
+  - Copy link and open form functionality with toast notifications
 
 ## System Architecture
 

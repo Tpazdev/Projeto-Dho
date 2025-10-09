@@ -333,6 +333,7 @@ export class DatabaseStorage implements IStorage {
         funcionarioNome: funcionarios.nome,
         gestorId: formulariosExperiencia.gestorId,
         gestorNome: gestores.nome,
+        periodo: formulariosExperiencia.periodo,
         dataLimite: formulariosExperiencia.dataLimite,
         status: formulariosExperiencia.status,
         dataPreenchimento: formulariosExperiencia.dataPreenchimento,
@@ -366,6 +367,7 @@ export class DatabaseStorage implements IStorage {
         funcionarioNome: funcionarios.nome,
         gestorId: formulariosExperiencia.gestorId,
         gestorNome: gestores.nome,
+        periodo: formulariosExperiencia.periodo,
         dataLimite: formulariosExperiencia.dataLimite,
         status: formulariosExperiencia.status,
       })
@@ -386,6 +388,7 @@ export class DatabaseStorage implements IStorage {
         funcionarioNome: funcionarios.nome,
         gestorId: formulariosExperiencia.gestorId,
         gestorNome: gestores.nome,
+        periodo: formulariosExperiencia.periodo,
         dataLimite: formulariosExperiencia.dataLimite,
         status: formulariosExperiencia.status,
         dataPreenchimento: formulariosExperiencia.dataPreenchimento,
