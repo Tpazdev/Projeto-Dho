@@ -31,8 +31,14 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const formSchema = insertDesligamentoSchema.extend({
+const formSchema = insertDesligamentoSchema.omit({ 
+  dataDesligamento: true 
+}).extend({
   dataDesligamento: z.string().min(1, "Data é obrigatória"),
+  empresaId: z.number().min(1, "Empresa é obrigatória"),
+  gestorId: z.number().min(1, "Gestor é obrigatório"),
+  funcionarioId: z.number().min(1, "Funcionário é obrigatório"),
+  tipoDesligamento: z.enum(["funcionario", "gestor"]),
 });
 
 interface DesligamentoFormProps {
@@ -58,7 +64,7 @@ export function DesligamentoForm({
     defaultValues: {
       dataDesligamento: "",
       motivo: "",
-      tipoDesligamento: "gestor",
+      tipoDesligamento: "gestor" as const,
       funcionarioId: 0,
       empresaId: 0,
       gestorId: 0,
