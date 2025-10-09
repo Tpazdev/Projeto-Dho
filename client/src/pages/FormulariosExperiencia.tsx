@@ -1,10 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, User, AlertCircle, FileText } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { AlertCircle, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { EnviarFormularioExperiencia } from "@/components/EnviarFormularioExperiencia";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 type FormularioExperienciaItem = {
   id: number;
@@ -72,18 +80,7 @@ export default function FormulariosExperiencia({ periodo }: FormulariosExperienc
         </div>
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader>
-                <div className="h-6 bg-muted rounded w-3/4"></div>
-                <div className="h-4 bg-muted rounded w-1/2 mt-2"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="h-4 bg-muted rounded"></div>
-                  <div className="h-4 bg-muted rounded"></div>
-                </div>
-              </CardContent>
-            </Card>
+            <div key={i} className="h-16 bg-muted rounded animate-pulse"></div>
           ))}
         </div>
       </div>
@@ -112,45 +109,60 @@ export default function FormulariosExperiencia({ periodo }: FormulariosExperienc
             <AlertCircle className="h-5 w-5 text-yellow-500" />
             Pendentes ({pendentes.length})
           </h2>
-          <div className="space-y-4">
-            {pendentes.map((formulario) => {
-              const vencido = isVencido(formulario.dataLimite);
-              
-              return (
-                <Card
-                  key={formulario.id}
-                  className={vencido ? "border-red-500/50" : ""}
-                  data-testid={`card-formulario-${formulario.id}`}
-                >
-                  <CardHeader>
-                    <div className="flex items-center gap-3">
-                      <CardTitle className="text-lg">{formulario.funcionarioNome}</CardTitle>
-                      {getStatusBadge(formulario.status)}
-                    </div>
-                    <CardDescription className="flex items-center gap-1">
-                      <User className="h-3 w-3" />
-                      Gestor: {formulario.gestorNome}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span className={vencido ? "text-red-500 font-semibold" : ""}>
-                        {vencido ? "Vencido em " : "Prazo: "}
+          <div className="rounded-md border overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-16">ID</TableHead>
+                  <TableHead>Nome do Funcionário</TableHead>
+                  <TableHead>Nome do Gestor</TableHead>
+                  <TableHead className="w-32">Período</TableHead>
+                  <TableHead className="w-36">Data Limite</TableHead>
+                  <TableHead className="w-32">Status</TableHead>
+                  <TableHead className="w-48">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {pendentes.map((formulario) => {
+                  const vencido = isVencido(formulario.dataLimite);
+                  
+                  return (
+                    <TableRow
+                      key={formulario.id}
+                      className={vencido ? "bg-red-500/5" : ""}
+                      data-testid={`row-formulario-${formulario.id}`}
+                    >
+                      <TableCell className="font-medium" data-testid={`text-id-${formulario.id}`}>
+                        {formulario.id}
+                      </TableCell>
+                      <TableCell data-testid={`text-funcionario-${formulario.id}`}>
+                        {formulario.funcionarioNome}
+                      </TableCell>
+                      <TableCell data-testid={`text-gestor-${formulario.id}`}>
+                        {formulario.gestorNome}
+                      </TableCell>
+                      <TableCell>
+                        {formulario.periodo === "1" ? "01° Período" : "02° Período"}
+                      </TableCell>
+                      <TableCell className={vencido ? "text-red-500 font-semibold" : ""}>
                         {format(new Date(formulario.dataLimite), "dd/MM/yyyy", { locale: ptBR })}
-                      </span>
-                    </div>
-
-                    <EnviarFormularioExperiencia
-                      formularioId={formulario.id}
-                      gestorNome={formulario.gestorNome}
-                      funcionarioNome={formulario.funcionarioNome}
-                      periodo={formulario.periodo}
-                    />
-                  </CardContent>
-                </Card>
-              );
-            })}
+                      </TableCell>
+                      <TableCell>
+                        {getStatusBadge(formulario.status)}
+                      </TableCell>
+                      <TableCell>
+                        <EnviarFormularioExperiencia
+                          formularioId={formulario.id}
+                          gestorNome={formulario.gestorNome}
+                          funcionarioNome={formulario.funcionarioNome}
+                          periodo={formulario.periodo}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
           </div>
         </div>
       )}
@@ -160,40 +172,51 @@ export default function FormulariosExperiencia({ periodo }: FormulariosExperienc
           <h2 className="text-xl font-semibold mb-4" data-testid="text-section-preenchidos">
             Preenchidos ({preenchidos.length})
           </h2>
-          <div className="space-y-4">
-            {preenchidos.map((formulario) => {
-              return (
-                <Card key={formulario.id} data-testid={`card-formulario-${formulario.id}`}>
-                  <CardHeader>
-                    <div className="flex items-center gap-3">
-                      <CardTitle className="text-lg">{formulario.funcionarioNome}</CardTitle>
-                      {getStatusBadge(formulario.status)}
-                    </div>
-                    <CardDescription className="flex items-center gap-1">
-                      <User className="h-3 w-3" />
-                      Gestor: {formulario.gestorNome}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span>
-                        Preenchido em:{" "}
+          <div className="rounded-md border overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-16">ID</TableHead>
+                  <TableHead>Nome do Funcionário</TableHead>
+                  <TableHead>Nome do Gestor</TableHead>
+                  <TableHead className="w-32">Período</TableHead>
+                  <TableHead className="w-36">Data Preenchimento</TableHead>
+                  <TableHead className="w-32">Desempenho</TableHead>
+                  <TableHead className="w-32">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {preenchidos.map((formulario) => {
+                  return (
+                    <TableRow key={formulario.id} data-testid={`row-formulario-${formulario.id}`}>
+                      <TableCell className="font-medium" data-testid={`text-id-${formulario.id}`}>
+                        {formulario.id}
+                      </TableCell>
+                      <TableCell data-testid={`text-funcionario-${formulario.id}`}>
+                        {formulario.funcionarioNome}
+                      </TableCell>
+                      <TableCell data-testid={`text-gestor-${formulario.id}`}>
+                        {formulario.gestorNome}
+                      </TableCell>
+                      <TableCell>
+                        {formulario.periodo === "1" ? "01° Período" : "02° Período"}
+                      </TableCell>
+                      <TableCell>
                         {formulario.dataPreenchimento
                           ? format(new Date(formulario.dataPreenchimento), "dd/MM/yyyy", { locale: ptBR })
                           : "-"}
-                      </span>
-                    </div>
-                    {formulario.desempenho && (
-                      <div className="text-sm">
-                        <span className="font-semibold">Desempenho: </span>
-                        {formulario.desempenho}/10
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })}
+                      </TableCell>
+                      <TableCell>
+                        {formulario.desempenho ? `${formulario.desempenho}/10` : "-"}
+                      </TableCell>
+                      <TableCell>
+                        {getStatusBadge(formulario.status)}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
           </div>
         </div>
       )}

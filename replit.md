@@ -21,10 +21,17 @@ Preferred communication style: Simple, everyday language.
   - `/formularios-experiencia/primeiro-periodo` - First period evaluations
   - `/formularios-experiencia/segundo-periodo` - Second period evaluations
 - **Microsoft Forms Integration**: 
+  - External form filling only - no internal evaluation form
   - "Enviar Formulário ao Gestor" button on each pending evaluation form
   - Dialog interface with manager/employee context and period information
   - Single Microsoft Forms URL for all evaluation periods: https://forms.office.com/pages/responsepage.aspx?id=fKhs6GEk4keMILRXyHexKD9hUGoTJTBAh3e6AfxsqZRUREcxQzk3SUJNMkFYMVVKWE04R1IzRjJNUSQlQCN0PWcu&route=shorturl
   - Copy link and open form functionality with toast notifications
+- **List/Table Layout**:
+  - Converted from card-based to table/list layout for better data visualization
+  - **Pendentes table columns**: ID, Nome do Funcionário, Nome do Gestor, Período, Data Limite, Status, Ações
+  - **Preenchidos table columns**: ID, Nome do Funcionário, Nome do Gestor, Período, Data Preenchimento, Desempenho, Status
+  - Responsive design with horizontal scroll on mobile devices
+  - Overdue evaluations highlighted with red background
 
 ## System Architecture
 
