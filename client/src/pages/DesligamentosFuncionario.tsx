@@ -2,11 +2,10 @@ import { Link } from "wouter";
 import { Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { DesligamentosTable } from "@/components/DesligamentosTable";
+import { DesligamentosTable, type DesligamentoData } from "@/components/DesligamentosTable";
+import { EnviarQuestionario } from "@/components/EnviarQuestionario";
 
-interface Desligamento {
-  id: number;
-  dataDesligamento: string;
+interface DesligamentoCompleto extends DesligamentoData {
   motivo: string | null;
   tipoDesligamento: string;
   funcionarioId: number;
@@ -15,7 +14,7 @@ interface Desligamento {
 }
 
 export default function DesligamentosFuncionario() {
-  const { data: desligamentos = [], isLoading } = useQuery<Desligamento[]>({
+  const { data: desligamentos = [], isLoading } = useQuery<DesligamentoCompleto[]>({
     queryKey: ["/api/desligamentos"],
   });
 
@@ -40,6 +39,8 @@ export default function DesligamentosFuncionario() {
           </Button>
         </Link>
       </div>
+
+      <EnviarQuestionario tipoDesligamento="funcionario" />
 
       {isLoading ? (
         <div className="text-center text-muted-foreground py-8">Carregando...</div>

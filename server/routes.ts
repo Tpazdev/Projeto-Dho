@@ -660,6 +660,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/enviar-questionario", async (req, res) => {
+    try {
+      const { funcionarioId, email, tipoDesligamento } = req.body;
+
+      // Buscar dados do funcionário
+      const funcionarios = await storage.getFuncionarios();
+      const funcionario = funcionarios.find((f) => f.id === funcionarioId);
+
+      if (!funcionario) {
+        return res.status(404).json({ error: "Funcionário não encontrado" });
+      }
+
+      // TODO: Implementar integração de email (Gmail, SendGrid, Resend, etc.)
+      // Por enquanto, apenas registra a solicitação no console
+      console.log(`[ENVIO DE QUESTIONÁRIO]`);
+      console.log(`Funcionário: ${funcionario.nome}`);
+      console.log(`Email: ${email}`);
+      console.log(`Tipo: ${tipoDesligamento}`);
+      console.log(`Data: ${new Date().toISOString()}`);
+
+      // Simula sucesso
+      res.json({
+        success: true,
+        message: "Questionário preparado para envio",
+        funcionario: funcionario.nome,
+        email,
+      });
+    } catch (error) {
+      console.error("Erro ao enviar questionário:", error);
+      res.status(500).json({ error: "Erro ao enviar questionário" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
