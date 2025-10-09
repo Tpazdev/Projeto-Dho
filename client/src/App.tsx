@@ -25,6 +25,7 @@ import Treinamentos from "@/pages/Treinamentos";
 import TreinamentoDetalhes from "@/pages/TreinamentoDetalhes";
 import PDI from "@/pages/PDI";
 import PDIDetalhes from "@/pages/PDIDetalhes";
+import QuestionariosDesligamento from "@/pages/QuestionariosDesligamento";
 
 function Router() {
   return (
@@ -46,6 +47,7 @@ function Router() {
       <Route path="/treinamentos/:id" component={TreinamentoDetalhes} />
       <Route path="/pdi" component={PDI} />
       <Route path="/pdi/:id" component={PDIDetalhes} />
+      <Route path="/questionarios-desligamento" component={QuestionariosDesligamento} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Building2, UserCog, UserX, FileText, BarChart, GraduationCap, Target, ChevronRight, UserMinus } from "lucide-react";
+import { LayoutDashboard, Users, Building2, UserCog, UserX, FileText, BarChart, GraduationCap, Target, ChevronRight, UserMinus, ClipboardList } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
   Sidebar,
@@ -38,6 +38,11 @@ const items = [
         title: "Entrevista de desligamento – por parte da empresa",
         url: "/desligamentos/gestor",
         icon: UserCog,
+      },
+      {
+        title: "Questionários de Desligamento",
+        url: "/questionarios-desligamento",
+        icon: ClipboardList,
       },
     ],
   },
