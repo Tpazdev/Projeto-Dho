@@ -22,16 +22,23 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Updates
 
-### Termination Interview Management (October 2025)
+### Termination Questionnaire Management System (October 2025)
 - **Categorized Terminations**: Added `tipoDesligamento` field to distinguish between employee-initiated ("funcionario") and company-initiated ("gestor") terminations
-- **Submenu Navigation**: Implemented expandable Desligamentos menu with two categories:
+- **Submenu Navigation**: Implemented expandable Desligamentos menu with three categories:
   - "Entrevista de desligamento – por parte do colaborador" (Employee-initiated)
   - "Entrevista de desligamento – por parte da empresa" (Company-initiated)
-- **Employee Search & Questionnaire**: New component `EnviarQuestionario` enables:
+  - "Questionários de Desligamento" (Questionnaire Management)
+- **Employee Search & Questionnaire**: Component `EnviarQuestionario` enables:
   - Real-time search/filter of employees by name or position
   - Direct questionnaire sending to employee email
   - Prepared for email service integration (Gmail, SendGrid, Resend, or Outlook)
   - Currently logs requests to console (email integration pending configuration)
+- **Questionnaire Management System**: New comprehensive system for creating and managing termination questionnaires:
+  - Create questionnaires with title, description, and type (employee/company-initiated)
+  - Add multiple questions to each questionnaire with different types (text, scale 1-10, multiple choice)
+  - Mark questions as required or optional
+  - Delete questionnaires and questions
+  - Full CRUD API and database persistence
 
 ## System Architecture
 
@@ -70,6 +77,9 @@ Preferred communication style: Simple, everyday language.
 - `/api/funcionarios` - Employee management (GET, POST)
 - `/api/desligamentos` - Termination records (GET, POST)
 - `/api/enviar-questionario` - Send termination questionnaire by email (POST)
+- `/api/questionarios-desligamento` - Questionnaire management (GET, POST, GET/:id, PATCH/:id, DELETE/:id)
+- `/api/questionarios-desligamento/:id/perguntas` - Question management (GET, POST)
+- `/api/perguntas-desligamento/:id` - Individual question operations (PATCH, DELETE)
 - `/api/dados/*` - Aggregated analytics endpoints
 - `/api/pdis` - Individual Development Plans (GET, POST)
 - `/api/pdis/:id/metas` - PDI goals management (GET, POST)
@@ -204,6 +214,23 @@ Preferred communication style: Simple, everyday language.
     - `prazo`: Deadline (date, required)
     - `status`: Action status (pendente, em_andamento, concluido)
     - `resultado`: Outcome description (text, optional)
+
+15. **questionariosDesligamento** (Termination Questionnaires)
+    - `id`: Auto-incrementing primary key
+    - `titulo`: Questionnaire title (text, required)
+    - `descricao`: Description (text, optional)
+    - `tipoDesligamento`: Questionnaire type - "funcionario" or "gestor" (text, required)
+    - `ativo`: Active flag (integer, default: 1)
+    - `dataCriacao`: Creation date (text, required)
+
+16. **perguntasDesligamento** (Termination Questionnaire Questions)
+    - `id`: Auto-incrementing primary key
+    - `questionarioId`: Foreign key to questionariosDesligamento
+    - `pergunta`: Question text (text, required)
+    - `tipo`: Question type - "escala", "multipla_escolha", or "texto_livre" (text, required)
+    - `obrigatoria`: Required flag (integer, default: 1)
+    - `ordem`: Display order (integer, required)
+    - `opcoes`: Multiple choice options array (text[], optional)
 
 **Design Patterns**:
 - Normalized relational structure with referential integrity
