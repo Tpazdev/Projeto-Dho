@@ -20,6 +20,19 @@ A comprehensive web application for managing employee termination processes, exp
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Updates
+
+### Termination Interview Management (October 2025)
+- **Categorized Terminations**: Added `tipoDesligamento` field to distinguish between employee-initiated ("funcionario") and company-initiated ("gestor") terminations
+- **Submenu Navigation**: Implemented expandable Desligamentos menu with two categories:
+  - "Entrevista de desligamento – por parte do colaborador" (Employee-initiated)
+  - "Entrevista de desligamento – por parte da empresa" (Company-initiated)
+- **Employee Search & Questionnaire**: New component `EnviarQuestionario` enables:
+  - Real-time search/filter of employees by name or position
+  - Direct questionnaire sending to employee email
+  - Prepared for email service integration (Gmail, SendGrid, Resend, or Outlook)
+  - Currently logs requests to console (email integration pending configuration)
+
 ## System Architecture
 
 ### Frontend Architecture
@@ -56,6 +69,7 @@ Preferred communication style: Simple, everyday language.
 - `/api/gestores` - Manager management (GET, POST)
 - `/api/funcionarios` - Employee management (GET, POST)
 - `/api/desligamentos` - Termination records (GET, POST)
+- `/api/enviar-questionario` - Send termination questionnaire by email (POST)
 - `/api/dados/*` - Aggregated analytics endpoints
 - `/api/pdis` - Individual Development Plans (GET, POST)
 - `/api/pdis/:id/metas` - PDI goals management (GET, POST)
@@ -94,6 +108,7 @@ Preferred communication style: Simple, everyday language.
    - `id`: Auto-incrementing primary key
    - `dataDesligamento`: Termination date (date, required)
    - `motivo`: Termination reason (text, optional)
+   - `tipoDesligamento`: Termination type (text, required, default: "gestor") - Values: "funcionario" (employee-initiated) or "gestor" (company-initiated)
    - `funcionarioId`: Foreign key to funcionarios
    - `empresaId`: Foreign key to empresas
    - `gestorId`: Foreign key to gestores
