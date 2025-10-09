@@ -154,6 +154,25 @@ export const pdiAcoes = pgTable("pdi_acoes", {
   resultado: text("resultado"),
 });
 
+export const questionariosDesligamento = pgTable("questionarios_desligamento", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  titulo: text("titulo").notNull(),
+  descricao: text("descricao"),
+  tipoDesligamento: text("tipo_desligamento").notNull(), // "funcionario" ou "gestor"
+  ativo: integer("ativo").notNull().default(1), // 1 = ativo, 0 = inativo
+  dataCriacao: date("data_criacao").notNull().default(sql`CURRENT_DATE`),
+});
+
+export const perguntasDesligamento = pgTable("perguntas_desligamento", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  questionarioId: integer("questionario_id").notNull().references(() => questionariosDesligamento.id),
+  pergunta: text("pergunta").notNull(),
+  tipo: text("tipo").notNull(), // "texto", "multipla_escolha", "escala"
+  opcoes: text("opcoes").array(), // Para perguntas de múltipla escolha
+  obrigatoria: integer("obrigatoria").notNull().default(1), // 1 = sim, 0 = não
+  ordem: integer("ordem").notNull(),
+});
+
 const baseEmpresaSchema = createInsertSchema(empresas);
 export const insertEmpresaSchema = baseEmpresaSchema.omit({ id: true });
 
@@ -202,6 +221,12 @@ export const insertPdiCompetenciaSchema = basePdiCompetenciaSchema.omit({ id: tr
 const basePdiAcaoSchema = createInsertSchema(pdiAcoes);
 export const insertPdiAcaoSchema = basePdiAcaoSchema.omit({ id: true });
 
+const baseQuestionarioDesligamentoSchema = createInsertSchema(questionariosDesligamento);
+export const insertQuestionarioDesligamentoSchema = baseQuestionarioDesligamentoSchema.omit({ id: true, dataCriacao: true });
+
+const basePerguntaDesligamentoSchema = createInsertSchema(perguntasDesligamento);
+export const insertPerguntaDesligamentoSchema = basePerguntaDesligamentoSchema.omit({ id: true });
+
 export type InsertEmpresa = z.infer<typeof insertEmpresaSchema>;
 export type Empresa = typeof empresas.$inferSelect;
 
@@ -249,3 +274,9 @@ export type PdiCompetencia = typeof pdiCompetencias.$inferSelect;
 
 export type InsertPdiAcao = z.infer<typeof insertPdiAcaoSchema>;
 export type PdiAcao = typeof pdiAcoes.$inferSelect;
+
+export type InsertQuestionarioDesligamento = z.infer<typeof insertQuestionarioDesligamentoSchema>;
+export type QuestionarioDesligamento = typeof questionariosDesligamento.$inferSelect;
+
+export type InsertPerguntaDesligamento = z.infer<typeof insertPerguntaDesligamentoSchema>;
+export type PerguntaDesligamento = typeof perguntasDesligamento.$inferSelect;

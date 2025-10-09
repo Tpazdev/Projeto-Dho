@@ -15,6 +15,8 @@ import {
   pdiMetas,
   pdiCompetencias,
   pdiAcoes,
+  questionariosDesligamento,
+  perguntasDesligamento,
   type Empresa,
   type InsertEmpresa,
   type Gestor,
@@ -47,6 +49,10 @@ import {
   type InsertPdiCompetencia,
   type PdiAcao,
   type InsertPdiAcao,
+  type QuestionarioDesligamento,
+  type InsertQuestionarioDesligamento,
+  type PerguntaDesligamento,
+  type InsertPerguntaDesligamento,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql, and } from "drizzle-orm";
@@ -134,6 +140,17 @@ export interface IStorage {
   getAcoesByPdi(pdiId: number): Promise<PdiAcao[]>;
   updatePdiAcao(id: number, data: Partial<InsertPdiAcao>): Promise<PdiAcao>;
   deletePdiAcao(id: number): Promise<void>;
+
+  createQuestionarioDesligamento(questionario: InsertQuestionarioDesligamento): Promise<QuestionarioDesligamento>;
+  getQuestionariosDesligamento(): Promise<QuestionarioDesligamento[]>;
+  getQuestionarioDesligamento(id: number): Promise<QuestionarioDesligamento | undefined>;
+  updateQuestionarioDesligamento(id: number, data: Partial<InsertQuestionarioDesligamento>): Promise<QuestionarioDesligamento>;
+  deleteQuestionarioDesligamento(id: number): Promise<void>;
+
+  createPerguntaDesligamento(pergunta: InsertPerguntaDesligamento): Promise<PerguntaDesligamento>;
+  getPerguntasByQuestionario(questionarioId: number): Promise<PerguntaDesligamento[]>;
+  updatePerguntaDesligamento(id: number, data: Partial<InsertPerguntaDesligamento>): Promise<PerguntaDesligamento>;
+  deletePerguntaDesligamento(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -806,6 +823,69 @@ export class DatabaseStorage implements IStorage {
 
   async deletePdiAcao(id: number): Promise<void> {
     await db.delete(pdiAcoes).where(eq(pdiAcoes.id, id));
+  }
+
+  async createQuestionarioDesligamento(data: InsertQuestionarioDesligamento): Promise<QuestionarioDesligamento> {
+    const [questionario] = await db
+      .insert(questionariosDesligamento)
+      .values(data)
+      .returning();
+    return questionario;
+  }
+
+  async getQuestionariosDesligamento(): Promise<QuestionarioDesligamento[]> {
+    return await db.select().from(questionariosDesligamento).orderBy(questionariosDesligamento.dataCriacao);
+  }
+
+  async getQuestionarioDesligamento(id: number): Promise<QuestionarioDesligamento | undefined> {
+    const [questionario] = await db
+      .select()
+      .from(questionariosDesligamento)
+      .where(eq(questionariosDesligamento.id, id));
+    return questionario || undefined;
+  }
+
+  async updateQuestionarioDesligamento(id: number, data: Partial<InsertQuestionarioDesligamento>): Promise<QuestionarioDesligamento> {
+    const [updated] = await db
+      .update(questionariosDesligamento)
+      .set(data)
+      .where(eq(questionariosDesligamento.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteQuestionarioDesligamento(id: number): Promise<void> {
+    await db.delete(perguntasDesligamento).where(eq(perguntasDesligamento.questionarioId, id));
+    await db.delete(questionariosDesligamento).where(eq(questionariosDesligamento.id, id));
+  }
+
+  async createPerguntaDesligamento(data: InsertPerguntaDesligamento): Promise<PerguntaDesligamento> {
+    const [pergunta] = await db
+      .insert(perguntasDesligamento)
+      .values(data)
+      .returning();
+    return pergunta;
+  }
+
+  async getPerguntasByQuestionario(questionarioId: number): Promise<PerguntaDesligamento[]> {
+    return await db
+      .select()
+      .from(perguntasDesligamento)
+      .where(eq(perguntasDesligamento.questionarioId, questionarioId))
+      .orderBy(perguntasDesligamento.ordem);
+  }
+
+  async updatePerguntaDesligamento(id: number, data: Partial<InsertPerguntaDesligamento>): Promise<PerguntaDesligamento> {
+    const [updated] = await db
+      .update(perguntasDesligamento)
+      .set(data)
+      .where(eq(perguntasDesligamento.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deletePerguntaDesligamento(id: number): Promise<void> {
+    await db.delete(perguntasDesligamento).where(eq(perguntasDesligamento.id, id));
   }
 }
 

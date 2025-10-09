@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEmpresaSchema, insertGestorSchema, insertFuncionarioSchema, insertDesligamentoSchema, insertDocumentoFuncionarioSchema, insertDocumentoGestorSchema, insertFormularioExperienciaSchema, insertPesquisaClimaSchema, insertPerguntaClimaSchema, insertRespostaClimaSchema, insertTreinamentoSchema, insertTreinamentoParticipanteSchema, insertPdiSchema, insertPdiMetaSchema, insertPdiCompetenciaSchema, insertPdiAcaoSchema } from "@shared/schema";
+import { insertEmpresaSchema, insertGestorSchema, insertFuncionarioSchema, insertDesligamentoSchema, insertDocumentoFuncionarioSchema, insertDocumentoGestorSchema, insertFormularioExperienciaSchema, insertPesquisaClimaSchema, insertPerguntaClimaSchema, insertRespostaClimaSchema, insertTreinamentoSchema, insertTreinamentoParticipanteSchema, insertPdiSchema, insertPdiMetaSchema, insertPdiCompetenciaSchema, insertPdiAcaoSchema, insertQuestionarioDesligamentoSchema, insertPerguntaDesligamentoSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/empresas", async (req, res) => {
@@ -690,6 +690,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Erro ao enviar questionário:", error);
       res.status(500).json({ error: "Erro ao enviar questionário" });
+    }
+  });
+
+  // Rotas para questionários de desligamento
+  app.get("/api/questionarios-desligamento", async (req, res) => {
+    try {
+      const questionarios = await storage.getQuestionariosDesligamento();
+      res.json(questionarios);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar questionários" });
+    }
+  });
+
+  app.post("/api/questionarios-desligamento", async (req, res) => {
+    try {
+      const validated = insertQuestionarioDesligamentoSchema.parse(req.body);
+      const questionario = await storage.createQuestionarioDesligamento(validated);
+      res.json(questionario);
+    } catch (error) {
+      res.status(400).json({ error: "Dados inválidos" });
+    }
+  });
+
+  app.get("/api/questionarios-desligamento/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const questionario = await storage.getQuestionarioDesligamento(id);
+      if (!questionario) {
+        return res.status(404).json({ error: "Questionário não encontrado" });
+      }
+      res.json(questionario);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar questionário" });
+    }
+  });
+
+  app.patch("/api/questionarios-desligamento/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const questionario = await storage.updateQuestionarioDesligamento(id, req.body);
+      res.json(questionario);
+    } catch (error) {
+      res.status(400).json({ error: "Erro ao atualizar questionário" });
+    }
+  });
+
+  app.delete("/api/questionarios-desligamento/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteQuestionarioDesligamento(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao deletar questionário" });
+    }
+  });
+
+  // Rotas para perguntas do questionário de desligamento
+  app.get("/api/questionarios-desligamento/:id/perguntas", async (req, res) => {
+    try {
+      const questionarioId = parseInt(req.params.id);
+      const perguntas = await storage.getPerguntasByQuestionario(questionarioId);
+      res.json(perguntas);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar perguntas" });
+    }
+  });
+
+  app.post("/api/questionarios-desligamento/:id/perguntas", async (req, res) => {
+    try {
+      const questionarioId = parseInt(req.params.id);
+      const validated = insertPerguntaDesligamentoSchema.parse({
+        ...req.body,
+        questionarioId,
+      });
+      const pergunta = await storage.createPerguntaDesligamento(validated);
+      res.json(pergunta);
+    } catch (error) {
+      res.status(400).json({ error: "Dados inválidos" });
+    }
+  });
+
+  app.patch("/api/perguntas-desligamento/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const pergunta = await storage.updatePerguntaDesligamento(id, req.body);
+      res.json(pergunta);
+    } catch (error) {
+      res.status(400).json({ error: "Erro ao atualizar pergunta" });
+    }
+  });
+
+  app.delete("/api/perguntas-desligamento/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deletePerguntaDesligamento(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao deletar pergunta" });
     }
   });
 
