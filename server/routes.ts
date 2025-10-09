@@ -672,20 +672,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Funcionário não encontrado" });
       }
 
+      // Link do Microsoft Forms para desligamento por parte da empresa
+      const linkFormGestor = "https://forms.office.com/pages/responsepage.aspx?id=fKhs6GEk4keMILRXyHexKD9hUGoTJTBAh3e6AfxsqZRUMkJPVzBTM1VCN0VNVFg5QjZJTFZPV1YwSyQlQCN0PWcu&route=shorturl";
+
       // TODO: Implementar integração de email (Gmail, SendGrid, Resend, etc.)
       // Por enquanto, apenas registra a solicitação no console
       console.log(`[ENVIO DE QUESTIONÁRIO]`);
       console.log(`Funcionário: ${funcionario.nome}`);
       console.log(`Email: ${email}`);
       console.log(`Tipo: ${tipoDesligamento}`);
+      
+      if (tipoDesligamento === "gestor") {
+        console.log(`Link do formulário: ${linkFormGestor}`);
+        console.log(`\nMensagem a ser enviada:`);
+        console.log(`Prezado(a) ${funcionario.nome},`);
+        console.log(`\nPor favor, acesse o link abaixo para responder o questionário de desligamento:`);
+        console.log(linkFormGestor);
+      }
+      
       console.log(`Data: ${new Date().toISOString()}`);
 
       // Simula sucesso
       res.json({
         success: true,
-        message: "Questionário preparado para envio",
+        message: tipoDesligamento === "gestor" 
+          ? "Questionário preparado para envio com link do Microsoft Forms"
+          : "Questionário preparado para envio",
         funcionario: funcionario.nome,
         email,
+        link: tipoDesligamento === "gestor" ? linkFormGestor : undefined,
       });
     } catch (error) {
       console.error("Erro ao enviar questionário:", error);
