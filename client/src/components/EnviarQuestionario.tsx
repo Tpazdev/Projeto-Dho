@@ -1,11 +1,9 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { Search, Mail, Loader2, Copy, ExternalLink } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Search } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { QuestionarioDesligamentoForm } from "./QuestionarioDesligamentoForm";
 
 interface Funcionario {
   id: number;
@@ -35,16 +34,24 @@ interface Gestor {
   empresaId: number;
 }
 
+interface Desligamento {
+  id: number;
+  funcionarioId: number;
+  empresaId: number;
+  gestorId: number;
+  dataDesligamento: string;
+  motivo: string | null;
+  tipoDesligamento: string;
+}
+
 interface EnviarQuestionarioProps {
   tipoDesligamento: "funcionario" | "gestor";
 }
 
 export function EnviarQuestionario({ tipoDesligamento }: EnviarQuestionarioProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [linkDialogOpen, setLinkDialogOpen] = useState(false);
-  const [currentLink, setCurrentLink] = useState("");
-  const [currentFuncionario, setCurrentFuncionario] = useState("");
-  const { toast } = useToast();
+  const [questionarioDialogOpen, setQuestionarioDialogOpen] = useState(false);
+  const [selectedDesligamento, setSelectedDesligamento] = useState<{ id: number; funcionarioNome: string } | null>(null);
 
   const { data: funcionarios = [], isLoading: loadingFuncionarios } = useQuery<Funcionario[]>({
     queryKey: ["/api/funcionarios"],
@@ -54,74 +61,45 @@ export function EnviarQuestionario({ tipoDesligamento }: EnviarQuestionarioProps
     queryKey: ["/api/gestores"],
   });
 
-  const enviarEmailMutation = useMutation({
-    mutationFn: async ({ funcionarioId, email, funcionarioNome }: { funcionarioId: number; email: string; funcionarioNome: string }) => {
-      const response = await apiRequest("POST", "/api/enviar-questionario", {
-        funcionarioId,
-        email,
-        tipoDesligamento,
-      });
-      return { ...(await response.json()), funcionarioNome };
-    },
-    onSuccess: (data) => {
-      if (data.link) {
-        setCurrentLink(data.link);
-        setCurrentFuncionario(data.funcionarioNome);
-        setLinkDialogOpen(true);
-        toast({
-          title: "Link do questionário gerado",
-          description: "O link do Microsoft Forms está pronto para ser enviado ao colaborador.",
-        });
-      } else {
-        toast({
-          title: "Questionário enviado",
-          description: "O questionário de desligamento foi enviado por email com sucesso.",
-        });
-      }
-    },
-    onError: () => {
-      toast({
-        title: "Erro ao enviar",
-        description: "Não foi possível enviar o questionário. Tente novamente.",
-        variant: "destructive",
-      });
-    },
+  const { data: desligamentos = [], isLoading: loadingDesligamentos } = useQuery<Desligamento[]>({
+    queryKey: ["/api/desligamentos"],
   });
 
-  const filteredFuncionarios = funcionarios.filter((f) =>
-    f.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (f.cargo && f.cargo.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredDesligamentos = desligamentos
+    .filter((d) => d.tipoDesligamento === tipoDesligamento)
+    .map((d) => {
+      const funcionario = funcionarios.find((f) => f.id === d.funcionarioId);
+      return {
+        ...d,
+        funcionarioNome: funcionario?.nome || "N/A",
+        funcionarioCargo: funcionario?.cargo || "N/A",
+        gestorNome: gestores.find((g) => g.id === d.gestorId)?.nome || "N/A",
+      };
+    })
+    .filter((d) =>
+      d.funcionarioNome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      d.funcionarioCargo.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-  const handleEnviarEmail = (funcionarioId: number, funcionarioNome: string) => {
-    // Por enquanto, vamos solicitar o email ao usuário
-    const email = prompt("Digite o email do funcionário:");
-    if (email) {
-      enviarEmailMutation.mutate({ funcionarioId, email, funcionarioNome });
-    }
+  const handleAbrirQuestionario = (desligamentoId: number, funcionarioNome: string) => {
+    setSelectedDesligamento({ id: desligamentoId, funcionarioNome });
+    setQuestionarioDialogOpen(true);
   };
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(currentLink);
-    toast({
-      title: "Link copiado",
-      description: "O link foi copiado para a área de transferência.",
-    });
+  const handleQuestionarioSuccess = () => {
+    setQuestionarioDialogOpen(false);
+    setSelectedDesligamento(null);
   };
 
-  const getGestorNome = (gestorId: number) => {
-    const gestor = gestores.find((g) => g.id === gestorId);
-    return gestor?.nome || "N/A";
-  };
-
-  const isLoading = loadingFuncionarios || loadingGestores;
+  const isLoading = loadingFuncionarios || loadingGestores || loadingDesligamentos;
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Enviar Questionário de Desligamento</CardTitle>
+        <CardTitle>Questionário de Desligamento</CardTitle>
         <CardDescription>
-          Pesquise funcionários e envie o questionário de desligamento por email
+          Preencha o questionário de desligamento para funcionários que foram desligados
+          {tipoDesligamento === "gestor" ? " pela empresa" : " por iniciativa própria"}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -140,41 +118,39 @@ export function EnviarQuestionario({ tipoDesligamento }: EnviarQuestionarioProps
 
         {isLoading ? (
           <div className="text-center text-muted-foreground py-8">Carregando...</div>
-        ) : filteredFuncionarios.length === 0 ? (
+        ) : filteredDesligamentos.length === 0 ? (
           <div className="text-center text-muted-foreground py-8">
-            Nenhum funcionário encontrado
+            Nenhum desligamento encontrado
           </div>
         ) : (
-          <div className="border rounded-md">
+          <div className="border rounded-md overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Nome</TableHead>
                   <TableHead>Cargo</TableHead>
                   <TableHead>Gestor</TableHead>
+                  <TableHead>Data Desligamento</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredFuncionarios.map((funcionario) => (
-                  <TableRow key={funcionario.id} data-testid={`row-funcionario-${funcionario.id}`}>
-                    <TableCell className="font-medium">{funcionario.nome}</TableCell>
-                    <TableCell>{funcionario.cargo || "N/A"}</TableCell>
-                    <TableCell>{getGestorNome(funcionario.gestorId)}</TableCell>
+                {filteredDesligamentos.map((desligamento) => (
+                  <TableRow key={desligamento.id} data-testid={`row-desligamento-${desligamento.id}`}>
+                    <TableCell className="font-medium">{desligamento.funcionarioNome}</TableCell>
+                    <TableCell>{desligamento.funcionarioCargo}</TableCell>
+                    <TableCell>{desligamento.gestorNome}</TableCell>
+                    <TableCell>
+                      {new Date(desligamento.dataDesligamento).toLocaleDateString('pt-BR')}
+                    </TableCell>
                     <TableCell className="text-right">
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleEnviarEmail(funcionario.id, funcionario.nome)}
-                        disabled={enviarEmailMutation.isPending}
-                        data-testid={`button-enviar-email-${funcionario.id}`}
+                        onClick={() => handleAbrirQuestionario(desligamento.id, desligamento.funcionarioNome)}
+                        data-testid={`button-abrir-questionario-${desligamento.id}`}
                       >
-                        {enviarEmailMutation.isPending ? (
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        ) : (
-                          <Mail className="h-4 w-4 mr-2" />
-                        )}
-                        Enviar Questionário
+                        Preencher Questionário
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -185,46 +161,23 @@ export function EnviarQuestionario({ tipoDesligamento }: EnviarQuestionarioProps
         )}
       </CardContent>
 
-      <Dialog open={linkDialogOpen} onOpenChange={setLinkDialogOpen}>
-        <DialogContent className="max-w-2xl">
+      <Dialog open={questionarioDialogOpen} onOpenChange={setQuestionarioDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Link do Questionário - Microsoft Forms</DialogTitle>
+            <DialogTitle>Questionário de Desligamento</DialogTitle>
             <DialogDescription>
-              Envie este link para o colaborador {currentFuncionario} responder o questionário de desligamento
+              {selectedDesligamento?.funcionarioNome && (
+                <>Respondendo questionário para: {selectedDesligamento.funcionarioNome}</>
+              )}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="bg-muted p-4 rounded-lg">
-              <p className="text-sm font-mono break-all">{currentLink}</p>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                onClick={handleCopyLink}
-                className="flex-1"
-                data-testid="button-copy-link"
-              >
-                <Copy className="h-4 w-4 mr-2" />
-                Copiar Link
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => window.open(currentLink, '_blank')}
-                className="flex-1"
-                data-testid="button-open-link"
-              >
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Abrir no Navegador
-              </Button>
-            </div>
-            <div className="text-sm text-muted-foreground">
-              <p className="font-semibold mb-2">Mensagem sugerida para o colaborador:</p>
-              <div className="bg-background border rounded-lg p-3">
-                <p>Prezado(a) {currentFuncionario},</p>
-                <p className="mt-2">Por favor, acesse o link abaixo para responder o questionário de desligamento:</p>
-                <p className="mt-2 font-mono text-xs break-all text-primary">{currentLink}</p>
-              </div>
-            </div>
-          </div>
+          {selectedDesligamento && (
+            <QuestionarioDesligamentoForm
+              desligamentoId={selectedDesligamento.id}
+              tipoDesligamento={tipoDesligamento}
+              onSuccess={handleQuestionarioSuccess}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </Card>
