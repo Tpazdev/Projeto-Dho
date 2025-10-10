@@ -26,6 +26,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Credenciais inválidas" });
       }
       
+      // Limpar tokens expirados globalmente
+      await storage.deleteExpiredTokens();
+      
       // Gerar tokens
       const accessToken = generateAccessToken(usuario);
       const refreshToken = generateRefreshToken();
@@ -99,19 +102,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Token inválido ou expirado" });
       }
       
+      // Verificar se o token expirou (double-check além da query)
+      if (new Date(sessao.expiraEm) <= new Date()) {
+        await storage.deleteSessaoToken(refreshTokenHash);
+        return res.status(401).json({ error: "Token expirado" });
+      }
+      
       const usuario = await storage.getUsuario(sessao.usuarioId);
       if (!usuario || !usuario.ativo) {
+        await storage.deleteSessaoToken(refreshTokenHash);
         return res.status(401).json({ error: "Usuário inválido" });
       }
+      
+      // Rotacionar refresh token (gerar novo e invalidar o antigo)
+      const novoRefreshToken = generateRefreshToken();
+      const novoRefreshTokenHash = hashToken(novoRefreshToken);
+      
+      // Deletar token antigo
+      await storage.deleteSessaoToken(refreshTokenHash);
+      
+      // Criar novo token
+      await storage.createSessaoToken({
+        usuarioId: usuario.id,
+        tokenHash: novoRefreshTokenHash,
+        expiraEm: getRefreshTokenExpiry(),
+      });
       
       // Gerar novo access token
       const accessToken = generateAccessToken(usuario);
       
+      // Atualizar cookies com novos tokens
       res.cookie("accessToken", accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         maxAge: 15 * 60 * 1000,
+      });
+      
+      res.cookie("refreshToken", novoRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 30 * 24 * 60 * 60 * 1000,
       });
       
       res.json({
