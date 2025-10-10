@@ -1,9 +1,164 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEmpresaSchema, insertGestorSchema, insertFuncionarioSchema, insertDesligamentoSchema, insertDocumentoFuncionarioSchema, insertDocumentoGestorSchema, insertFormularioExperienciaSchema, insertPesquisaClimaSchema, insertPerguntaClimaSchema, insertRespostaClimaSchema, insertTreinamentoSchema, insertTreinamentoParticipanteSchema, insertPdiSchema, insertPdiMetaSchema, insertPdiCompetenciaSchema, insertPdiAcaoSchema, insertQuestionarioDesligamentoSchema, insertPerguntaDesligamentoSchema, insertRespostaDesligamentoSchema } from "@shared/schema";
+import { insertEmpresaSchema, insertGestorSchema, insertFuncionarioSchema, insertDesligamentoSchema, insertDocumentoFuncionarioSchema, insertDocumentoGestorSchema, insertFormularioExperienciaSchema, insertPesquisaClimaSchema, insertPerguntaClimaSchema, insertRespostaClimaSchema, insertTreinamentoSchema, insertTreinamentoParticipanteSchema, insertPdiSchema, insertPdiMetaSchema, insertPdiCompetenciaSchema, insertPdiAcaoSchema, insertQuestionarioDesligamentoSchema, insertPerguntaDesligamentoSchema, insertRespostaDesligamentoSchema, insertUsuarioSchema } from "@shared/schema";
+import { hashPassword, comparePassword, generateAccessToken, generateRefreshToken, hashToken, getRefreshTokenExpiry, verifyAccessToken } from "./auth";
+import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Rotas de autenticação
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const loginSchema = z.object({
+        email: z.string().email(),
+        senha: z.string().min(6),
+      });
+      
+      const { email, senha } = loginSchema.parse(req.body);
+      
+      const usuario = await storage.getUsuarioByEmail(email);
+      if (!usuario || !usuario.ativo) {
+        return res.status(401).json({ error: "Credenciais inválidas" });
+      }
+      
+      const senhaValida = await comparePassword(senha, usuario.senhaHash);
+      if (!senhaValida) {
+        return res.status(401).json({ error: "Credenciais inválidas" });
+      }
+      
+      // Gerar tokens
+      const accessToken = generateAccessToken(usuario);
+      const refreshToken = generateRefreshToken();
+      const refreshTokenHash = hashToken(refreshToken);
+      
+      // Salvar refresh token no banco
+      await storage.createSessaoToken({
+        usuarioId: usuario.id,
+        tokenHash: refreshTokenHash,
+        expiraEm: getRefreshTokenExpiry(),
+      });
+      
+      // Configurar cookies
+      res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 15 * 60 * 1000, // 15 minutos
+      });
+      
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 dias
+      });
+      
+      res.json({
+        usuario: {
+          id: usuario.id,
+          nome: usuario.nome,
+          email: usuario.email,
+          role: usuario.role,
+        },
+      });
+    } catch (error) {
+      res.status(400).json({ error: "Dados inválidos" });
+    }
+  });
+  
+  app.post("/api/auth/logout", async (req, res) => {
+    try {
+      const refreshToken = req.cookies?.refreshToken;
+      
+      if (refreshToken) {
+        const refreshTokenHash = hashToken(refreshToken);
+        await storage.deleteSessaoToken(refreshTokenHash);
+      }
+      
+      res.clearCookie("accessToken");
+      res.clearCookie("refreshToken");
+      
+      res.json({ message: "Logout realizado com sucesso" });
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao fazer logout" });
+    }
+  });
+  
+  app.post("/api/auth/refresh", async (req, res) => {
+    try {
+      const refreshToken = req.cookies?.refreshToken;
+      
+      if (!refreshToken) {
+        return res.status(401).json({ error: "Token não fornecido" });
+      }
+      
+      const refreshTokenHash = hashToken(refreshToken);
+      const sessao = await storage.getSessaoToken(refreshTokenHash);
+      
+      if (!sessao) {
+        return res.status(401).json({ error: "Token inválido ou expirado" });
+      }
+      
+      const usuario = await storage.getUsuario(sessao.usuarioId);
+      if (!usuario || !usuario.ativo) {
+        return res.status(401).json({ error: "Usuário inválido" });
+      }
+      
+      // Gerar novo access token
+      const accessToken = generateAccessToken(usuario);
+      
+      res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 15 * 60 * 1000,
+      });
+      
+      res.json({
+        usuario: {
+          id: usuario.id,
+          nome: usuario.nome,
+          email: usuario.email,
+          role: usuario.role,
+        },
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao atualizar token" });
+    }
+  });
+  
+  app.get("/api/auth/me", async (req, res) => {
+    try {
+      const accessToken = req.cookies?.accessToken;
+      
+      if (!accessToken) {
+        return res.status(401).json({ error: "Não autenticado" });
+      }
+      
+      const payload = verifyAccessToken(accessToken);
+      if (!payload) {
+        return res.status(401).json({ error: "Token inválido" });
+      }
+      
+      const usuario = await storage.getUsuario(payload.usuarioId);
+      if (!usuario || !usuario.ativo) {
+        return res.status(401).json({ error: "Usuário inválido" });
+      }
+      
+      res.json({
+        usuario: {
+          id: usuario.id,
+          nome: usuario.nome,
+          email: usuario.email,
+          role: usuario.role,
+        },
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar usuário" });
+    }
+  });
+
+  // Rotas existentes
   app.get("/api/empresas", async (req, res) => {
     try {
       const empresas = await storage.getEmpresas();
