@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEmpresaSchema, insertGestorSchema, insertFuncionarioSchema, insertDesligamentoSchema, insertDocumentoFuncionarioSchema, insertDocumentoGestorSchema, insertFormularioExperienciaSchema, insertPesquisaClimaSchema, insertPerguntaClimaSchema, insertRespostaClimaSchema, insertTreinamentoSchema, insertTreinamentoParticipanteSchema, insertPdiSchema, insertPdiMetaSchema, insertPdiCompetenciaSchema, insertPdiAcaoSchema, insertQuestionarioDesligamentoSchema, insertPerguntaDesligamentoSchema } from "@shared/schema";
+import { insertEmpresaSchema, insertGestorSchema, insertFuncionarioSchema, insertDesligamentoSchema, insertDocumentoFuncionarioSchema, insertDocumentoGestorSchema, insertFormularioExperienciaSchema, insertPesquisaClimaSchema, insertPerguntaClimaSchema, insertRespostaClimaSchema, insertTreinamentoSchema, insertTreinamentoParticipanteSchema, insertPdiSchema, insertPdiMetaSchema, insertPdiCompetenciaSchema, insertPdiAcaoSchema, insertQuestionarioDesligamentoSchema, insertPerguntaDesligamentoSchema, insertRespostaDesligamentoSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/empresas", async (req, res) => {
@@ -800,6 +800,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Erro ao deletar pergunta" });
+    }
+  });
+
+  // Rotas para respostas de questionário de desligamento
+  app.get("/api/questionarios-desligamento/tipo/:tipoDesligamento", async (req, res) => {
+    try {
+      const tipoDesligamento = req.params.tipoDesligamento;
+      const questionario = await storage.getQuestionarioAtivoByTipo(tipoDesligamento);
+      
+      if (!questionario) {
+        return res.status(404).json({ error: "Questionário não encontrado para este tipo de desligamento" });
+      }
+
+      const perguntas = await storage.getPerguntasByQuestionario(questionario.id);
+      res.json({
+        questionario,
+        perguntas,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar questionário" });
+    }
+  });
+
+  app.post("/api/respostas-desligamento", async (req, res) => {
+    try {
+      const { desligamentoId, questionarioId, respostas } = req.body;
+
+      if (!Array.isArray(respostas)) {
+        return res.status(400).json({ error: "Respostas deve ser um array" });
+      }
+
+      const respostasSalvas = [];
+      
+      for (const resposta of respostas) {
+        const validated = insertRespostaDesligamentoSchema.parse({
+          desligamentoId,
+          questionarioId,
+          perguntaId: resposta.perguntaId,
+          valorEscala: resposta.valorEscala,
+          textoResposta: resposta.textoResposta,
+        });
+        const respostaSalva = await storage.createRespostaDesligamento(validated);
+        respostasSalvas.push(respostaSalva);
+      }
+
+      res.json({
+        success: true,
+        respostas: respostasSalvas,
+      });
+    } catch (error) {
+      console.error("Erro ao salvar respostas:", error);
+      res.status(400).json({ error: "Erro ao salvar respostas" });
+    }
+  });
+
+  app.get("/api/respostas-desligamento/:desligamentoId", async (req, res) => {
+    try {
+      const desligamentoId = parseInt(req.params.desligamentoId);
+      const respostas = await storage.getRespostasByDesligamento(desligamentoId);
+      res.json(respostas);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar respostas" });
     }
   });
 
