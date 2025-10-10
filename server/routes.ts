@@ -542,7 +542,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/pesquisas-clima/:id/respostas", requireAuth, async (req, res) => {
+  app.post("/api/pesquisas-clima/:id/respostas", requireAuth, requireNotAdmin, async (req, res) => {
     try {
       const pesquisaId = parseInt(req.params.id);
       const validated = insertRespostaClimaSchema.parse({
@@ -1011,7 +1011,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/respostas-desligamento", requireAuth, async (req, res) => {
+  app.post("/api/respostas-desligamento", requireAuth, requireNotAdmin, async (req, res) => {
     try {
       const { desligamentoId, questionarioId, respostas } = req.body;
 

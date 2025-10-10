@@ -1,5 +1,6 @@
 import { LayoutDashboard, Users, Building2, UserCog, UserX, FileText, BarChart, GraduationCap, Target, ChevronRight, UserMinus, ClipboardList, Calendar } from "lucide-react";
 import { Link, useLocation } from "wouter";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Sidebar,
   SidebarContent,
@@ -99,6 +100,12 @@ const cadastroItems = [
 
 export function AppSidebar() {
   const [location] = useLocation();
+  const { usuario } = useAuth();
+
+  // Todos os usuários veem todos os menus
+  // A restrição de Admin é aplicada no preenchimento de formulários/questionários
+  const visibleItems = items;
+  const visibleCadastroItems = cadastroItems;
 
   return (
     <Sidebar>
@@ -107,7 +114,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => {
+              {visibleItems.map((item) => {
                 // Se o item tem subItems, renderiza um menu expansível
                 if (item.subItems) {
                   return (
@@ -166,7 +173,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Cadastros</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {cadastroItems.map((item) => (
+              {visibleCadastroItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
