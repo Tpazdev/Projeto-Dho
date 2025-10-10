@@ -19,8 +19,17 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import type { LucideIcon } from "lucide-react";
 
-const items = [
+interface MenuItem {
+  title: string;
+  url?: string;
+  icon: LucideIcon;
+  adminOnly?: boolean;
+  subItems?: MenuItem[];
+}
+
+const items: MenuItem[] = [
   {
     title: "Dashboard",
     url: "/dashboard",
@@ -174,7 +183,7 @@ export function AppSidebar() {
                                         </CollapsibleTrigger>
                                         <CollapsibleContent>
                                           <SidebarMenuSub>
-                                            {subItem.subItems.map((nestedItem) => (
+                                            {subItem.subItems.map((nestedItem) => nestedItem.url && (
                                               <SidebarMenuSubItem key={nestedItem.title}>
                                                 <SidebarMenuSubButton
                                                   asChild
@@ -196,6 +205,7 @@ export function AppSidebar() {
                                 }
 
                                 // Caso contrário, renderiza um subItem normal
+                                if (!subItem.url) return null;
                                 return (
                                   <SidebarMenuSubItem key={subItem.title}>
                                     <SidebarMenuSubButton
@@ -219,6 +229,7 @@ export function AppSidebar() {
                 }
                 
                 // Caso contrário, renderiza um item normal
+                if (!item.url) return null;
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
