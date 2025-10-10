@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, Eye } from "lucide-react";
+import { Search, Eye, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLocation } from "wouter";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface Funcionario {
   id: number;
@@ -50,9 +53,13 @@ interface RespostaDesligamento {
   dataResposta: string;
 }
 
+interface DesligamentoComRespostas {
+  desligamentoId: number;
+}
+
 interface Pergunta {
   id: number;
-  texto: string;
+  pergunta: string;
   tipo: string;
 }
 
@@ -61,6 +68,8 @@ interface QuestionariosPreenchidosProps {
 }
 
 export default function QuestionariosPreenchidos({ tipoDesligamento }: QuestionariosPreenchidosProps) {
+  const { usuario } = useAuth();
+  const [, navigate] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [respostasDialogOpen, setRespostasDialogOpen] = useState(false);
   const [selectedDesligamento, setSelectedDesligamento] = useState<{ 
@@ -69,6 +78,18 @@ export default function QuestionariosPreenchidos({ tipoDesligamento }: Questiona
     gestorNome: string;
     dataDesligamento: string;
   } | null>(null);
+
+  // Redirect non-admin users
+  useEffect(() => {
+    if (usuario && usuario.role !== "admin") {
+      navigate("/dashboard");
+    }
+  }, [usuario, navigate]);
+
+  // Show nothing while checking permissions
+  if (!usuario || usuario.role !== "admin") {
+    return null;
+  }
 
   const { data: funcionarios = [] } = useQuery<Funcionario[]>({
     queryKey: ["/api/funcionarios"],
@@ -82,10 +103,14 @@ export default function QuestionariosPreenchidos({ tipoDesligamento }: Questiona
     queryKey: ["/api/desligamentos"],
   });
 
+  const { data: todosDesligamentosComRespostas = [], isError: errorDesligamentosComRespostas } = useQuery<DesligamentoComRespostas[]>({
+    queryKey: ["/api/desligamentos-com-respostas"],
+  });
 
   // Filtrar desligamentos com respostas
   const desligamentosComRespostas = desligamentos
     .filter((d) => d.tipoDesligamento === tipoDesligamento)
+    .filter((d) => todosDesligamentosComRespostas.some((dr) => dr.desligamentoId === d.id))
     .map((d) => {
       const funcionario = funcionarios.find((f) => f.id === d.funcionarioId);
       const gestor = gestores.find((g) => g.id === d.gestorId);
@@ -126,6 +151,16 @@ export default function QuestionariosPreenchidos({ tipoDesligamento }: Questiona
           Visualize os questionários de desligamento que foram preenchidos
         </p>
       </div>
+
+      {errorDesligamentosComRespostas && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Erro de Permissão</AlertTitle>
+          <AlertDescription>
+            Você não tem permissão para acessar esta funcionalidade. Apenas administradores podem visualizar questionários preenchidos.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Card>
         <CardHeader>
@@ -259,7 +294,7 @@ function RespostasView({ desligamentoId }: { desligamentoId: number }) {
               <span className="font-semibold text-sm text-muted-foreground">Pergunta {index + 1}</span>
             </div>
             <div className="mb-3">
-              <p className="font-medium">{pergunta?.texto || "Pergunta não encontrada"}</p>
+              <p className="font-medium">{pergunta?.pergunta || "Pergunta não encontrada"}</p>
             </div>
             <div className="bg-muted/50 p-3 rounded-md">
               <span className="text-sm text-muted-foreground">Resposta:</span>

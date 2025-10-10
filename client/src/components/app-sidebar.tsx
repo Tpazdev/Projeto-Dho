@@ -45,6 +45,7 @@ const items = [
   {
     title: "Questionários Preenchidos",
     icon: FileCheck,
+    adminOnly: true,
     subItems: [
       {
         title: "Por iniciativa do colaborador",
@@ -118,9 +119,14 @@ export function AppSidebar() {
   const [location] = useLocation();
   const { usuario } = useAuth();
 
-  // Todos os usuários veem todos os menus
-  // A restrição de Admin é aplicada no preenchimento de formulários/questionários
-  const visibleItems = items;
+  // Filtrar menus baseado no role do usuário
+  const visibleItems = items.filter(item => {
+    // Se o item é admin-only e o usuário não é admin, esconder
+    if (item.adminOnly && usuario?.role !== "admin") {
+      return false;
+    }
+    return true;
+  });
   const visibleCadastroItems = cadastroItems;
 
   return (

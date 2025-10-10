@@ -66,6 +66,32 @@ Preferred communication style: Simple, everyday language.
   - API endpoints for fetching active questionnaires and saving responses
   - Support for multiple question types with appropriate UI controls
 
+### Filled Termination Questionnaires Viewing (October 2025)
+- **Admin-Only Feature**: Allows Admin users to view filled termination questionnaires
+- **Security Implementation**:
+  - Backend routes protected with `requireRole(["admin"])`
+  - Frontend route guards redirect non-admin users to dashboard
+  - Error handling displays permission messages for unauthorized access
+  - Menu items hidden from non-admin users
+- **Navigation**:
+  - Collapsible "Questionários Preenchidos" menu (Admin-only) with two sub-items
+  - `/questionarios-preenchidos/funcionario` - View employee-initiated questionnaires
+  - `/questionarios-preenchidos/gestor` - View company-initiated questionnaires
+- **Features**:
+  - Lists desligamentos that have submitted questionnaire responses
+  - Search functionality to filter by employee name or position
+  - Dialog interface to view detailed question-answer pairs
+  - Displays text responses, scale values (1-10), and response dates
+  - Shows employee, manager, and termination date context
+- **API Endpoints** (All Admin-only):
+  - GET `/api/desligamentos-com-respostas` - Returns unique desligamento IDs with responses
+  - GET `/api/respostas-desligamento/:desligamentoId` - Returns all responses for a specific termination
+- **Database**:
+  - New `getDesligamentosComRespostas()` storage method returns distinct desligamentoIds
+  - Optimized queries to avoid redundant data
+- **Bug Fixes**:
+  - Corrected question field reference from `texto` to `pergunta` (matches database schema)
+
 ### Experience Evaluation Period Management (October 2025)
 - **Two-Period Structure**: Avaliações de Experiência now organized into two separate periods:
   - **01° Período**: First evaluation period for probationary employees (30 days)

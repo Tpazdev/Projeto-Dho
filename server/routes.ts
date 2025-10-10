@@ -1044,13 +1044,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/respostas-desligamento/:desligamentoId", requireAuth, async (req, res) => {
+  app.get("/api/respostas-desligamento/:desligamentoId", requireAuth, requireRole(["admin"]), async (req, res) => {
     try {
       const desligamentoId = parseInt(req.params.desligamentoId);
       const respostas = await storage.getRespostasByDesligamento(desligamentoId);
       res.json(respostas);
     } catch (error) {
       res.status(500).json({ error: "Erro ao buscar respostas" });
+    }
+  });
+
+  app.get("/api/desligamentos-com-respostas", requireAuth, requireRole(["admin"]), async (req, res) => {
+    try {
+      const desligamentosComRespostas = await storage.getDesligamentosComRespostas();
+      res.json(desligamentosComRespostas);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar desligamentos com respostas" });
     }
   });
 

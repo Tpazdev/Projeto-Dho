@@ -164,6 +164,7 @@ export interface IStorage {
   createRespostaDesligamento(resposta: InsertRespostaDesligamento): Promise<RespostaDesligamento>;
   getRespostasByDesligamento(desligamentoId: number): Promise<RespostaDesligamento[]>;
   getQuestionarioAtivoByTipo(tipoDesligamento: string): Promise<QuestionarioDesligamento | undefined>;
+  getDesligamentosComRespostas(): Promise<{ desligamentoId: number }[]>;
 
   createUsuario(usuario: InsertUsuario): Promise<Usuario>;
   getUsuarios(): Promise<Usuario[]>;
@@ -945,6 +946,15 @@ export class DatabaseStorage implements IStorage {
       .orderBy(questionariosDesligamento.dataCriacao)
       .limit(1);
     return questionario || undefined;
+  }
+
+  async getDesligamentosComRespostas(): Promise<{ desligamentoId: number }[]> {
+    const result = await db
+      .selectDistinct({
+        desligamentoId: respostasDesligamento.desligamentoId
+      })
+      .from(respostasDesligamento);
+    return result;
   }
 
   async createUsuario(data: InsertUsuario): Promise<Usuario> {
