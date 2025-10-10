@@ -39,10 +39,21 @@ const items = [
         url: "/desligamentos/gestor",
         icon: UserCog,
       },
+    ],
+  },
+  {
+    title: "Questionários de Desligamento",
+    icon: ClipboardList,
+    subItems: [
       {
-        title: "Questionários de Desligamento",
-        url: "/questionarios-desligamento",
-        icon: ClipboardList,
+        title: "Iniciativa do Funcionário",
+        url: "/questionarios-desligamento/iniciativa-funcionario",
+        icon: UserMinus,
+      },
+      {
+        title: "Iniciativa da Empresa",
+        url: "/questionarios-desligamento/iniciativa-empresa",
+        icon: UserCog,
       },
     ],
   },

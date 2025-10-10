@@ -235,6 +235,7 @@ export class DatabaseStorage implements IStorage {
         id: desligamentos.id,
         dataDesligamento: desligamentos.dataDesligamento,
         motivo: desligamentos.motivo,
+        tipoDesligamento: desligamentos.tipoDesligamento,
         funcionarioId: desligamentos.funcionarioId,
         funcionarioNome: funcionarios.nome,
         cargo: funcionarios.cargo,
