@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertEmpresaSchema, insertGestorSchema, insertFuncionarioSchema, insertDesligamentoSchema, insertDocumentoFuncionarioSchema, insertDocumentoGestorSchema, insertFormularioExperienciaSchema, insertPesquisaClimaSchema, insertPerguntaClimaSchema, insertRespostaClimaSchema, insertTreinamentoSchema, insertTreinamentoParticipanteSchema, insertPdiSchema, insertPdiMetaSchema, insertPdiCompetenciaSchema, insertPdiAcaoSchema, insertQuestionarioDesligamentoSchema, insertPerguntaDesligamentoSchema, insertRespostaDesligamentoSchema, insertUsuarioSchema } from "@shared/schema";
 import { hashPassword, comparePassword, generateAccessToken, generateRefreshToken, hashToken, getRefreshTokenExpiry, verifyAccessToken } from "./auth";
+import { requireAuth, requireRole, requireNotAdmin } from "./middleware";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
