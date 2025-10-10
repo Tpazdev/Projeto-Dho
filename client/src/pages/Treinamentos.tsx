@@ -8,12 +8,13 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, GraduationCap, Users, Clock, Plus, Loader2, FileText } from "lucide-react";
+import { GraduationCap, Plus, Loader2, Eye, Search } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Link } from "wouter";
@@ -46,6 +47,7 @@ type TreinamentoFormData = z.infer<typeof treinamentoSchema>;
 
 export default function Treinamentos() {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 
   const { data: treinamentos = [], isLoading } = useQuery<TreinamentoItem[]>({
@@ -132,33 +134,10 @@ export default function Treinamentos() {
     return cores[status as keyof typeof cores] || "";
   };
 
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold" data-testid="text-page-title">
-            Treinamentos e Desenvolvimento
-          </h1>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader>
-                <div className="h-6 bg-muted rounded w-3/4"></div>
-                <div className="h-4 bg-muted rounded w-1/2 mt-2"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="h-4 bg-muted rounded"></div>
-                  <div className="h-4 bg-muted rounded"></div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  // Filtrar por termo de busca
+  const treinamentosFiltrados = treinamentos.filter((treinamento) =>
+    treinamento.titulo.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="space-y-6">
@@ -332,63 +311,90 @@ export default function Treinamentos() {
         </Dialog>
       </div>
 
-      {treinamentos.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <GraduationCap className="h-16 w-16 text-muted-foreground mb-4" />
-            <p className="text-lg text-muted-foreground" data-testid="text-empty-state">
-              Nenhum treinamento cadastrado
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {treinamentos.map((treinamento) => (
-            <Link key={treinamento.id} href={`/treinamentos/${treinamento.id}`}>
-              <Card className="hover-elevate cursor-pointer" data-testid={`card-treinamento-${treinamento.id}`}>
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="text-lg">{treinamento.titulo}</CardTitle>
-                    <div className="flex flex-col gap-1">
-                      <Badge variant="outline" className={getTipoBadgeColor(treinamento.tipo)} data-testid={`badge-tipo-${treinamento.id}`}>
-                        {getTipoLabel(treinamento.tipo)}
-                      </Badge>
-                      <Badge variant="outline" className={getStatusBadgeColor(treinamento.status)} data-testid={`badge-status-${treinamento.id}`}>
-                        {getStatusLabel(treinamento.status)}
-                      </Badge>
-                    </div>
-                  </div>
-                  <CardDescription className="flex items-center gap-1">
-                    <Users className="h-3 w-3" />
-                    Gestor: {treinamento.gestorNome}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span>
-                      {format(new Date(treinamento.dataInicio), "dd/MM/yyyy", { locale: ptBR })}
-                      {" - "}
-                      {format(new Date(treinamento.dataFim), "dd/MM/yyyy", { locale: ptBR })}
-                    </span>
-                  </div>
-                  {treinamento.cargaHoraria && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span>{treinamento.cargaHoraria}h</span>
-                    </div>
-                  )}
-                  {treinamento.descricao && (
-                    <p className="text-sm text-muted-foreground line-clamp-2 mt-2">
-                      {treinamento.descricao}
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      )}
+      <Card>
+        <CardHeader>
+          <CardTitle>Treinamentos Cadastrados</CardTitle>
+          <CardDescription>
+            Lista de todos os programas de treinamento e desenvolvimento
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar treinamento..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+                data-testid="input-buscar-treinamento"
+              />
+            </div>
+          </div>
+
+          {isLoading ? (
+            <div className="text-center text-muted-foreground py-8">Carregando...</div>
+          ) : treinamentosFiltrados.length === 0 ? (
+            <div className="text-center py-12">
+              <GraduationCap className="h-16 w-16 text-muted-foreground mb-4 mx-auto" />
+              <p className="text-lg text-muted-foreground" data-testid="text-empty-state">
+                {treinamentos.length === 0 
+                  ? "Nenhum treinamento cadastrado"
+                  : "Nenhum treinamento encontrado com esse termo de busca"}
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-md border overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Título</TableHead>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead>Período</TableHead>
+                    <TableHead>Gestor</TableHead>
+                    <TableHead>Carga Horária</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {treinamentosFiltrados.map((treinamento) => (
+                    <TableRow key={treinamento.id} data-testid={`row-treinamento-${treinamento.id}`}>
+                      <TableCell>{treinamento.id}</TableCell>
+                      <TableCell className="font-medium">{treinamento.titulo}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getTipoBadgeColor(treinamento.tipo)} data-testid={`badge-tipo-${treinamento.id}`}>
+                          {getTipoLabel(treinamento.tipo)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {format(new Date(treinamento.dataInicio), "dd/MM/yyyy", { locale: ptBR })} -{" "}
+                        {format(new Date(treinamento.dataFim), "dd/MM/yyyy", { locale: ptBR })}
+                      </TableCell>
+                      <TableCell>{treinamento.gestorNome || "N/A"}</TableCell>
+                      <TableCell>{treinamento.cargaHoraria ? `${treinamento.cargaHoraria}h` : "N/A"}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getStatusBadgeColor(treinamento.status)} data-testid={`badge-status-${treinamento.id}`}>
+                          {getStatusLabel(treinamento.status)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Link href={`/treinamentos/${treinamento.id}`}>
+                          <Button size="sm" variant="outline" data-testid={`button-detalhes-${treinamento.id}`}>
+                            <Eye className="h-4 w-4 mr-2" />
+                            Ver Detalhes
+                          </Button>
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
