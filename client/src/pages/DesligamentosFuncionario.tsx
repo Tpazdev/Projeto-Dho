@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { DesligamentosTable, type DesligamentoData } from "@/components/DesligamentosTable";
 import { EnviarQuestionario } from "@/components/EnviarQuestionario";
+import { VisualizarPerguntasQuestionario } from "@/components/VisualizarPerguntasQuestionario";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface DesligamentoCompleto extends DesligamentoData {
   motivo: string | null;
@@ -14,6 +16,7 @@ interface DesligamentoCompleto extends DesligamentoData {
 }
 
 export default function DesligamentosFuncionario() {
+  const { usuario } = useAuth();
   const { data: desligamentos = [], isLoading } = useQuery<DesligamentoCompleto[]>({
     queryKey: ["/api/desligamentos"],
   });
@@ -39,6 +42,10 @@ export default function DesligamentosFuncionario() {
           </Button>
         </Link>
       </div>
+
+      {usuario?.role === "admin" && (
+        <VisualizarPerguntasQuestionario tipoDesligamento="funcionario" />
+      )}
 
       <EnviarQuestionario tipoDesligamento="funcionario" />
 
