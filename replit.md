@@ -10,6 +10,40 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Updates
 
+### User Authentication and Access Control (October 2025)
+- **Complete Authentication System**: Implemented secure JWT-based authentication with role-based access control
+- **User Roles**: Three distinct roles with different permission levels:
+  - **Admin**: Full platform visibility but cannot fill questionnaires or forms (read-only for submissions)
+  - **Gestor** (Manager): Can manage teams, fill manager-specific forms and questionnaires
+  - **Funcionario** (Employee): Can fill employee-specific forms and questionnaires
+- **Security Features**:
+  - JWT access tokens (15 minutes expiration) stored in httpOnly cookies
+  - Rotating refresh tokens (30 days expiration) for enhanced security
+  - Automatic token refresh every 14 minutes to maintain session
+  - Password hashing with bcrypt (10 salt rounds)
+  - Token rotation on each refresh to prevent replay attacks
+  - 78+ API routes protected with `requireAuth` middleware
+- **Backend Protection**:
+  - `requireAuth` middleware: Verifies authentication for all protected routes
+  - `requireNotAdmin` middleware: Blocks Admin from POST routes for questionnaires/forms
+  - Returns clear 403 error messages when access is denied
+  - All auth routes: /api/auth/login, /api/auth/logout, /api/auth/refresh, /api/auth/me
+- **Frontend Features**:
+  - AuthContext manages global authentication state
+  - Automatic redirect to /login for unauthenticated users
+  - Route guards prevent unauthorized access
+  - Visual indicators (yellow warning banners) when Admin views submission pages
+  - Submit buttons disabled for Admin users with clear messaging
+  - Loading states during authentication verification
+- **User Experience**:
+  - Seamless session management with auto-refresh
+  - No interruption during active use (14-minute refresh interval)
+  - Clear visual feedback about role restrictions
+  - Unified navigation - all users see all menus, restrictions applied at action level
+- **Default Admin Users**:
+  - admin@sistema.com (password: admin123)
+  - tpazdev@gmail.com (password: 123456)
+
 ### Internal Termination Questionnaires (October 2025)
 - **Platform-Based Forms**: Termination questionnaires moved from external Microsoft Forms to internal platform forms
 - **Database Structure**:
@@ -67,7 +101,14 @@ The backend is an Express.js (Node.js) application exposing RESTful APIs. It inc
 
 ### Data Architecture
 
-The system uses a PostgreSQL database, managed with Drizzle ORM for type-safe schema definitions and migrations. It employs a normalized relational structure with tables for `empresas` (Companies), `gestores` (Managers), `funcionarios` (Employees), `desligamentos` (Terminations), `formulariosExperiencia` (Experience Evaluation Forms), `pesquisasClima` (Climate Surveys) and associated questions/responses, `treinamentos` (Training Programs) and participants, `pdis` (Individual Development Plans) with goals, competencies, and actions, and a comprehensive `questionariosDesligamento` (Termination Questionnaires) system with associated questions.
+The system uses a PostgreSQL database, managed with Drizzle ORM for type-safe schema definitions and migrations. It employs a normalized relational structure with tables for:
+- **Authentication**: `usuarios` (Users with roles), `sessoes_tokens` (Session management with refresh tokens)
+- **Core Entities**: `empresas` (Companies), `gestores` (Managers), `funcionarios` (Employees)
+- **Terminations**: `desligamentos` (Terminations), `questionariosDesligamento` (Termination Questionnaires), `perguntasDesligamento` (Questionnaire Questions), `respostasDesligamento` (Questionnaire Responses)
+- **Evaluations**: `formulariosExperiencia` (Experience Evaluation Forms) with two-period support
+- **Climate**: `pesquisasClima` (Climate Surveys), `perguntasClima` (Survey Questions), `respostasClima` (Survey Responses)
+- **Development**: `treinamentos` (Training Programs), `participantesTreinamento` (Participants), `pdis` (Individual Development Plans), `metasPDI` (PDI Goals), `competenciasPDI` (PDI Competencies), `acoesPDI` (PDI Actions)
+- **Documents**: `documentosFuncionario` (Employee Documents), `documentosGestor` (Manager Documents)
 
 ## External Dependencies
 
