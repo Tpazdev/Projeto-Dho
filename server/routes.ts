@@ -840,6 +840,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           perguntaId: resposta.perguntaId,
           valorEscala: resposta.valorEscala,
           textoResposta: resposta.textoResposta,
+          valorData: resposta.valorData,
         });
         const respostaSalva = await storage.createRespostaDesligamento(validated);
         respostasSalvas.push(respostaSalva);

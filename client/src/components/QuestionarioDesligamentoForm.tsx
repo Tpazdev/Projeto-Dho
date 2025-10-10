@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Loader2, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -45,7 +46,7 @@ export function QuestionarioDesligamentoForm({
   onSuccess,
 }: QuestionarioDesligamentoFormProps) {
   const { toast } = useToast();
-  const [respostas, setRespostas] = useState<Record<number, { valorEscala?: number; textoResposta?: string }>>({});
+  const [respostas, setRespostas] = useState<Record<number, { valorEscala?: number; textoResposta?: string; valorData?: string }>>({});
 
   const { data, isLoading } = useQuery<QuestionarioData>({
     queryKey: [`/api/questionarios-desligamento/tipo/${tipoDesligamento}`],
@@ -59,6 +60,7 @@ export function QuestionarioDesligamentoForm({
         perguntaId: pergunta.id,
         valorEscala: respostas[pergunta.id]?.valorEscala || null,
         textoResposta: respostas[pergunta.id]?.textoResposta || null,
+        valorData: respostas[pergunta.id]?.valorData || null,
       }));
 
       const response = await apiRequest("POST", "/api/respostas-desligamento", {
@@ -85,7 +87,7 @@ export function QuestionarioDesligamentoForm({
     },
   });
 
-  const handleResposta = (perguntaId: number, valor: { valorEscala?: number; textoResposta?: string }) => {
+  const handleResposta = (perguntaId: number, valor: { valorEscala?: number; textoResposta?: string; valorData?: string }) => {
     setRespostas((prev) => ({
       ...prev,
       [perguntaId]: valor,
@@ -97,7 +99,7 @@ export function QuestionarioDesligamentoForm({
 
     const obrigatoriasFaltando = data.perguntas
       .filter((p) => p.obrigatoria === 1)
-      .some((p) => !respostas[p.id]?.textoResposta && !respostas[p.id]?.valorEscala);
+      .some((p) => !respostas[p.id]?.textoResposta && !respostas[p.id]?.valorEscala && !respostas[p.id]?.valorData);
 
     if (obrigatoriasFaltando) {
       toast({
@@ -214,6 +216,17 @@ export function QuestionarioDesligamentoForm({
                     </div>
                   ))}
                 </RadioGroup>
+              )}
+
+              {pergunta.tipo === "data" && (
+                <Input
+                  type="date"
+                  value={respostas[pergunta.id]?.valorData || ""}
+                  onChange={(e) =>
+                    handleResposta(pergunta.id, { valorData: e.target.value })
+                  }
+                  data-testid={`input-data-${pergunta.id}`}
+                />
               )}
             </CardContent>
           </Card>
