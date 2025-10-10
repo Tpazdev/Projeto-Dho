@@ -74,8 +74,8 @@ function AppContent() {
     return <Router />;
   }
 
-  // Mostrar loading enquanto verifica autenticação
-  if (isLoading) {
+  // Mostrar loading enquanto verifica autenticação ou se não há usuário
+  if (isLoading || !usuario) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-lg">Carregando...</div>

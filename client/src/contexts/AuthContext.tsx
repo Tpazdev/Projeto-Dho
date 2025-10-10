@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect } from "react";
+import { createContext, useContext, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -23,9 +23,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
+  const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Buscar dados do usuário autenticado
-  const { data, isLoading, error } = useQuery<{ usuario: Usuario }>({
+  const { data, isLoading, error, refetch } = useQuery<{ usuario: Usuario }>({
     queryKey: ["/api/auth/me"],
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutos
@@ -51,6 +52,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
     },
   });
+
+  // Função para refresh do token
+  const refreshToken = async () => {
+    try {
+      const response = await apiRequest("POST", "/api/auth/refresh", {});
+      if (response.ok) {
+        // Token renovado com sucesso, atualizar dados do usuário
+        await refetch();
+        // Programar próximo refresh (14 minutos)
+        scheduleTokenRefresh();
+      } else {
+        // Falha no refresh, fazer logout
+        queryClient.setQueryData(["/api/auth/me"], null);
+        setLocation("/login");
+      }
+    } catch (error) {
+      // Erro no refresh, fazer logout
+      queryClient.setQueryData(["/api/auth/me"], null);
+      setLocation("/login");
+    }
+  };
+
+  // Programar refresh automático do token
+  const scheduleTokenRefresh = () => {
+    // Limpar timeout anterior se existir
+    if (refreshTimeoutRef.current) {
+      clearTimeout(refreshTimeoutRef.current);
+    }
+    
+    // Programar refresh para 14 minutos (1 minuto antes da expiração)
+    refreshTimeoutRef.current = setTimeout(() => {
+      refreshToken();
+    }, 14 * 60 * 1000);
+  };
+
+  // Configurar refresh automático quando usuário estiver autenticado
+  useEffect(() => {
+    if (data?.usuario) {
+      scheduleTokenRefresh();
+    }
+    
+    // Cleanup ao desmontar
+    return () => {
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+      }
+    };
+  }, [data?.usuario]);
 
   // Redirecionar para login se não autenticado
   useEffect(() => {

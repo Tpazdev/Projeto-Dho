@@ -160,7 +160,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.get("/api/auth/me", async (req, res) => {
+  app.get("/api/auth/me", requireAuth, async (req, res) => {
     try {
       const accessToken = req.cookies?.accessToken;
       
@@ -191,8 +191,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Rotas existentes
-  app.get("/api/empresas", async (req, res) => {
+  // Rotas protegidas - requerem autenticação
+  app.get("/api/empresas", requireAuth, async (req, res) => {
     try {
       const empresas = await storage.getEmpresas();
       res.json(empresas);
@@ -201,7 +201,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/empresas", async (req, res) => {
+  app.post("/api/empresas", requireAuth, async (req, res) => {
     try {
       const validated = insertEmpresaSchema.parse(req.body);
       const empresa = await storage.createEmpresa(validated);
@@ -211,7 +211,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/gestores", async (req, res) => {
+  app.get("/api/gestores", requireAuth, async (req, res) => {
     try {
       const gestores = await storage.getGestores();
       res.json(gestores);
@@ -220,7 +220,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/gestores", async (req, res) => {
+  app.post("/api/gestores", requireAuth, async (req, res) => {
     try {
       const validated = insertGestorSchema.parse(req.body);
       const gestor = await storage.createGestor(validated);
@@ -230,7 +230,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/funcionarios", async (req, res) => {
+  app.get("/api/funcionarios", requireAuth, async (req, res) => {
     try {
       const funcionarios = await storage.getFuncionarios();
       res.json(funcionarios);
@@ -239,7 +239,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/funcionarios", async (req, res) => {
+  app.post("/api/funcionarios", requireAuth, async (req, res) => {
     try {
       const validated = insertFuncionarioSchema.parse(req.body);
       const funcionario = await storage.createFuncionario(validated);
@@ -249,7 +249,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/desligamentos", async (req, res) => {
+  app.get("/api/desligamentos", requireAuth, async (req, res) => {
     try {
       const desligamentos = await storage.getDesligamentosComDetalhes();
       res.json(desligamentos);
@@ -258,7 +258,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/desligamentos", async (req, res) => {
+  app.post("/api/desligamentos", requireAuth, async (req, res) => {
     try {
       const validated = insertDesligamentoSchema.parse(req.body);
       const desligamento = await storage.createDesligamento(validated);
@@ -268,7 +268,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/dados/desligamentos_por_gestor", async (req, res) => {
+  app.get("/api/dados/desligamentos_por_gestor", requireAuth, async (req, res) => {
     try {
       const data = await storage.getDesligamentosPorGestor();
       res.json(data);
@@ -277,7 +277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/dados/desligamentos_por_empresa", async (req, res) => {
+  app.get("/api/dados/desligamentos_por_empresa", requireAuth, async (req, res) => {
     try {
       const data = await storage.getDesligamentosPorEmpresa();
       res.json(data);
@@ -286,7 +286,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/funcionarios/:id/documentos", async (req, res) => {
+  app.get("/api/funcionarios/:id/documentos", requireAuth, async (req, res) => {
     try {
       const funcionarioId = parseInt(req.params.id);
       const documentos = await storage.getDocumentosByFuncionario(funcionarioId);
@@ -296,7 +296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/funcionarios/:id/documentos", async (req, res) => {
+  app.post("/api/funcionarios/:id/documentos", requireAuth, async (req, res) => {
     try {
       const funcionarioId = parseInt(req.params.id);
       const validated = insertDocumentoFuncionarioSchema.parse({
@@ -310,7 +310,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/documentos/:id", async (req, res) => {
+  app.delete("/api/documentos/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deleteDocumentoFuncionario(id);
@@ -320,7 +320,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/gestores/:id/documentos", async (req, res) => {
+  app.get("/api/gestores/:id/documentos", requireAuth, async (req, res) => {
     try {
       const gestorId = parseInt(req.params.id);
       const documentos = await storage.getDocumentosByGestor(gestorId);
@@ -330,7 +330,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/gestores/:id/documentos", async (req, res) => {
+  app.post("/api/gestores/:id/documentos", requireAuth, async (req, res) => {
     try {
       const gestorId = parseInt(req.params.id);
       const validated = insertDocumentoGestorSchema.parse({
@@ -344,7 +344,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/documentos-gestor/:id", async (req, res) => {
+  app.delete("/api/documentos-gestor/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deleteDocumentoGestor(id);
@@ -354,7 +354,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/formularios-experiencia", async (req, res) => {
+  app.get("/api/formularios-experiencia", requireAuth, async (req, res) => {
     try {
       const formularios = await storage.getFormulariosExperiencia();
       res.json(formularios);
@@ -363,7 +363,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/formularios-experiencia/pendentes", async (req, res) => {
+  app.get("/api/formularios-experiencia/pendentes", requireAuth, async (req, res) => {
     try {
       const formularios = await storage.getFormulariosExperienciaPendentes();
       res.json(formularios);
@@ -372,7 +372,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/formularios-experiencia/gestor/:gestorId", async (req, res) => {
+  app.get("/api/formularios-experiencia/gestor/:gestorId", requireAuth, async (req, res) => {
     try {
       const gestorId = parseInt(req.params.gestorId);
       const formularios = await storage.getFormulariosExperienciaByGestor(gestorId);
@@ -382,7 +382,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/formularios-experiencia/:id", async (req, res) => {
+  app.get("/api/formularios-experiencia/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const formulario = await storage.getFormularioExperiencia(id);
@@ -395,7 +395,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/formularios-experiencia", async (req, res) => {
+  app.post("/api/formularios-experiencia", requireAuth, async (req, res) => {
     try {
       const validated = insertFormularioExperienciaSchema.parse(req.body);
       const formulario = await storage.createFormularioExperiencia(validated);
@@ -405,7 +405,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/formularios-experiencia/:id", async (req, res) => {
+  app.patch("/api/formularios-experiencia/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const data = req.body;
@@ -436,7 +436,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/pesquisas-clima", async (req, res) => {
+  app.get("/api/pesquisas-clima", requireAuth, async (req, res) => {
     try {
       const pesquisas = await storage.getPesquisasClima();
       res.json(pesquisas);
@@ -445,7 +445,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/pesquisas-clima/:id", async (req, res) => {
+  app.get("/api/pesquisas-clima/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const pesquisa = await storage.getPesquisaClima(id);
@@ -458,7 +458,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/pesquisas-clima", async (req, res) => {
+  app.post("/api/pesquisas-clima", requireAuth, async (req, res) => {
     try {
       const validated = insertPesquisaClimaSchema.parse(req.body);
       const pesquisa = await storage.createPesquisaClima(validated);
@@ -468,7 +468,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/pesquisas-clima/:id", async (req, res) => {
+  app.patch("/api/pesquisas-clima/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const pesquisa = await storage.updatePesquisaClima(id, req.body);
@@ -478,7 +478,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/pesquisas-clima/:id", async (req, res) => {
+  app.delete("/api/pesquisas-clima/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deletePesquisaClima(id);
@@ -488,7 +488,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/pesquisas-clima/:id/perguntas", async (req, res) => {
+  app.get("/api/pesquisas-clima/:id/perguntas", requireAuth, async (req, res) => {
     try {
       const pesquisaId = parseInt(req.params.id);
       const perguntas = await storage.getPerguntasByPesquisa(pesquisaId);
@@ -498,7 +498,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/pesquisas-clima/:id/perguntas", async (req, res) => {
+  app.post("/api/pesquisas-clima/:id/perguntas", requireAuth, async (req, res) => {
     try {
       const pesquisaId = parseInt(req.params.id);
       const validated = insertPerguntaClimaSchema.parse({
@@ -512,7 +512,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/perguntas-clima/:id", async (req, res) => {
+  app.patch("/api/perguntas-clima/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const pergunta = await storage.updatePerguntaClima(id, req.body);
@@ -522,7 +522,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/perguntas-clima/:id", async (req, res) => {
+  app.delete("/api/perguntas-clima/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deletePerguntaClima(id);
@@ -532,7 +532,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/pesquisas-clima/:id/respostas", async (req, res) => {
+  app.get("/api/pesquisas-clima/:id/respostas", requireAuth, async (req, res) => {
     try {
       const pesquisaId = parseInt(req.params.id);
       const respostas = await storage.getRespostasByPesquisa(pesquisaId);
@@ -542,7 +542,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/pesquisas-clima/:id/respostas", async (req, res) => {
+  app.post("/api/pesquisas-clima/:id/respostas", requireAuth, async (req, res) => {
     try {
       const pesquisaId = parseInt(req.params.id);
       const validated = insertRespostaClimaSchema.parse({
@@ -557,7 +557,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/pesquisas-clima/:id/analise", async (req, res) => {
+  app.get("/api/pesquisas-clima/:id/analise", requireAuth, async (req, res) => {
     try {
       const pesquisaId = parseInt(req.params.id);
       const analise = await storage.getAnalisePesquisa(pesquisaId);
@@ -567,7 +567,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/treinamentos", async (req, res) => {
+  app.get("/api/treinamentos", requireAuth, async (req, res) => {
     try {
       const treinamentos = await storage.getTreinamentos();
       res.json(treinamentos);
@@ -576,7 +576,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/treinamentos/:id", async (req, res) => {
+  app.get("/api/treinamentos/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const treinamento = await storage.getTreinamento(id);
@@ -589,7 +589,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/treinamentos", async (req, res) => {
+  app.post("/api/treinamentos", requireAuth, async (req, res) => {
     try {
       const validated = insertTreinamentoSchema.parse(req.body);
       const treinamento = await storage.createTreinamento(validated);
@@ -599,7 +599,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/treinamentos/:id", async (req, res) => {
+  app.patch("/api/treinamentos/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const treinamento = await storage.updateTreinamento(id, req.body);
@@ -609,7 +609,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/treinamentos/:id", async (req, res) => {
+  app.delete("/api/treinamentos/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deleteTreinamento(id);
@@ -619,7 +619,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/treinamentos/:id/participantes", async (req, res) => {
+  app.get("/api/treinamentos/:id/participantes", requireAuth, async (req, res) => {
     try {
       const treinamentoId = parseInt(req.params.id);
       const participantes = await storage.getParticipantesByTreinamento(treinamentoId);
@@ -629,7 +629,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/treinamentos/:id/participantes", async (req, res) => {
+  app.post("/api/treinamentos/:id/participantes", requireAuth, async (req, res) => {
     try {
       const treinamentoId = parseInt(req.params.id);
       const validated = insertTreinamentoParticipanteSchema.parse({
@@ -644,7 +644,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/participantes/:id", async (req, res) => {
+  app.patch("/api/participantes/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const participante = await storage.updateParticipante(id, req.body);
@@ -654,7 +654,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/participantes/:id", async (req, res) => {
+  app.delete("/api/participantes/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.removeParticipante(id);
@@ -664,7 +664,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/pdis", async (req, res) => {
+  app.get("/api/pdis", requireAuth, async (req, res) => {
     try {
       const pdis = await storage.getPdis();
       res.json(pdis);
@@ -673,7 +673,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/pdis/:id", async (req, res) => {
+  app.get("/api/pdis/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const pdi = await storage.getPdi(id);
@@ -686,7 +686,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/pdis", async (req, res) => {
+  app.post("/api/pdis", requireAuth, async (req, res) => {
     try {
       const validated = insertPdiSchema.parse(req.body);
       const pdi = await storage.createPdi(validated);
@@ -696,7 +696,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/pdis/:id", async (req, res) => {
+  app.patch("/api/pdis/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const pdi = await storage.updatePdi(id, req.body);
@@ -706,7 +706,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/pdis/:id", async (req, res) => {
+  app.delete("/api/pdis/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deletePdi(id);
@@ -716,7 +716,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/pdis/:id/metas", async (req, res) => {
+  app.get("/api/pdis/:id/metas", requireAuth, async (req, res) => {
     try {
       const pdiId = parseInt(req.params.id);
       const metas = await storage.getMetasByPdi(pdiId);
@@ -726,7 +726,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/pdis/:id/metas", async (req, res) => {
+  app.post("/api/pdis/:id/metas", requireAuth, async (req, res) => {
     try {
       const pdiId = parseInt(req.params.id);
       const validated = insertPdiMetaSchema.parse({
@@ -740,7 +740,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/pdi-metas/:id", async (req, res) => {
+  app.patch("/api/pdi-metas/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const meta = await storage.updatePdiMeta(id, req.body);
@@ -750,7 +750,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/pdi-metas/:id", async (req, res) => {
+  app.delete("/api/pdi-metas/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deletePdiMeta(id);
@@ -760,7 +760,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/pdis/:id/competencias", async (req, res) => {
+  app.get("/api/pdis/:id/competencias", requireAuth, async (req, res) => {
     try {
       const pdiId = parseInt(req.params.id);
       const competencias = await storage.getCompetenciasByPdi(pdiId);
@@ -770,7 +770,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/pdis/:id/competencias", async (req, res) => {
+  app.post("/api/pdis/:id/competencias", requireAuth, async (req, res) => {
     try {
       const pdiId = parseInt(req.params.id);
       const validated = insertPdiCompetenciaSchema.parse({
@@ -784,7 +784,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/pdi-competencias/:id", async (req, res) => {
+  app.patch("/api/pdi-competencias/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const competencia = await storage.updatePdiCompetencia(id, req.body);
@@ -794,7 +794,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/pdi-competencias/:id", async (req, res) => {
+  app.delete("/api/pdi-competencias/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deletePdiCompetencia(id);
@@ -804,7 +804,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/pdis/:id/acoes", async (req, res) => {
+  app.get("/api/pdis/:id/acoes", requireAuth, async (req, res) => {
     try {
       const pdiId = parseInt(req.params.id);
       const acoes = await storage.getAcoesByPdi(pdiId);
@@ -814,7 +814,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/pdis/:id/acoes", async (req, res) => {
+  app.post("/api/pdis/:id/acoes", requireAuth, async (req, res) => {
     try {
       const pdiId = parseInt(req.params.id);
       const validated = insertPdiAcaoSchema.parse({
@@ -828,7 +828,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/pdi-acoes/:id", async (req, res) => {
+  app.patch("/api/pdi-acoes/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const acao = await storage.updatePdiAcao(id, req.body);
@@ -838,7 +838,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/pdi-acoes/:id", async (req, res) => {
+  app.delete("/api/pdi-acoes/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deletePdiAcao(id);
@@ -848,7 +848,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/enviar-questionario", async (req, res) => {
+  app.post("/api/enviar-questionario", requireAuth, async (req, res) => {
     try {
       const { funcionarioId, email, tipoDesligamento } = req.body;
 
@@ -894,7 +894,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Rotas para questionários de desligamento
-  app.get("/api/questionarios-desligamento", async (req, res) => {
+  app.get("/api/questionarios-desligamento", requireAuth, async (req, res) => {
     try {
       const questionarios = await storage.getQuestionariosDesligamento();
       res.json(questionarios);
@@ -903,7 +903,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/questionarios-desligamento", async (req, res) => {
+  app.post("/api/questionarios-desligamento", requireAuth, async (req, res) => {
     try {
       const validated = insertQuestionarioDesligamentoSchema.parse(req.body);
       const questionario = await storage.createQuestionarioDesligamento(validated);
@@ -913,7 +913,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/questionarios-desligamento/:id", async (req, res) => {
+  app.get("/api/questionarios-desligamento/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const questionario = await storage.getQuestionarioDesligamento(id);
@@ -926,7 +926,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/questionarios-desligamento/:id", async (req, res) => {
+  app.patch("/api/questionarios-desligamento/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const questionario = await storage.updateQuestionarioDesligamento(id, req.body);
@@ -936,7 +936,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/questionarios-desligamento/:id", async (req, res) => {
+  app.delete("/api/questionarios-desligamento/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deleteQuestionarioDesligamento(id);
@@ -947,7 +947,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Rotas para perguntas do questionário de desligamento
-  app.get("/api/questionarios-desligamento/:id/perguntas", async (req, res) => {
+  app.get("/api/questionarios-desligamento/:id/perguntas", requireAuth, async (req, res) => {
     try {
       const questionarioId = parseInt(req.params.id);
       const perguntas = await storage.getPerguntasByQuestionario(questionarioId);
@@ -957,7 +957,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/questionarios-desligamento/:id/perguntas", async (req, res) => {
+  app.post("/api/questionarios-desligamento/:id/perguntas", requireAuth, async (req, res) => {
     try {
       const questionarioId = parseInt(req.params.id);
       const validated = insertPerguntaDesligamentoSchema.parse({
@@ -971,7 +971,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/perguntas-desligamento/:id", async (req, res) => {
+  app.patch("/api/perguntas-desligamento/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const pergunta = await storage.updatePerguntaDesligamento(id, req.body);
@@ -981,7 +981,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/perguntas-desligamento/:id", async (req, res) => {
+  app.delete("/api/perguntas-desligamento/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deletePerguntaDesligamento(id);
@@ -992,7 +992,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Rotas para respostas de questionário de desligamento
-  app.get("/api/questionarios-desligamento/tipo/:tipoDesligamento", async (req, res) => {
+  app.get("/api/questionarios-desligamento/tipo/:tipoDesligamento", requireAuth, async (req, res) => {
     try {
       const tipoDesligamento = req.params.tipoDesligamento;
       const questionario = await storage.getQuestionarioAtivoByTipo(tipoDesligamento);
@@ -1011,7 +1011,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/respostas-desligamento", async (req, res) => {
+  app.post("/api/respostas-desligamento", requireAuth, async (req, res) => {
     try {
       const { desligamentoId, questionarioId, respostas } = req.body;
 
@@ -1044,7 +1044,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/respostas-desligamento/:desligamentoId", async (req, res) => {
+  app.get("/api/respostas-desligamento/:desligamentoId", requireAuth, async (req, res) => {
     try {
       const desligamentoId = parseInt(req.params.desligamentoId);
       const respostas = await storage.getRespostasByDesligamento(desligamentoId);
