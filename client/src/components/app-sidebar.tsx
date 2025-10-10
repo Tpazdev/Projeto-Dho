@@ -40,22 +40,22 @@ const items = [
         url: "/desligamentos/gestor",
         icon: UserCog,
       },
-    ],
-  },
-  {
-    title: "Questionários Preenchidos",
-    icon: FileCheck,
-    adminOnly: true,
-    subItems: [
       {
-        title: "Por iniciativa do colaborador",
-        url: "/questionarios-preenchidos/funcionario",
-        icon: UserMinus,
-      },
-      {
-        title: "Por iniciativa da empresa",
-        url: "/questionarios-preenchidos/gestor",
-        icon: UserCog,
+        title: "Questionários Preenchidos",
+        icon: FileCheck,
+        adminOnly: true,
+        subItems: [
+          {
+            title: "Por iniciativa do colaborador",
+            url: "/questionarios-preenchidos/funcionario",
+            icon: UserMinus,
+          },
+          {
+            title: "Por iniciativa da empresa",
+            url: "/questionarios-preenchidos/gestor",
+            icon: UserCog,
+          },
+        ],
       },
     ],
   },
@@ -151,20 +151,66 @@ export function AppSidebar() {
                         </CollapsibleTrigger>
                         <CollapsibleContent>
                           <SidebarMenuSub>
-                            {item.subItems.map((subItem) => (
-                              <SidebarMenuSubItem key={subItem.title}>
-                                <SidebarMenuSubButton
-                                  asChild
-                                  className={location === subItem.url ? "bg-sidebar-accent" : ""}
-                                  data-testid={`link-${subItem.title.toLowerCase().replace(/\s+/g, '-')}`}
-                                >
-                                  <Link href={subItem.url}>
-                                    <subItem.icon />
-                                    <span>{subItem.title}</span>
-                                  </Link>
-                                </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
-                            ))}
+                            {item.subItems
+                              .filter((subItem) => {
+                                // Filtrar sub-items admin-only
+                                if (subItem.adminOnly && usuario?.role !== "admin") {
+                                  return false;
+                                }
+                                return true;
+                              })
+                              .map((subItem) => {
+                                // Se o subItem tem subItems (nested menu), renderiza um collapsible aninhado
+                                if (subItem.subItems) {
+                                  return (
+                                    <Collapsible key={subItem.title} asChild defaultOpen className="group/nested-collapsible">
+                                      <SidebarMenuSubItem>
+                                        <CollapsibleTrigger asChild>
+                                          <SidebarMenuSubButton data-testid={`link-${subItem.title.toLowerCase().replace(/\s+/g, '-')}`}>
+                                            <subItem.icon />
+                                            <span>{subItem.title}</span>
+                                            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/nested-collapsible:rotate-90" />
+                                          </SidebarMenuSubButton>
+                                        </CollapsibleTrigger>
+                                        <CollapsibleContent>
+                                          <SidebarMenuSub>
+                                            {subItem.subItems.map((nestedItem) => (
+                                              <SidebarMenuSubItem key={nestedItem.title}>
+                                                <SidebarMenuSubButton
+                                                  asChild
+                                                  className={location === nestedItem.url ? "bg-sidebar-accent" : ""}
+                                                  data-testid={`link-${nestedItem.title.toLowerCase().replace(/\s+/g, '-')}`}
+                                                >
+                                                  <Link href={nestedItem.url}>
+                                                    <nestedItem.icon />
+                                                    <span>{nestedItem.title}</span>
+                                                  </Link>
+                                                </SidebarMenuSubButton>
+                                              </SidebarMenuSubItem>
+                                            ))}
+                                          </SidebarMenuSub>
+                                        </CollapsibleContent>
+                                      </SidebarMenuSubItem>
+                                    </Collapsible>
+                                  );
+                                }
+
+                                // Caso contrário, renderiza um subItem normal
+                                return (
+                                  <SidebarMenuSubItem key={subItem.title}>
+                                    <SidebarMenuSubButton
+                                      asChild
+                                      className={location === subItem.url ? "bg-sidebar-accent" : ""}
+                                      data-testid={`link-${subItem.title.toLowerCase().replace(/\s+/g, '-')}`}
+                                    >
+                                      <Link href={subItem.url}>
+                                        <subItem.icon />
+                                        <span>{subItem.title}</span>
+                                      </Link>
+                                    </SidebarMenuSubButton>
+                                  </SidebarMenuSubItem>
+                                );
+                              })}
                           </SidebarMenuSub>
                         </CollapsibleContent>
                       </SidebarMenuItem>

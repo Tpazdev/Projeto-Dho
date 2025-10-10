@@ -39,7 +39,7 @@ Preferred communication style: Simple, everyday language.
   - Seamless session management with auto-refresh
   - No interruption during active use (14-minute refresh interval)
   - Clear visual feedback about role restrictions
-  - Unified navigation - all users see all menus, restrictions applied at action level
+  - Role-based menu visibility - Admin-only items hidden from other users
 - **Default Admin Users**:
   - admin@sistema.com (password: admin123)
   - tpazdev@gmail.com (password: 123456)
@@ -72,11 +72,13 @@ Preferred communication style: Simple, everyday language.
   - Backend routes protected with `requireRole(["admin"])`
   - Frontend route guards redirect non-admin users to dashboard
   - Error handling displays permission messages for unauthorized access
-  - Menu items hidden from non-admin users
+  - Menu items hidden from non-admin users via adminOnly flag
 - **Navigation**:
-  - Collapsible "Questionários Preenchidos" menu (Admin-only) with two sub-items
-  - `/questionarios-preenchidos/funcionario` - View employee-initiated questionnaires
-  - `/questionarios-preenchidos/gestor` - View company-initiated questionnaires
+  - Nested within "Desligamentos" menu as a collapsible sub-item
+  - "Questionários Preenchidos" appears below the two interview options (Admin-only)
+  - Two nested links:
+    - `/questionarios-preenchidos/funcionario` - View employee-initiated questionnaires
+    - `/questionarios-preenchidos/gestor` - View company-initiated questionnaires
 - **Features**:
   - Lists desligamentos that have submitted questionnaire responses
   - Search functionality to filter by employee name or position
