@@ -10,6 +10,28 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Updates
 
+### Internal Termination Questionnaires (October 2025)
+- **Platform-Based Forms**: Termination questionnaires moved from external Microsoft Forms to internal platform forms
+- **Database Structure**:
+  - `respostasDesligamento` table stores questionnaire responses with references to desligamento, questionario, and pergunta
+  - Full support for text, multiple choice, and scale (1-10) question types
+  - Mandatory/optional question configuration
+- **Navigation**: 
+  - Collapsible "Questionários de Desligamento" menu with two sub-items
+  - `/questionarios-desligamento/iniciativa-funcionario` - Employee-initiated termination questionnaires
+  - `/questionarios-desligamento/iniciativa-empresa` - Company-initiated termination questionnaires
+- **User Experience**:
+  - Internal dialog-based form filling with dynamic question rendering
+  - Validation for required fields before submission
+  - Automatic questionnaire selection based on termination type (funcionario/gestor)
+  - Searchable desligamento list filtered by type
+  - Success toast notification after submission
+- **Technical Implementation**:
+  - `QuestionarioDesligamentoForm` component handles internal form rendering
+  - `EnviarQuestionario` component manages desligamento selection and dialog display
+  - API endpoints for fetching active questionnaires and saving responses
+  - Support for multiple question types with appropriate UI controls
+
 ### Experience Evaluation Period Management (October 2025)
 - **Two-Period Structure**: Avaliações de Experiência now organized into two separate periods:
   - **01° Período**: First evaluation period for probationary employees (30 days)
@@ -53,10 +75,10 @@ The system uses a PostgreSQL database, managed with Drizzle ORM for type-safe sc
 
 - **Neon Database**: Serverless PostgreSQL hosting for all database operations.
 - **Google Fonts**: Inter font family for consistent typography.
-- **Microsoft Forms**: Integrated for termination questionnaires with separate forms for different termination types:
-  - **Employee-initiated terminations**: https://forms.office.com/pages/responsepage.aspx?id=fKhs6GEk4keMILRXyHexKD9hUGoTJTBAh3e6AfxsqZRUN1NMOEdNUjRLNk9aVFQ0UEFVOVRMMTFJWSQlQCN0PWcu&route=shorturl
-  - **Company-initiated terminations**: https://forms.office.com/pages/responsepage.aspx?id=fKhs6GEk4keMILRXyHexKD9hUGoTJTBAh3e6AfxsqZRUMkJPVzBTM1VCN0VNVFg5QjZJTFZPV1YwSyQlQCN0PWcu&route=shorturl
-  - System automatically provides the appropriate link based on termination type via dialog interface with copy/open options
+- **Microsoft Forms**: Integrated for experience evaluation forms only:
+  - Single Microsoft Forms URL for all evaluation periods: https://forms.office.com/pages/responsepage.aspx?id=fKhs6GEk4keMILRXyHexKD9hUGoTJTBAh3e6AfxsqZRUREcxQzk3SUJNMkFYMVVKWE04R1IzRjJNUSQlQCN0PWcu&route=shorturl
+  - Dialog interface with copy/open link functionality
+  - **Note**: Termination questionnaires are now handled internally via platform-based forms, no longer using Microsoft Forms
 
 ### UI Component Libraries
 
