@@ -1,0 +1,71 @@
+Quando você enviar este formulário, ele não coletará automaticamente seus detalhes, como nome e endereço de email, a menos que você mesmo o forneça.
+Obrigatória
+1.Data da entrevista
+
+2.Nome completo 
+3.Cargo
+4.Qual cliente do grupo Opus você trabalha?
+5.Nome do gestor imediato:
+6.Data de desligamento
+
+7.Tipo de desligamento 
+Pedido de desligamento
+Encerramento do contrato de experiência
+8.Motivo da saída: 
+Selecionar sua resposta
+9.Descreva o motivo do seu desligamento
+10.Cumpriu aviso prévio? 
+Sim
+Não
+11.O que teria feito você permanecer na empresa? 
+12.Como você avalia a relação com seu gestor direto?
+Boa
+Ruim
+13.Você recebia feedback?
+Sim
+Não
+14.Com qual frequência? 
+Nenhuma 
+Toda semana 
+A cada quinze dias 
+Todo mês
+15.As condições apresentadas no processo seletivo correspondem à realidade vivenciada na empresa? 
+Sim
+Não
+16.Teve liberdade para expor problemas e apresentar sugestões?
+Sim
+Não
+17.Você recebeu treinamento e orientações para realizar suas atividades?
+Sim
+Não
+18.Você tinha os materiais necessários para realizar suas atividades? 
+Sim
+Não
+19.O que faltou? 
+20.Você indicaria um amigo para trabalhar no Grupo Opus? 
+Sim
+Não
+21.De 0 à 10, quanto você indicaria um amigo (a) para trabalhar no Grupo Opus?
+Selecionar sua resposta
+22.Você tinha os EPIS necessários para as atividade exercidas? 
+Sim
+Não
+23.Fui instruído adequadamente sobre questões relacionadas a saúde e segurança do trabalho. 
+Selecionar sua resposta
+24.Seu gestor reconhecia quando realizava um bom trabalho? 
+Selecionar sua resposta
+25.Você foi bem recebido pela sua equipe de trabalho?
+Selecionar sua resposta
+26.Você foi bem recebido pela equipe da Opus? 
+Selecionar sua resposta
+27.As condições físicas do local de trabalho eram adequadas? 
+Selecionar sua resposta
+28.O atendimento da equipe de RH/ Administrativo da Opus era eficiente?
+Selecionar sua resposta
+29.Trabalharia na empresa novamente?
+Sim
+Não
+30.No mesmo setor?
+Sim
+Não
+31.Utilize esse espaço para escrever considerações sobre a entrevista. 

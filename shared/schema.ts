@@ -168,7 +168,7 @@ export const perguntasDesligamento = pgTable("perguntas_desligamento", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   questionarioId: integer("questionario_id").notNull().references(() => questionariosDesligamento.id),
   pergunta: text("pergunta").notNull(),
-  tipo: text("tipo").notNull(), // "texto", "multipla_escolha", "escala"
+  tipo: text("tipo").notNull(), // "texto", "multipla_escolha", "escala", "data"
   opcoes: text("opcoes").array(), // Para perguntas de múltipla escolha
   obrigatoria: integer("obrigatoria").notNull().default(1), // 1 = sim, 0 = não
   ordem: integer("ordem").notNull(),
@@ -181,6 +181,7 @@ export const respostasDesligamento = pgTable("respostas_desligamento", {
   perguntaId: integer("pergunta_id").notNull().references(() => perguntasDesligamento.id),
   valorEscala: integer("valor_escala"),
   textoResposta: text("texto_resposta"),
+  valorData: date("valor_data"), // Para perguntas do tipo "data"
   dataResposta: date("data_resposta").notNull().default(sql`CURRENT_DATE`),
 });
 
