@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Building2, UserCog, UserX, FileText, BarChart, GraduationCap, Target, ChevronRight, UserMinus, ClipboardList, Calendar } from "lucide-react";
+import { LayoutDashboard, Users, Building2, UserCog, UserX, FileText, BarChart, GraduationCap, Target, ChevronRight, UserMinus, ClipboardList, Calendar, FileCheck } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -38,6 +38,22 @@ const items = [
       {
         title: "Entrevista de desligamento – por parte da empresa",
         url: "/desligamentos/gestor",
+        icon: UserCog,
+      },
+    ],
+  },
+  {
+    title: "Questionários Preenchidos",
+    icon: FileCheck,
+    subItems: [
+      {
+        title: "Por iniciativa do colaborador",
+        url: "/questionarios-preenchidos/funcionario",
+        icon: UserMinus,
+      },
+      {
+        title: "Por iniciativa da empresa",
+        url: "/questionarios-preenchidos/gestor",
         icon: UserCog,
       },
     ],

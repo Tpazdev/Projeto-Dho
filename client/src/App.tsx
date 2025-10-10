@@ -30,6 +30,7 @@ import TreinamentoDetalhes from "@/pages/TreinamentoDetalhes";
 import PDI from "@/pages/PDI";
 import PDIDetalhes from "@/pages/PDIDetalhes";
 import QuestionariosDesligamento from "@/pages/QuestionariosDesligamento";
+import QuestionariosPreenchidos from "@/pages/QuestionariosPreenchidos";
 
 function Router() {
   return (
@@ -40,6 +41,8 @@ function Router() {
       <Route path="/desligamento/novo" component={NovoDesligamento} />
       <Route path="/desligamentos/funcionario" component={DesligamentosFuncionario} />
       <Route path="/desligamentos/gestor" component={DesligamentosGestor} />
+      <Route path="/questionarios-preenchidos/funcionario" component={() => <QuestionariosPreenchidos tipoDesligamento="funcionario" />} />
+      <Route path="/questionarios-preenchidos/gestor" component={() => <QuestionariosPreenchidos tipoDesligamento="gestor" />} />
       <Route path="/empresas" component={Empresas} />
       <Route path="/gestores" component={Gestores} />
       <Route path="/funcionarios" component={Funcionarios} />
