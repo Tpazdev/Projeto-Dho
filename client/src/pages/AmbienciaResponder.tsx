@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +35,10 @@ type PerguntaClima = {
 
 export default function AmbienciaResponder() {
   const { toast } = useToast();
+  const { usuario } = useAuth();
   const [respostas, setRespostas] = useState<{ [key: number]: { valorEscala?: number; textoResposta?: string } }>({});
+  
+  const isAdmin = usuario?.role === "admin";
 
   const { data: pesquisas = [] } = useQuery<PesquisaClima[]>({
     queryKey: ["/api/pesquisas-clima"],
@@ -89,6 +93,11 @@ export default function AmbienciaResponder() {
         <p className="text-muted-foreground mt-1">
           Participe das pesquisas de clima organizacional
         </p>
+        {isAdmin && (
+          <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md text-sm text-yellow-800 dark:text-yellow-200">
+            Você está visualizando como administrador. Apenas gestores e funcionários podem responder pesquisas.
+          </div>
+        )}
       </div>
 
       <div className="space-y-6">
@@ -100,6 +109,7 @@ export default function AmbienciaResponder() {
             onResposta={handleResposta}
             onSubmit={submitMutation.mutate}
             isSubmitting={submitMutation.isPending}
+            isAdmin={isAdmin}
           />
         ))}
       </div>
@@ -124,12 +134,14 @@ function PesquisaCard({
   onResposta,
   onSubmit,
   isSubmitting,
+  isAdmin,
 }: {
   pesquisa: PesquisaClima;
   respostas: { [key: number]: { valorEscala?: number; textoResposta?: string } };
   onResposta: (perguntaId: number, valor: number | string, tipo: "escala" | "texto") => void;
   onSubmit: (data: { pesquisaId: number; perguntas: PerguntaClima[] }) => void;
   isSubmitting: boolean;
+  isAdmin: boolean;
 }) {
   const { data: perguntas = [] } = useQuery<PerguntaClima[]>({
     queryKey: ["/api/pesquisas-clima", pesquisa.id, "perguntas"],
@@ -230,7 +242,7 @@ function PesquisaCard({
         {perguntas.length > 0 && (
           <Button
             onClick={handleSubmit}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isAdmin}
             className="w-full"
             data-testid={`button-enviar-${pesquisa.id}`}
           >
