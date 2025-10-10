@@ -60,9 +60,16 @@ Preferred communication style: Simple, everyday language.
   - Automatic questionnaire selection based on termination type (funcionario/gestor)
   - Searchable desligamento list filtered by type
   - Success toast notification after submission
+- **Admin Question Preview**:
+  - Admin users can view active questionnaire questions on desligamento pages
+  - Blue collapsible card displays all questions with type badges (Texto Livre, Múltipla Escolha, Escala)
+  - Shows mandatory indicators and question ordering
+  - Yellow warning card appears when no active questionnaire is configured
+  - Available on both `/desligamentos/funcionario` and `/desligamentos/gestor` pages
 - **Technical Implementation**:
   - `QuestionarioDesligamentoForm` component handles internal form rendering
   - `EnviarQuestionario` component manages desligamento selection and dialog display
+  - `VisualizarPerguntasQuestionario` component displays questions for Admin review
   - API endpoints for fetching active questionnaires and saving responses
   - Support for multiple question types with appropriate UI controls
 
