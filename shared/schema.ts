@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, date } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, date, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -185,6 +185,25 @@ export const respostasDesligamento = pgTable("respostas_desligamento", {
   dataResposta: date("data_resposta").notNull().default(sql`CURRENT_DATE`),
 });
 
+export const usuarios = pgTable("usuarios", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  nome: text("nome").notNull(),
+  email: text("email").notNull().unique(),
+  senhaHash: text("senha_hash").notNull(),
+  role: text("role").notNull().default("funcionario"), // "admin", "gestor", "funcionario"
+  ativo: integer("ativo").notNull().default(1), // 1 = ativo, 0 = inativo
+  criadoEm: timestamp("criado_em").notNull().default(sql`CURRENT_TIMESTAMP`),
+  atualizadoEm: timestamp("atualizado_em").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const sessoesTokens = pgTable("sessoes_tokens", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  usuarioId: integer("usuario_id").notNull().references(() => usuarios.id),
+  tokenHash: text("token_hash").notNull().unique(),
+  expiraEm: timestamp("expira_em").notNull(),
+  criadoEm: timestamp("criado_em").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
 const baseEmpresaSchema = createInsertSchema(empresas);
 export const insertEmpresaSchema = baseEmpresaSchema.omit({ id: true });
 
@@ -298,3 +317,15 @@ export type PerguntaDesligamento = typeof perguntasDesligamento.$inferSelect;
 
 export type InsertRespostaDesligamento = z.infer<typeof insertRespostaDesligamentoSchema>;
 export type RespostaDesligamento = typeof respostasDesligamento.$inferSelect;
+
+const baseUsuarioSchema = createInsertSchema(usuarios);
+export const insertUsuarioSchema = baseUsuarioSchema.omit({ id: true, criadoEm: true, atualizadoEm: true });
+
+const baseSessaoTokenSchema = createInsertSchema(sessoesTokens);
+export const insertSessaoTokenSchema = baseSessaoTokenSchema.omit({ id: true, criadoEm: true });
+
+export type InsertUsuario = z.infer<typeof insertUsuarioSchema>;
+export type Usuario = typeof usuarios.$inferSelect;
+
+export type InsertSessaoToken = z.infer<typeof insertSessaoTokenSchema>;
+export type SessaoToken = typeof sessoesTokens.$inferSelect;
