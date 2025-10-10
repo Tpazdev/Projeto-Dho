@@ -319,7 +319,11 @@ export type InsertRespostaDesligamento = z.infer<typeof insertRespostaDesligamen
 export type RespostaDesligamento = typeof respostasDesligamento.$inferSelect;
 
 const baseUsuarioSchema = createInsertSchema(usuarios);
-export const insertUsuarioSchema = baseUsuarioSchema.omit({ id: true, criadoEm: true, atualizadoEm: true });
+export const insertUsuarioSchema = baseUsuarioSchema
+  .omit({ id: true, criadoEm: true, atualizadoEm: true })
+  .extend({
+    role: z.enum(["admin", "gestor", "funcionario"]),
+  });
 
 const baseSessaoTokenSchema = createInsertSchema(sessoesTokens);
 export const insertSessaoTokenSchema = baseSessaoTokenSchema.omit({ id: true, criadoEm: true });

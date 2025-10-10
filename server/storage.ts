@@ -18,6 +18,8 @@ import {
   questionariosDesligamento,
   perguntasDesligamento,
   respostasDesligamento,
+  usuarios,
+  sessoesTokens,
   type Empresa,
   type InsertEmpresa,
   type Gestor,
@@ -56,6 +58,10 @@ import {
   type InsertPerguntaDesligamento,
   type RespostaDesligamento,
   type InsertRespostaDesligamento,
+  type Usuario,
+  type InsertUsuario,
+  type SessaoToken,
+  type InsertSessaoToken,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql, and } from "drizzle-orm";
@@ -158,6 +164,18 @@ export interface IStorage {
   createRespostaDesligamento(resposta: InsertRespostaDesligamento): Promise<RespostaDesligamento>;
   getRespostasByDesligamento(desligamentoId: number): Promise<RespostaDesligamento[]>;
   getQuestionarioAtivoByTipo(tipoDesligamento: string): Promise<QuestionarioDesligamento | undefined>;
+
+  createUsuario(usuario: InsertUsuario): Promise<Usuario>;
+  getUsuarios(): Promise<Usuario[]>;
+  getUsuario(id: number): Promise<Usuario | undefined>;
+  getUsuarioByEmail(email: string): Promise<Usuario | undefined>;
+  updateUsuario(id: number, data: Partial<InsertUsuario>): Promise<Usuario>;
+  deleteUsuario(id: number): Promise<void>;
+
+  createSessaoToken(sessao: InsertSessaoToken): Promise<SessaoToken>;
+  getSessaoToken(tokenHash: string): Promise<SessaoToken | undefined>;
+  deleteSessaoToken(tokenHash: string): Promise<void>;
+  deleteExpiredTokens(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -927,6 +945,74 @@ export class DatabaseStorage implements IStorage {
       .orderBy(questionariosDesligamento.dataCriacao)
       .limit(1);
     return questionario || undefined;
+  }
+
+  async createUsuario(data: InsertUsuario): Promise<Usuario> {
+    const [usuario] = await db
+      .insert(usuarios)
+      .values(data)
+      .returning();
+    return usuario;
+  }
+
+  async getUsuarios(): Promise<Usuario[]> {
+    return await db.select().from(usuarios);
+  }
+
+  async getUsuario(id: number): Promise<Usuario | undefined> {
+    const [usuario] = await db.select().from(usuarios).where(eq(usuarios.id, id));
+    return usuario || undefined;
+  }
+
+  async getUsuarioByEmail(email: string): Promise<Usuario | undefined> {
+    const [usuario] = await db.select().from(usuarios).where(eq(usuarios.email, email));
+    return usuario || undefined;
+  }
+
+  async updateUsuario(id: number, data: Partial<InsertUsuario>): Promise<Usuario> {
+    const [updated] = await db
+      .update(usuarios)
+      .set({
+        ...data,
+        atualizadoEm: sql`CURRENT_TIMESTAMP`,
+      })
+      .where(eq(usuarios.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteUsuario(id: number): Promise<void> {
+    await db.delete(sessoesTokens).where(eq(sessoesTokens.usuarioId, id));
+    await db.delete(usuarios).where(eq(usuarios.id, id));
+  }
+
+  async createSessaoToken(data: InsertSessaoToken): Promise<SessaoToken> {
+    const [sessao] = await db
+      .insert(sessoesTokens)
+      .values(data)
+      .returning();
+    return sessao;
+  }
+
+  async getSessaoToken(tokenHash: string): Promise<SessaoToken | undefined> {
+    const [sessao] = await db
+      .select()
+      .from(sessoesTokens)
+      .where(
+        and(
+          eq(sessoesTokens.tokenHash, tokenHash),
+          sql`${sessoesTokens.expiraEm} > CURRENT_TIMESTAMP`
+        )
+      );
+    return sessao || undefined;
+  }
+
+  async deleteSessaoToken(tokenHash: string): Promise<void> {
+    await db.delete(sessoesTokens).where(eq(sessoesTokens.tokenHash, tokenHash));
+  }
+
+  async deleteExpiredTokens(): Promise<void> {
+    await db.delete(sessoesTokens).where(sql`${sessoesTokens.expiraEm} < CURRENT_TIMESTAMP`);
   }
 }
 
