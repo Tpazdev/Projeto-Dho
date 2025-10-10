@@ -174,6 +174,16 @@ export const perguntasDesligamento = pgTable("perguntas_desligamento", {
   ordem: integer("ordem").notNull(),
 });
 
+export const respostasDesligamento = pgTable("respostas_desligamento", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  desligamentoId: integer("desligamento_id").notNull().references(() => desligamentos.id),
+  questionarioId: integer("questionario_id").notNull().references(() => questionariosDesligamento.id),
+  perguntaId: integer("pergunta_id").notNull().references(() => perguntasDesligamento.id),
+  valorEscala: integer("valor_escala"),
+  textoResposta: text("texto_resposta"),
+  dataResposta: date("data_resposta").notNull().default(sql`CURRENT_DATE`),
+});
+
 const baseEmpresaSchema = createInsertSchema(empresas);
 export const insertEmpresaSchema = baseEmpresaSchema.omit({ id: true });
 
@@ -228,6 +238,9 @@ export const insertQuestionarioDesligamentoSchema = baseQuestionarioDesligamento
 const basePerguntaDesligamentoSchema = createInsertSchema(perguntasDesligamento);
 export const insertPerguntaDesligamentoSchema = basePerguntaDesligamentoSchema.omit({ id: true });
 
+const baseRespostaDesligamentoSchema = createInsertSchema(respostasDesligamento);
+export const insertRespostaDesligamentoSchema = baseRespostaDesligamentoSchema.omit({ id: true, dataResposta: true });
+
 export type InsertEmpresa = z.infer<typeof insertEmpresaSchema>;
 export type Empresa = typeof empresas.$inferSelect;
 
@@ -281,3 +294,6 @@ export type QuestionarioDesligamento = typeof questionariosDesligamento.$inferSe
 
 export type InsertPerguntaDesligamento = z.infer<typeof insertPerguntaDesligamentoSchema>;
 export type PerguntaDesligamento = typeof perguntasDesligamento.$inferSelect;
+
+export type InsertRespostaDesligamento = z.infer<typeof insertRespostaDesligamentoSchema>;
+export type RespostaDesligamento = typeof respostasDesligamento.$inferSelect;
