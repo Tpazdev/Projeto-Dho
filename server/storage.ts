@@ -17,6 +17,7 @@ import {
   pdiAcoes,
   questionariosDesligamento,
   perguntasDesligamento,
+  respostasDesligamento,
   type Empresa,
   type InsertEmpresa,
   type Gestor,
@@ -53,6 +54,8 @@ import {
   type InsertQuestionarioDesligamento,
   type PerguntaDesligamento,
   type InsertPerguntaDesligamento,
+  type RespostaDesligamento,
+  type InsertRespostaDesligamento,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql, and } from "drizzle-orm";
@@ -151,6 +154,10 @@ export interface IStorage {
   getPerguntasByQuestionario(questionarioId: number): Promise<PerguntaDesligamento[]>;
   updatePerguntaDesligamento(id: number, data: Partial<InsertPerguntaDesligamento>): Promise<PerguntaDesligamento>;
   deletePerguntaDesligamento(id: number): Promise<void>;
+
+  createRespostaDesligamento(resposta: InsertRespostaDesligamento): Promise<RespostaDesligamento>;
+  getRespostasByDesligamento(desligamentoId: number): Promise<RespostaDesligamento[]>;
+  getQuestionarioAtivoByTipo(tipoDesligamento: string): Promise<QuestionarioDesligamento | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -889,6 +896,36 @@ export class DatabaseStorage implements IStorage {
 
   async deletePerguntaDesligamento(id: number): Promise<void> {
     await db.delete(perguntasDesligamento).where(eq(perguntasDesligamento.id, id));
+  }
+
+  async createRespostaDesligamento(data: InsertRespostaDesligamento): Promise<RespostaDesligamento> {
+    const [resposta] = await db
+      .insert(respostasDesligamento)
+      .values(data)
+      .returning();
+    return resposta;
+  }
+
+  async getRespostasByDesligamento(desligamentoId: number): Promise<RespostaDesligamento[]> {
+    return await db
+      .select()
+      .from(respostasDesligamento)
+      .where(eq(respostasDesligamento.desligamentoId, desligamentoId));
+  }
+
+  async getQuestionarioAtivoByTipo(tipoDesligamento: string): Promise<QuestionarioDesligamento | undefined> {
+    const [questionario] = await db
+      .select()
+      .from(questionariosDesligamento)
+      .where(
+        and(
+          eq(questionariosDesligamento.tipoDesligamento, tipoDesligamento),
+          eq(questionariosDesligamento.ativo, 1)
+        )
+      )
+      .orderBy(questionariosDesligamento.dataCriacao)
+      .limit(1);
+    return questionario || undefined;
   }
 }
 
