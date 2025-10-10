@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Building2, UserCog, UserX, FileText, BarChart, GraduationCap, Target, ChevronRight, UserMinus, ClipboardList, Calendar, FileCheck } from "lucide-react";
+import { LayoutDashboard, Users, Building2, UserCog, UserX, FileText, BarChart, GraduationCap, Target, ChevronRight, UserMinus, ClipboardList, Calendar, FileCheck, ClipboardCheck } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -86,8 +86,19 @@ const items: MenuItem[] = [
   },
   {
     title: "Treinamentos",
-    url: "/treinamentos",
     icon: GraduationCap,
+    subItems: [
+      {
+        title: "Gerenciar Treinamentos",
+        url: "/treinamentos",
+        icon: GraduationCap,
+      },
+      {
+        title: "Avaliação de Eficácia",
+        url: "/treinamentos/avaliacao-eficacia",
+        icon: ClipboardCheck,
+      },
+    ],
   },
   {
     title: "PDI",

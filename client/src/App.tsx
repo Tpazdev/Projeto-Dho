@@ -27,6 +27,7 @@ import AmbienciaResponder from "@/pages/AmbienciaResponder";
 import AmbienciaAnalise from "@/pages/AmbienciaAnalise";
 import Treinamentos from "@/pages/Treinamentos";
 import TreinamentoDetalhes from "@/pages/TreinamentoDetalhes";
+import AvaliacaoEficacia from "@/pages/AvaliacaoEficacia";
 import PDI from "@/pages/PDI";
 import PDIDetalhes from "@/pages/PDIDetalhes";
 import QuestionariosDesligamento from "@/pages/QuestionariosDesligamento";
@@ -54,6 +55,7 @@ function Router() {
       <Route path="/ambiencia/:id/analise" component={AmbienciaAnalise} />
       <Route path="/ambiencia/responder" component={AmbienciaResponder} />
       <Route path="/treinamentos" component={Treinamentos} />
+      <Route path="/treinamentos/avaliacao-eficacia" component={AvaliacaoEficacia} />
       <Route path="/treinamentos/:id" component={TreinamentoDetalhes} />
       <Route path="/pdi" component={PDI} />
       <Route path="/pdi/:id" component={PDIDetalhes} />
