@@ -124,6 +124,28 @@ Preferred communication style: Simple, everyday language.
   - Responsive design with horizontal scroll on mobile devices
   - Overdue evaluations highlighted with red background
 
+### Training Effectiveness Evaluation (October 2025)
+- **Submenu Structure**: Training menu now organized with collapsible submenu for better navigation:
+  - **Gerenciar Treinamentos** (`/treinamentos`) - Main training management page
+  - **Avaliação de Eficácia** (`/treinamentos/avaliacao-eficacia`) - Training effectiveness evaluation page
+- **New Page**: Avaliação de Eficácia de Treinamento
+  - Lists completed trainings (status "concluido") available for effectiveness evaluation
+  - Search functionality to filter trainings by title
+  - Table layout with columns: ID, Título, Tipo, Período, Gestor, Avaliações, Ações
+  - Visual status badges for evaluation progress:
+    - **Completo** (Green): 100% of participants evaluated
+    - **Parcial** (Gray): Partial evaluations completed (N/M)
+    - **Pendente** (Red): No evaluations submitted
+  - "Ver Detalhes" button navigates to existing training detail page
+- **Navigation Enhancement**: 
+  - Icon: GraduationCap for main menu
+  - Icon: ClipboardCheck for evaluation submenu
+  - Collapsible menu structure supports nested navigation
+- **Integration**: Links to existing TreinamentoDetalhes component for viewing participant evaluations
+- **Routes**:
+  - `/treinamentos/avaliacao-eficacia` - Main evaluation listing page
+  - `/treinamentos/:id` - Training details (existing route, shows participant evaluations)
+
 ## System Architecture
 
 ### Frontend Architecture
