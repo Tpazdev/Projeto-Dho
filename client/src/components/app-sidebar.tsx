@@ -42,22 +42,6 @@ const items = [
     ],
   },
   {
-    title: "Questionários de Desligamento",
-    icon: ClipboardList,
-    subItems: [
-      {
-        title: "Iniciativa do Funcionário",
-        url: "/questionarios-desligamento/iniciativa-funcionario",
-        icon: UserMinus,
-      },
-      {
-        title: "Iniciativa da Empresa",
-        url: "/questionarios-desligamento/iniciativa-empresa",
-        icon: UserCog,
-      },
-    ],
-  },
-  {
     title: "Avaliações de Experiência",
     icon: FileText,
     subItems: [
