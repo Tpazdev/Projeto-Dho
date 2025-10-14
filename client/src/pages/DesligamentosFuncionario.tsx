@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { DesligamentosTable, type DesligamentoData } from "@/components/DesligamentosTable";
 import { EnviarQuestionario } from "@/components/EnviarQuestionario";
-import { VisualizarPerguntasQuestionario } from "@/components/VisualizarPerguntasQuestionario";
+import { GerenciarPerguntasQuestionario } from "@/components/GerenciarPerguntasQuestionario";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface DesligamentoCompleto extends DesligamentoData {
@@ -43,8 +43,8 @@ export default function DesligamentosFuncionario() {
         </Link>
       </div>
 
-      {usuario?.role === "admin" && (
-        <VisualizarPerguntasQuestionario tipoDesligamento="funcionario" />
+      {(usuario?.role === "admin" || usuario?.role === "gestor") && (
+        <GerenciarPerguntasQuestionario tipoDesligamento="funcionario" />
       )}
 
       <EnviarQuestionario tipoDesligamento="funcionario" />
