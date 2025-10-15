@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Building2, UserCog, UserX, FileText, BarChart, GraduationCap, Target, ChevronRight, UserMinus, ClipboardList, Calendar, FileCheck, ClipboardCheck } from "lucide-react";
+import { LayoutDashboard, Users, Building2, UserCog, UserX, FileText, BarChart, GraduationCap, Target, ChevronRight, UserMinus, ClipboardList, Calendar, FileCheck, ClipboardCheck, Database } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -132,6 +132,14 @@ const cadastroItems = [
     title: "Funcionários",
     url: "/funcionarios",
     icon: Users,
+  },
+];
+
+const integracaoItems = [
+  {
+    title: "Dados Externos",
+    url: "/dados-externos",
+    icon: Database,
   },
 ];
 
@@ -269,6 +277,27 @@ export function AppSidebar() {
                     asChild
                     className={location === item.url ? "bg-sidebar-accent" : ""}
                     data-testid={`link-${item.title.toLowerCase()}`}
+                  >
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Integrações</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {integracaoItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    className={location === item.url ? "bg-sidebar-accent" : ""}
+                    data-testid={`link-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
                   >
                     <Link href={item.url}>
                       <item.icon />

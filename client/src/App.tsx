@@ -32,6 +32,7 @@ import PDI from "@/pages/PDI";
 import PDIDetalhes from "@/pages/PDIDetalhes";
 import QuestionariosDesligamento from "@/pages/QuestionariosDesligamento";
 import QuestionariosPreenchidos from "@/pages/QuestionariosPreenchidos";
+import DadosExternos from "@/pages/DadosExternos";
 
 function Router() {
   return (
@@ -60,6 +61,7 @@ function Router() {
       <Route path="/pdi" component={PDI} />
       <Route path="/pdi/:id" component={PDIDetalhes} />
       <Route path="/questionarios-desligamento" component={QuestionariosDesligamento} />
+      <Route path="/dados-externos" component={DadosExternos} />
       <Route component={NotFound} />
     </Switch>
   );

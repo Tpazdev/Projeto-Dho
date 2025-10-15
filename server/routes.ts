@@ -1082,6 +1082,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Rota para buscar dados da tabela r34fun
+  app.get("/api/external-db/r34fun", requireAuth, async (req, res) => {
+    try {
+      const result = await queryExternalDb("SELECT * FROM r34fun");
+      res.json({ 
+        success: true, 
+        data: result,
+        rowCount: result.length 
+      });
+    } catch (error) {
+      console.error("Erro ao buscar dados da tabela r34fun:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: "Erro ao buscar dados da tabela r34fun",
+        details: error instanceof Error ? error.message : "Erro desconhecido"
+      });
+    }
+  });
+
   // Rota para executar query no banco externo
   app.post("/api/external-db/query", requireAuth, requireRole(["admin"]), async (req, res) => {
     try {
