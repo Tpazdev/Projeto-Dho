@@ -5,6 +5,7 @@ import { insertEmpresaSchema, insertGestorSchema, insertFuncionarioSchema, inser
 import { hashPassword, comparePassword, generateAccessToken, generateRefreshToken, hashToken, getRefreshTokenExpiry, verifyAccessToken } from "./auth";
 import { requireAuth, requireRole, requireNotAdmin } from "./middleware";
 import { z } from "zod";
+import { queryExternalDb, getExternalDbConnection } from "./externalDb";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Rotas de autenticação
@@ -1060,6 +1061,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(desligamentosComRespostas);
     } catch (error) {
       res.status(500).json({ error: "Erro ao buscar desligamentos com respostas" });
+    }
+  });
+
+  // Rota de teste de conexão SQL Server externo
+  app.get("/api/external-db/test", requireAuth, requireRole(["admin"]), async (req, res) => {
+    try {
+      await getExternalDbConnection();
+      res.json({ 
+        success: true, 
+        message: "Conexão com banco SQL Server externo estabelecida com sucesso!" 
+      });
+    } catch (error) {
+      console.error("Erro ao conectar ao banco externo:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: "Erro ao conectar ao banco SQL Server externo",
+        details: error instanceof Error ? error.message : "Erro desconhecido"
+      });
+    }
+  });
+
+  // Rota para executar query no banco externo
+  app.post("/api/external-db/query", requireAuth, requireRole(["admin"]), async (req, res) => {
+    try {
+      const { query } = req.body;
+      if (!query || typeof query !== 'string') {
+        return res.status(400).json({ error: "Query inválida" });
+      }
+      
+      const result = await queryExternalDb(query);
+      res.json({ 
+        success: true, 
+        data: result,
+        rowCount: result.length 
+      });
+    } catch (error) {
+      console.error("Erro ao executar query:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: "Erro ao executar query no banco externo",
+        details: error instanceof Error ? error.message : "Erro desconhecido"
+      });
     }
   });
 
