@@ -439,6 +439,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validated = insertDesligamentoSchema.parse(req.body);
       const desligamento = await storage.createDesligamento(validated);
       
+      // Se o funcionário desligado for também um gestor, remover acesso de gestor
+      if (desligamento.funcionarioId) {
+        try {
+          const funcionario = await storage.getFuncionario(desligamento.funcionarioId);
+          if (funcionario) {
+            // Buscar se existe um usuário com role="gestor" e nome do funcionário desligado
+            const usuarioGestor = await storage.getUsuarioByNomeAndRole(funcionario.nome, "gestor");
+            
+            if (usuarioGestor) {
+              // Atualizar role para "funcionario" (perde acesso de gestor)
+              await storage.updateUsuario(usuarioGestor.id, { role: "funcionario" });
+              console.log(`✅ Acesso de gestor removido para: ${funcionario.nome} (agora é apenas funcionário)`);
+            }
+          }
+        } catch (gestorError) {
+          console.error("Erro ao remover acesso de gestor:", gestorError);
+          // Não falha a criação do desligamento se houver erro ao remover acesso
+        }
+      }
+      
       // Enviar email automaticamente se houver email do colaborador
       if (desligamento.emailColaborador) {
         try {
