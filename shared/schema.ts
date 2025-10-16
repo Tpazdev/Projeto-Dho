@@ -209,83 +209,43 @@ export const sessoesTokens = pgTable("sessoes_tokens", {
   criadoEm: timestamp("criado_em").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const insertEmpresaSchema = createInsertSchema(empresas, {
-  id: z.number().optional(),
-}).omit({ id: true });
+export const insertEmpresaSchema = createInsertSchema(empresas).omit({ id: true });
 
-export const insertGestorSchema = createInsertSchema(gestores, {
-  id: z.number().optional(),
-}).omit({ id: true });
+export const insertGestorSchema = createInsertSchema(gestores).omit({ id: true });
 
-export const insertFuncionarioSchema = createInsertSchema(funcionarios, {
-  id: z.number().optional(),
-}).omit({ id: true });
+export const insertFuncionarioSchema = createInsertSchema(funcionarios).omit({ id: true });
 
-export const insertDesligamentoSchema = createInsertSchema(desligamentos, {
-  id: z.number().optional(),
-}).omit({ id: true });
+export const insertDesligamentoSchema = createInsertSchema(desligamentos).omit({ id: true });
 
-export const insertDocumentoFuncionarioSchema = createInsertSchema(documentosFuncionario, {
-  id: z.number().optional(),
-}).omit({ id: true });
+export const insertDocumentoFuncionarioSchema = createInsertSchema(documentosFuncionario).omit({ id: true });
 
-export const insertDocumentoGestorSchema = createInsertSchema(documentosGestor, {
-  id: z.number().optional(),
-}).omit({ id: true });
+export const insertDocumentoGestorSchema = createInsertSchema(documentosGestor).omit({ id: true });
 
-export const insertFormularioExperienciaSchema = createInsertSchema(formulariosExperiencia, {
-  id: z.number().optional(),
-}).omit({ id: true });
+export const insertFormularioExperienciaSchema = createInsertSchema(formulariosExperiencia).omit({ id: true });
 
-export const insertPesquisaClimaSchema = createInsertSchema(pesquisasClima, {
-  id: z.number().optional(),
-}).omit({ id: true });
+export const insertPesquisaClimaSchema = createInsertSchema(pesquisasClima).omit({ id: true });
 
-export const insertPerguntaClimaSchema = createInsertSchema(perguntasClima, {
-  id: z.number().optional(),
-}).omit({ id: true });
+export const insertPerguntaClimaSchema = createInsertSchema(perguntasClima).omit({ id: true });
 
-export const insertRespostaClimaSchema = createInsertSchema(respostasClima, {
-  id: z.number().optional(),
-}).omit({ id: true });
+export const insertRespostaClimaSchema = createInsertSchema(respostasClima).omit({ id: true });
 
-export const insertTreinamentoSchema = createInsertSchema(treinamentos, {
-  id: z.number().optional(),
-}).omit({ id: true });
+export const insertTreinamentoSchema = createInsertSchema(treinamentos).omit({ id: true });
 
-export const insertTreinamentoParticipanteSchema = createInsertSchema(treinamentoParticipantes, {
-  id: z.number().optional(),
-}).omit({ id: true });
+export const insertTreinamentoParticipanteSchema = createInsertSchema(treinamentoParticipantes).omit({ id: true });
 
-export const insertPdiSchema = createInsertSchema(pdis, {
-  id: z.number().optional(),
-}).omit({ id: true });
+export const insertPdiSchema = createInsertSchema(pdis).omit({ id: true });
 
-export const insertPdiMetaSchema = createInsertSchema(pdiMetas, {
-  id: z.number().optional(),
-}).omit({ id: true });
+export const insertPdiMetaSchema = createInsertSchema(pdiMetas).omit({ id: true });
 
-export const insertPdiCompetenciaSchema = createInsertSchema(pdiCompetencias, {
-  id: z.number().optional(),
-}).omit({ id: true });
+export const insertPdiCompetenciaSchema = createInsertSchema(pdiCompetencias).omit({ id: true });
 
-export const insertPdiAcaoSchema = createInsertSchema(pdiAcoes, {
-  id: z.number().optional(),
-}).omit({ id: true });
+export const insertPdiAcaoSchema = createInsertSchema(pdiAcoes).omit({ id: true });
 
-export const insertQuestionarioDesligamentoSchema = createInsertSchema(questionariosDesligamento, {
-  id: z.number().optional(),
-  dataCriacao: z.date().optional(),
-}).omit({ id: true, dataCriacao: true });
+export const insertQuestionarioDesligamentoSchema = createInsertSchema(questionariosDesligamento).omit({ id: true, dataCriacao: true });
 
-export const insertPerguntaDesligamentoSchema = createInsertSchema(perguntasDesligamento, {
-  id: z.number().optional(),
-}).omit({ id: true });
+export const insertPerguntaDesligamentoSchema = createInsertSchema(perguntasDesligamento).omit({ id: true });
 
-export const insertRespostaDesligamentoSchema = createInsertSchema(respostasDesligamento, {
-  id: z.number().optional(),
-  dataResposta: z.date().optional(),
-}).omit({ id: true, dataResposta: true });
+export const insertRespostaDesligamentoSchema = createInsertSchema(respostasDesligamento).omit({ id: true, dataResposta: true });
 
 export type InsertEmpresa = z.infer<typeof insertEmpresaSchema>;
 export type Empresa = typeof empresas.$inferSelect;
@@ -344,20 +304,13 @@ export type PerguntaDesligamento = typeof perguntasDesligamento.$inferSelect;
 export type InsertRespostaDesligamento = z.infer<typeof insertRespostaDesligamentoSchema>;
 export type RespostaDesligamento = typeof respostasDesligamento.$inferSelect;
 
-export const insertUsuarioSchema = createInsertSchema(usuarios, {
-  id: z.number().optional(),
-  criadoEm: z.date().optional(),
-  atualizadoEm: z.date().optional(),
-})
+export const insertUsuarioSchema = createInsertSchema(usuarios)
   .omit({ id: true, criadoEm: true, atualizadoEm: true })
   .extend({
     role: z.enum(["admin", "gestor", "funcionario"]),
   });
 
-export const insertSessaoTokenSchema = createInsertSchema(sessoesTokens, {
-  id: z.number().optional(),
-  criadoEm: z.date().optional(),
-}).omit({ id: true, criadoEm: true });
+export const insertSessaoTokenSchema = createInsertSchema(sessoesTokens).omit({ id: true, criadoEm: true });
 
 export type InsertUsuario = z.infer<typeof insertUsuarioSchema>;
 export type Usuario = typeof usuarios.$inferSelect;
