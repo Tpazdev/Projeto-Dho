@@ -33,10 +33,12 @@ import PDIDetalhes from "@/pages/PDIDetalhes";
 import QuestionariosDesligamento from "@/pages/QuestionariosDesligamento";
 import QuestionariosPreenchidos from "@/pages/QuestionariosPreenchidos";
 import DadosExternos from "@/pages/DadosExternos";
+import QuestionarioPublico from "@/pages/QuestionarioPublico";
 
 function Router() {
   return (
     <Switch>
+      <Route path="/questionario/:token" component={QuestionarioPublico} />
       <Route path="/login" component={Login} />
       <Route path="/" component={Home} />
       <Route path="/dashboard" component={Dashboard} />
@@ -76,8 +78,8 @@ function AppContent() {
     "--sidebar-width-icon": "4rem",
   };
 
-  // Página de login não precisa de layout
-  if (location === "/login") {
+  // Páginas públicas (sem layout)
+  if (location === "/login" || location.startsWith("/questionario/")) {
     return <Router />;
   }
 

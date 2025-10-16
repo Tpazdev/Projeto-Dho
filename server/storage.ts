@@ -82,6 +82,8 @@ export interface IStorage {
   createDesligamento(desligamento: InsertDesligamento): Promise<Desligamento>;
   getDesligamentos(): Promise<Desligamento[]>;
   getDesligamento(id: number): Promise<Desligamento | undefined>;
+  getDesligamentoByToken(token: string): Promise<Desligamento | undefined>;
+  updateDesligamento(id: number, data: Partial<InsertDesligamento>): Promise<Desligamento>;
 
   getDesligamentosComDetalhes(): Promise<any[]>;
   getDesligamentosPorGestor(): Promise<{ labels: string[]; data: number[] }>;
@@ -246,6 +248,16 @@ export class DatabaseStorage implements IStorage {
   async getDesligamento(id: number): Promise<Desligamento | undefined> {
     const [desligamento] = await db.select().from(desligamentos).where(eq(desligamentos.id, id));
     return desligamento || undefined;
+  }
+
+  async getDesligamentoByToken(token: string): Promise<Desligamento | undefined> {
+    const [desligamento] = await db.select().from(desligamentos).where(eq(desligamentos.tokenQuestionario, token));
+    return desligamento || undefined;
+  }
+
+  async updateDesligamento(id: number, data: Partial<InsertDesligamento>): Promise<Desligamento> {
+    const [updated] = await db.update(desligamentos).set(data).where(eq(desligamentos.id, id)).returning();
+    return updated;
   }
 
   async getDesligamentosComDetalhes(): Promise<any[]> {

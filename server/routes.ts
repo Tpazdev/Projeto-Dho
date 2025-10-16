@@ -8,6 +8,111 @@ import { z } from "zod";
 import { queryExternalDb, getExternalDbConnection } from "./externalDb";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Rotas públicas (sem autenticação) - devem vir ANTES das rotas protegidas
+  
+  // Buscar questionário por token (público)
+  app.get("/api/public/questionario/:token", async (req, res) => {
+    try {
+      const { token } = req.params;
+      
+      const desligamento = await storage.getDesligamentoByToken(token);
+      if (!desligamento) {
+        return res.status(404).json({ error: "Questionário não encontrado ou token inválido" });
+      }
+      
+      // Verificar se o token expirou
+      if (desligamento.tokenExpiraEm && new Date(desligamento.tokenExpiraEm) < new Date()) {
+        return res.status(410).json({ error: "Token expirado" });
+      }
+      
+      // Buscar questionário e perguntas
+      const questionario = await storage.getQuestionarioDesligamento(desligamento.questionarioId);
+      if (!questionario) {
+        return res.status(404).json({ error: "Questionário não encontrado" });
+      }
+      
+      const perguntas = await storage.getPerguntasDesligamento(desligamento.questionarioId);
+      
+      // Buscar dados da empresa e funcionário
+      const empresa = await storage.getEmpresa(desligamento.empresaId);
+      const funcionario = desligamento.funcionarioId 
+        ? await storage.getFuncionario(desligamento.funcionarioId)
+        : null;
+      
+      res.json({
+        desligamento: {
+          id: desligamento.id,
+          funcionarioNome: desligamento.funcionarioNome,
+          empresaNome: empresa?.nome || "N/A",
+          dataDesligamento: desligamento.dataDesligamento,
+        },
+        questionario: {
+          id: questionario.id,
+          titulo: questionario.titulo,
+          descricao: questionario.descricao,
+        },
+        perguntas: perguntas.sort((a, b) => a.ordem - b.ordem),
+        jaRespondido: desligamento.questionarioRespondido === 1,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar questionário" });
+    }
+  });
+  
+  // Salvar respostas do questionário (público)
+  app.post("/api/public/questionario/responder", async (req, res) => {
+    try {
+      const responseSchema = z.object({
+        token: z.string(),
+        respostas: z.array(z.object({
+          perguntaId: z.number(),
+          valorEscala: z.number().optional(),
+          textoResposta: z.string().optional(),
+          valorData: z.string().optional(),
+        })),
+      });
+      
+      const { token, respostas } = responseSchema.parse(req.body);
+      
+      const desligamento = await storage.getDesligamentoByToken(token);
+      if (!desligamento) {
+        return res.status(404).json({ error: "Token inválido" });
+      }
+      
+      // Verificar se já respondeu
+      if (desligamento.questionarioRespondido === 1) {
+        return res.status(400).json({ error: "Questionário já foi respondido" });
+      }
+      
+      // Verificar se o token expirou
+      if (desligamento.tokenExpiraEm && new Date(desligamento.tokenExpiraEm) < new Date()) {
+        return res.status(410).json({ error: "Token expirado" });
+      }
+      
+      // Salvar respostas
+      for (const resposta of respostas) {
+        await storage.createRespostaDesligamento({
+          desligamentoId: desligamento.id,
+          questionarioId: desligamento.questionarioId,
+          perguntaId: resposta.perguntaId,
+          valorEscala: resposta.valorEscala || null,
+          textoResposta: resposta.textoResposta || null,
+          valorData: resposta.valorData || null,
+        });
+      }
+      
+      // Marcar como respondido
+      await storage.updateDesligamento(desligamento.id, {
+        questionarioRespondido: 1,
+      });
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Erro ao salvar respostas:", error);
+      res.status(500).json({ error: "Erro ao salvar respostas" });
+    }
+  });
+  
   // Rotas de autenticação
   app.post("/api/auth/login", async (req, res) => {
     try {
