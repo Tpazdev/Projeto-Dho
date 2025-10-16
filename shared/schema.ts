@@ -30,6 +30,11 @@ export const desligamentos = pgTable("desligamentos", {
   funcionarioId: integer("funcionario_id").notNull().references(() => funcionarios.id),
   empresaId: integer("empresa_id").notNull().references(() => empresas.id),
   gestorId: integer("gestor_id").notNull().references(() => gestores.id),
+  emailColaborador: text("email_colaborador"),
+  tokenQuestionario: text("token_questionario"),
+  tokenExpiraEm: timestamp("token_expira_em"),
+  questionarioEnviado: integer("questionario_enviado").notNull().default(0),
+  questionarioRespondido: integer("questionario_respondido").notNull().default(0),
 });
 
 export const documentosFuncionario = pgTable("documentos_funcionario", {
