@@ -25,13 +25,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(410).json({ error: "Token expirado" });
       }
       
-      // Buscar questionário e perguntas
-      const questionario = await storage.getQuestionarioDesligamento(desligamento.questionarioId);
+      // Buscar questionário ativo pelo tipo de desligamento
+      const questionario = await storage.getQuestionarioAtivoByTipo(desligamento.tipoDesligamento);
       if (!questionario) {
-        return res.status(404).json({ error: "Questionário não encontrado" });
+        return res.status(404).json({ error: "Questionário não encontrado para este tipo de desligamento" });
       }
       
-      const perguntas = await storage.getPerguntasDesligamento(desligamento.questionarioId);
+      const perguntas = await storage.getPerguntasByQuestionario(questionario.id);
       
       // Buscar dados da empresa e funcionário
       const empresa = await storage.getEmpresa(desligamento.empresaId);
@@ -42,7 +42,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         desligamento: {
           id: desligamento.id,
-          funcionarioNome: desligamento.funcionarioNome,
+          funcionarioNome: funcionario?.nome || "N/A",
           empresaNome: empresa?.nome || "N/A",
           dataDesligamento: desligamento.dataDesligamento,
         },
@@ -55,7 +55,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         jaRespondido: desligamento.questionarioRespondido === 1,
       });
     } catch (error) {
-      res.status(500).json({ error: "Erro ao buscar questionário" });
+      console.error("Erro ao buscar questionário:", error);
+      res.status(500).json({ error: "Erro ao buscar questionário", details: error instanceof Error ? error.message : String(error) });
     }
   });
   
@@ -89,11 +90,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(410).json({ error: "Token expirado" });
       }
       
+      // Buscar questionário ativo pelo tipo
+      const questionario = await storage.getQuestionarioAtivoByTipo(desligamento.tipoDesligamento);
+      if (!questionario) {
+        return res.status(404).json({ error: "Questionário não encontrado" });
+      }
+      
       // Salvar respostas
       for (const resposta of respostas) {
         await storage.createRespostaDesligamento({
           desligamentoId: desligamento.id,
-          questionarioId: desligamento.questionarioId,
+          questionarioId: questionario.id,
           perguntaId: resposta.perguntaId,
           valorEscala: resposta.valorEscala || null,
           textoResposta: resposta.textoResposta || null,
