@@ -24,6 +24,7 @@ import { QuestionarioDesligamentoForm } from "./QuestionarioDesligamentoForm";
 interface Funcionario {
   id: number;
   nome: string;
+  cpf: string | null;
   cargo: string | null;
   gestorId: number;
 }
@@ -72,12 +73,14 @@ export function EnviarQuestionario({ tipoDesligamento }: EnviarQuestionarioProps
       return {
         ...d,
         funcionarioNome: funcionario?.nome || "N/A",
+        funcionarioCpf: funcionario?.cpf || "",
         funcionarioCargo: funcionario?.cargo || "N/A",
         gestorNome: gestores.find((g) => g.id === d.gestorId)?.nome || "N/A",
       };
     })
     .filter((d) =>
       d.funcionarioNome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      d.funcionarioCpf.toLowerCase().includes(searchTerm.toLowerCase()) ||
       d.funcionarioCargo.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -107,7 +110,7 @@ export function EnviarQuestionario({ tipoDesligamento }: EnviarQuestionarioProps
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Pesquisar por nome ou cargo..."
+              placeholder="Pesquisar por nome, CPF ou cargo..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"

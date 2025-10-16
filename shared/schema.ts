@@ -17,6 +17,7 @@ export const gestores = pgTable("gestores", {
 export const funcionarios = pgTable("funcionarios", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   nome: text("nome").notNull(),
+  cpf: text("cpf"),
   cargo: text("cargo"),
   gestorId: integer("gestor_id").notNull().references(() => gestores.id),
   dataAdmissao: date("data_admissao"),
