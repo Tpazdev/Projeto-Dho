@@ -438,6 +438,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validated = insertDesligamentoSchema.parse(req.body);
       const desligamento = await storage.createDesligamento(validated);
+      
+      // Enviar email automaticamente se houver email do colaborador
+      if (desligamento.emailColaborador) {
+        try {
+          // Importar funções de email
+          const { generateQuestionarioToken, getTokenExpiry, sendEmail, criarEmailQuestionario } = await import("./email");
+          
+          // Gerar token e data de expiração
+          const token = generateQuestionarioToken();
+          const tokenExpiry = getTokenExpiry();
+          
+          // Atualizar desligamento com token
+          await storage.updateDesligamento(desligamento.id, {
+            tokenQuestionario: token,
+            tokenExpiraEm: tokenExpiry,
+            questionarioEnviado: 1,
+          });
+          
+          // Buscar dados da empresa e funcionário
+          const empresa = await storage.getEmpresa(desligamento.empresaId);
+          const funcionario = desligamento.funcionarioId 
+            ? await storage.getFuncionario(desligamento.funcionarioId)
+            : null;
+          
+          // Construir URL do questionário
+          const baseUrl = process.env.REPLIT_DEV_DOMAIN 
+            ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+            : `http://localhost:5000`;
+          const questionarioUrl = `${baseUrl}/questionario/${token}`;
+          
+          // Criar HTML do email
+          const emailHtml = criarEmailQuestionario(
+            funcionario?.nome || "Colaborador",
+            empresa?.nome || "Empresa",
+            desligamento.tipoDesligamento,
+            questionarioUrl
+          );
+          
+          // Enviar email
+          await sendEmail({
+            to: desligamento.emailColaborador,
+            subject: "Questionário de Desligamento",
+            html: emailHtml,
+          });
+          
+          console.log(`✅ Email enviado automaticamente para: ${desligamento.emailColaborador}`);
+        } catch (emailError) {
+          console.error("Erro ao enviar email automático:", emailError);
+          // Não falha a criação do desligamento se o email falhar
+        }
+      }
+      
       res.json(desligamento);
     } catch (error) {
       res.status(400).json({ error: "Dados inválidos" });
