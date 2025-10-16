@@ -388,7 +388,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Atualizar desligamento com token
       await storage.updateDesligamento(Number(id), {
         tokenQuestionario: token,
-        tokenExpiraEm: tokenExpiry.toISOString(),
+        tokenExpiraEm: tokenExpiry,
         questionarioEnviado: 1,
       });
       

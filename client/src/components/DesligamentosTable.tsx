@@ -44,10 +44,8 @@ export function DesligamentosTable({ desligamentos }: DesligamentosTableProps) {
 
   const enviarQuestionarioMutation = useMutation({
     mutationFn: async (desligamentoId: number) => {
-      const response = await apiRequest(`/api/desligamentos/${desligamentoId}/enviar-questionario`, {
-        method: "POST",
-      });
-      return response;
+      const response = await apiRequest("POST", `/api/desligamentos/${desligamentoId}/enviar-questionario`);
+      return await response.json();
     },
     onSuccess: (data, desligamentoId) => {
       toast({
