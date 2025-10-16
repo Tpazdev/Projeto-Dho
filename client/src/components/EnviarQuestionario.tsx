@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -50,12 +49,9 @@ interface EnviarQuestionarioProps {
 }
 
 export function EnviarQuestionario({ tipoDesligamento }: EnviarQuestionarioProps) {
-  const { usuario } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [questionarioDialogOpen, setQuestionarioDialogOpen] = useState(false);
   const [selectedDesligamento, setSelectedDesligamento] = useState<{ id: number; funcionarioNome: string } | null>(null);
-  
-  const isAdmin = usuario?.role === "admin";
 
   const { data: funcionarios = [], isLoading: loadingFuncionarios } = useQuery<Funcionario[]>({
     queryKey: ["/api/funcionarios"],
@@ -105,11 +101,6 @@ export function EnviarQuestionario({ tipoDesligamento }: EnviarQuestionarioProps
           Preencha o questionário de desligamento para funcionários que foram desligados
           {tipoDesligamento === "gestor" ? " pela empresa" : " por iniciativa própria"}
         </CardDescription>
-        {isAdmin && (
-          <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md text-sm text-yellow-800 dark:text-yellow-200">
-            Você está visualizando como administrador. Apenas gestores e funcionários podem preencher questionários.
-          </div>
-        )}
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center gap-2">
@@ -158,7 +149,6 @@ export function EnviarQuestionario({ tipoDesligamento }: EnviarQuestionarioProps
                         variant="outline"
                         onClick={() => handleAbrirQuestionario(desligamento.id, desligamento.funcionarioNome)}
                         data-testid={`button-abrir-questionario-${desligamento.id}`}
-                        disabled={isAdmin}
                       >
                         Preencher Questionário
                       </Button>
