@@ -364,6 +364,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enviar questionário por email
+  app.post("/api/desligamentos/:id/enviar-questionario", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const desligamento = await storage.getDesligamento(Number(id));
+      
+      if (!desligamento) {
+        return res.status(404).json({ error: "Desligamento não encontrado" });
+      }
+      
+      if (!desligamento.emailColaborador) {
+        return res.status(400).json({ error: "Email do colaborador não informado" });
+      }
+      
+      // Importar funções de email
+      const { generateQuestionarioToken, getTokenExpiry, sendEmail, criarEmailQuestionario } = await import("./email");
+      
+      // Gerar token e data de expiração
+      const token = generateQuestionarioToken();
+      const tokenExpiry = getTokenExpiry();
+      
+      // Atualizar desligamento com token
+      await storage.updateDesligamento(Number(id), {
+        tokenQuestionario: token,
+        tokenExpiraEm: tokenExpiry.toISOString(),
+        questionarioEnviado: 1,
+      });
+      
+      // Buscar dados da empresa
+      const empresa = await storage.getEmpresa(desligamento.empresaId);
+      
+      // Construir URL do questionário
+      const baseUrl = process.env.REPLIT_DEV_DOMAIN 
+        ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+        : `http://localhost:5000`;
+      const questionarioUrl = `${baseUrl}/questionario/${token}`;
+      
+      // Criar HTML do email
+      const emailHtml = criarEmailQuestionario(
+        desligamento.funcionarioNome,
+        empresa?.nome || "Empresa",
+        desligamento.tipoDesligamento,
+        questionarioUrl
+      );
+      
+      // Enviar email
+      await sendEmail({
+        to: desligamento.emailColaborador,
+        subject: "Questionário de Desligamento",
+        html: emailHtml,
+      });
+      
+      res.json({ 
+        success: true, 
+        message: "Questionário enviado por email com sucesso",
+        linkQuestionario: questionarioUrl // Para debug/teste
+      });
+    } catch (error) {
+      console.error("Erro ao enviar questionário:", error);
+      res.status(500).json({ error: "Erro ao enviar questionário" });
+    }
+  });
+
   app.post("/api/desligamentos", requireAuth, async (req, res) => {
     try {
       const validated = insertDesligamentoSchema.parse(req.body);
