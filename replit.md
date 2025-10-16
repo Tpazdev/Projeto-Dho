@@ -178,6 +178,12 @@ The system uses a PostgreSQL database, managed with Drizzle ORM for type-safe sc
   - Dialog interface with copy/open link functionality
   - **Note**: Termination questionnaires are now handled internally via platform-based forms, no longer using Microsoft Forms
 
+### Email Integration Note
+
+- **Resend Integration**: The user declined the Replit Resend integration setup.
+- **Current Status**: Email functionality is configured in `server/email.ts` but requires SMTP credentials or email service API key to be fully functional.
+- **TODO**: When the user provides email service credentials, update the `sendEmail` function in `server/email.ts` to implement actual email sending.
+
 ### UI Component Libraries
 
 - **Radix UI Primitives**: Headless components for Dialogs, Popovers, Selects, etc.
