@@ -1,9 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle, FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AlertCircle, FileText, Settings } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { Link } from "wouter";
+import { useAuth } from "@/contexts/AuthContext";
 import { EnviarFormularioExperiencia } from "@/components/EnviarFormularioExperiencia";
 import {
   Table,
@@ -36,6 +39,7 @@ interface FormulariosExperienciaProps {
 }
 
 export default function FormulariosExperiencia({ periodo }: FormulariosExperienciaProps = {}) {
+  const { usuario } = useAuth();
   const { data: allFormularios = [], isLoading } = useQuery<FormularioExperienciaItem[]>({
     queryKey: ["/api/formularios-experiencia"],
   });
@@ -101,6 +105,14 @@ export default function FormulariosExperiencia({ periodo }: FormulariosExperienc
             {periodo ? `Avaliações do ${periodo === "1" ? "primeiro" : "segundo"} período de experiência` : "Avaliações de período de experiência dos funcionários"}
           </p>
         </div>
+        {usuario?.role === "admin" && (
+          <Link href="/formularios-experiencia/configuracao">
+            <Button variant="outline" data-testid="button-configurar-perguntas">
+              <Settings className="w-4 h-4 mr-2" />
+              Configurar Perguntas
+            </Button>
+          </Link>
+        )}
       </div>
 
       {pendentes.length > 0 && (
