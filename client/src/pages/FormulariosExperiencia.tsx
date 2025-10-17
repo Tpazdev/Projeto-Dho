@@ -70,6 +70,8 @@ export default function FormulariosExperiencia({ periodo }: FormulariosExperienc
   const [obrigatoria, setObrigatoria] = useState(true);
   const [perguntaEditando, setPerguntaEditando] = useState<any>(null);
   const [perguntaExcluindo, setPerguntaExcluindo] = useState<any>(null);
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const perguntasPorPagina = 4;
   
   const { data: allFormularios = [], isLoading } = useQuery<FormularioExperienciaItem[]>({
     queryKey: ["/api/formularios-experiencia"],
@@ -281,15 +283,28 @@ export default function FormulariosExperiencia({ periodo }: FormulariosExperienc
         )}
       </div>
 
-      {periodo && campos.length > 0 && (
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Perguntas Configuradas ({campos.length})</h3>
-            <div className="space-y-2">
-              {campos.map((campo: any, index: number) => (
+      {periodo && campos.length > 0 && (() => {
+        const indiceInicial = (paginaAtual - 1) * perguntasPorPagina;
+        const indiceFinal = indiceInicial + perguntasPorPagina;
+        const perguntasPaginadas = campos.slice(indiceInicial, indiceFinal);
+        const totalPaginas = Math.ceil(campos.length / perguntasPorPagina);
+
+        return (
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-4">
+                Perguntas Configuradas ({campos.length})
+                {totalPaginas > 1 && (
+                  <span className="text-sm font-normal text-muted-foreground ml-2">
+                    - Página {paginaAtual} de {totalPaginas}
+                  </span>
+                )}
+              </h3>
+              <div className="space-y-2">
+                {perguntasPaginadas.map((campo: any, index: number) => (
                 <div key={campo.id} className="flex items-start gap-3 p-3 rounded-lg border bg-muted/50 group">
                   <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-sm font-semibold flex-shrink-0">
-                    {index + 1}
+                    {indiceInicial + index + 1}
                   </div>
                   <div className="flex-1">
                     <p className="font-medium">{campo.nomeCampo}</p>
@@ -336,11 +351,52 @@ export default function FormulariosExperiencia({ periodo }: FormulariosExperienc
                     </div>
                   )}
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                ))}
+              </div>
+              
+              {/* Navegação de paginação */}
+              {totalPaginas > 1 && (
+                <div className="flex items-center justify-between mt-6 pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPaginaAtual(prev => Math.max(1, prev - 1))}
+                    disabled={paginaAtual === 1}
+                    data-testid="button-pagina-anterior"
+                  >
+                    Anterior
+                  </Button>
+                  
+                  <div className="flex gap-2">
+                    {Array.from({ length: totalPaginas }, (_, i) => i + 1).map(numeroPagina => (
+                      <Button
+                        key={numeroPagina}
+                        variant={paginaAtual === numeroPagina ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setPaginaAtual(numeroPagina)}
+                        className="w-8 h-8 p-0"
+                        data-testid={`button-pagina-${numeroPagina}`}
+                      >
+                        {numeroPagina}
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPaginaAtual(prev => Math.min(totalPaginas, prev + 1))}
+                    disabled={paginaAtual === totalPaginas}
+                    data-testid="button-pagina-proxima"
+                  >
+                    Próxima
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       {/* AlertDialog para confirmar exclusão */}
       <AlertDialog open={!!perguntaExcluindo} onOpenChange={() => setPerguntaExcluindo(null)}>
