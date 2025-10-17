@@ -20,6 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { QuestionarioDesligamentoForm } from "./QuestionarioDesligamentoForm";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Funcionario {
   id: number;
@@ -50,6 +51,7 @@ interface EnviarQuestionarioProps {
 }
 
 export function EnviarQuestionario({ tipoDesligamento }: EnviarQuestionarioProps) {
+  const { usuario } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [questionarioDialogOpen, setQuestionarioDialogOpen] = useState(false);
   const [selectedDesligamento, setSelectedDesligamento] = useState<{ id: number; funcionarioNome: string } | null>(null);
@@ -153,7 +155,9 @@ export function EnviarQuestionario({ tipoDesligamento }: EnviarQuestionarioProps
                         onClick={() => handleAbrirQuestionario(desligamento.id, desligamento.funcionarioNome)}
                         data-testid={`button-abrir-questionario-${desligamento.id}`}
                       >
-                        Preencher Questionário
+                        {usuario?.role === "admin" || usuario?.role === "gestor" 
+                          ? "Visualizar Questionário" 
+                          : "Preencher Questionário"}
                       </Button>
                     </TableCell>
                   </TableRow>
