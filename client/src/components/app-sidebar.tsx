@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Building2, UserCog, UserX, FileText, BarChart, GraduationCap, Target, ChevronRight, UserMinus, ClipboardList, Calendar, FileCheck, ClipboardCheck, Database } from "lucide-react";
+import { LayoutDashboard, Users, Building2, UserCog, UserX, FileText, BarChart, GraduationCap, Target, ChevronRight, UserMinus, ClipboardList, Calendar, FileCheck, ClipboardCheck, Database, Settings } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -81,6 +81,12 @@ const items: MenuItem[] = [
         title: "02° Período",
         url: "/formularios-experiencia/segundo-periodo",
         icon: Calendar,
+      },
+      {
+        title: "Configurar Formulários",
+        url: "/formularios-experiencia/configuracao",
+        icon: Settings,
+        adminOnly: true,
       },
     ],
   },
