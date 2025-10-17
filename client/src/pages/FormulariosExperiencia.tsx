@@ -1,13 +1,27 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, FileText, Settings } from "lucide-react";
+import { AlertCircle, FileText, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Link } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { EnviarFormularioExperiencia } from "@/components/EnviarFormularioExperiencia";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import {
   Table,
   TableBody,
@@ -40,13 +54,61 @@ interface FormulariosExperienciaProps {
 
 export default function FormulariosExperiencia({ periodo }: FormulariosExperienciaProps = {}) {
   const { usuario } = useAuth();
+  const { toast } = useToast();
+  const [dialogAberto, setDialogAberto] = useState(false);
+  const [nomePergunta, setNomePergunta] = useState("");
+  const [obrigatoria, setObrigatoria] = useState(true);
+  
   const { data: allFormularios = [], isLoading } = useQuery<FormularioExperienciaItem[]>({
     queryKey: ["/api/formularios-experiencia"],
+  });
+
+  const { data: templates = [] } = useQuery<any[]>({
+    queryKey: ["/api/templates-avaliacao-experiencia"],
+  });
+
+  const { data: campos = [] } = useQuery<any[]>({
+    queryKey: ["/api/campos-avaliacao-experiencia/template", templates.find((t) => t.periodo === periodo)?.id],
+    enabled: !!templates.find((t) => t.periodo === periodo),
   });
 
   const formularios = periodo 
     ? allFormularios.filter(f => f.periodo === periodo)
     : allFormularios;
+
+  const adicionarPerguntaMutation = useMutation({
+    mutationFn: async (data: { nome: string; obrigatoria: boolean }) => {
+      const template = templates.find((t) => t.periodo === periodo);
+      if (!template) {
+        throw new Error("Template não encontrado para este período");
+      }
+      const ultimaOrdem = campos.length > 0 ? Math.max(...campos.map((c) => c.ordem)) : 0;
+      return await apiRequest("POST", "/api/campos-avaliacao-experiencia", {
+        templateId: template.id,
+        nomeCampo: data.nome,
+        tipoCampo: "texto",
+        obrigatorio: data.obrigatoria ? 1 : 0,
+        ordem: ultimaOrdem + 1,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/campos-avaliacao-experiencia/template"] });
+      setDialogAberto(false);
+      setNomePergunta("");
+      setObrigatoria(true);
+      toast({
+        title: "Sucesso!",
+        description: "Pergunta adicionada com sucesso",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -105,13 +167,66 @@ export default function FormulariosExperiencia({ periodo }: FormulariosExperienc
             {periodo ? `Avaliações do ${periodo === "1" ? "primeiro" : "segundo"} período de experiência` : "Avaliações de período de experiência dos funcionários"}
           </p>
         </div>
-        {usuario?.role === "admin" && (
-          <Link href="/formularios-experiencia/configuracao">
-            <Button variant="outline" data-testid="button-configurar-perguntas">
-              <Settings className="w-4 h-4 mr-2" />
-              Configurar Perguntas
-            </Button>
-          </Link>
+        {usuario?.role === "admin" && periodo && (
+          <Dialog open={dialogAberto} onOpenChange={setDialogAberto}>
+            <DialogTrigger asChild>
+              <Button variant="outline" data-testid="button-adicionar-pergunta">
+                <Plus className="w-4 h-4 mr-2" />
+                Adicionar Pergunta
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Adicionar Nova Pergunta</DialogTitle>
+                <DialogDescription>
+                  Adicione uma pergunta de texto livre ao formulário de experiência
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="pergunta">Texto da Pergunta</Label>
+                  <Input
+                    id="pergunta"
+                    placeholder="Ex: Descreva o comportamento do funcionário"
+                    value={nomePergunta}
+                    onChange={(e) => setNomePergunta(e.target.value)}
+                    data-testid="input-pergunta"
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="obrigatoria"
+                    checked={obrigatoria}
+                    onCheckedChange={(checked) => setObrigatoria(checked as boolean)}
+                    data-testid="checkbox-obrigatoria"
+                  />
+                  <Label htmlFor="obrigatoria" className="cursor-pointer">
+                    Campo obrigatório
+                  </Label>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setDialogAberto(false);
+                    setNomePergunta("");
+                    setObrigatoria(true);
+                  }}
+                  data-testid="button-cancelar"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={() => adicionarPerguntaMutation.mutate({ nome: nomePergunta, obrigatoria })}
+                  disabled={!nomePergunta.trim() || adicionarPerguntaMutation.isPending}
+                  data-testid="button-salvar-pergunta"
+                >
+                  {adicionarPerguntaMutation.isPending ? "Salvando..." : "Adicionar"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         )}
       </div>
 

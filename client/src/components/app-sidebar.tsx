@@ -82,12 +82,6 @@ const items: MenuItem[] = [
         url: "/formularios-experiencia/segundo-periodo",
         icon: Calendar,
       },
-      {
-        title: "Configurar Formulários",
-        url: "/formularios-experiencia/configuracao",
-        icon: Settings,
-        adminOnly: true,
-      },
     ],
   },
   {

@@ -21,7 +21,6 @@ import Empresas from "@/pages/Empresas";
 import Gestores from "@/pages/Gestores";
 import Funcionarios from "@/pages/Funcionarios";
 import FormulariosExperiencia from "@/pages/FormulariosExperiencia";
-import ConfiguracaoFormulariosExperiencia from "@/pages/ConfiguracaoFormulariosExperiencia";
 import Ambiencia from "@/pages/Ambiencia";
 import AmbienciaPerguntas from "@/pages/AmbienciaPerguntas";
 import AmbienciaResponder from "@/pages/AmbienciaResponder";
@@ -51,7 +50,6 @@ function Router() {
       <Route path="/empresas" component={Empresas} />
       <Route path="/gestores" component={Gestores} />
       <Route path="/funcionarios" component={Funcionarios} />
-      <Route path="/formularios-experiencia/configuracao" component={ConfiguracaoFormulariosExperiencia} />
       <Route path="/formularios-experiencia/primeiro-periodo" component={() => <FormulariosExperiencia periodo="1" />} />
       <Route path="/formularios-experiencia/segundo-periodo" component={() => <FormulariosExperiencia periodo="2" />} />
       <Route path="/formularios-experiencia" component={FormulariosExperiencia} />
