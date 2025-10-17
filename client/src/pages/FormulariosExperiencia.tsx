@@ -2,7 +2,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, FileText, Plus } from "lucide-react";
+import { AlertCircle, FileText, Plus, Pencil, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,6 +17,16 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -58,6 +68,8 @@ export default function FormulariosExperiencia({ periodo }: FormulariosExperienc
   const [dialogAberto, setDialogAberto] = useState(false);
   const [nomePergunta, setNomePergunta] = useState("");
   const [obrigatoria, setObrigatoria] = useState(true);
+  const [perguntaEditando, setPerguntaEditando] = useState<any>(null);
+  const [perguntaExcluindo, setPerguntaExcluindo] = useState<any>(null);
   
   const { data: allFormularios = [], isLoading } = useQuery<FormularioExperienciaItem[]>({
     queryKey: ["/api/formularios-experiencia"],
@@ -82,23 +94,55 @@ export default function FormulariosExperiencia({ periodo }: FormulariosExperienc
       if (!template) {
         throw new Error("Template não encontrado para este período");
       }
-      const ultimaOrdem = campos.length > 0 ? Math.max(...campos.map((c) => c.ordem)) : 0;
-      return await apiRequest("POST", "/api/campos-avaliacao-experiencia", {
-        templateId: template.id,
-        nomeCampo: data.nome,
-        tipoCampo: "texto",
-        obrigatorio: data.obrigatoria ? 1 : 0,
-        ordem: ultimaOrdem + 1,
-      });
+      
+      if (perguntaEditando) {
+        // Editar pergunta existente
+        return await apiRequest("PATCH", `/api/campos-avaliacao-experiencia/${perguntaEditando.id}`, {
+          nomeCampo: data.nome,
+          obrigatorio: data.obrigatoria ? 1 : 0,
+        });
+      } else {
+        // Adicionar nova pergunta
+        const ultimaOrdem = campos.length > 0 ? Math.max(...campos.map((c) => c.ordem)) : 0;
+        return await apiRequest("POST", "/api/campos-avaliacao-experiencia", {
+          templateId: template.id,
+          nomeCampo: data.nome,
+          tipoCampo: "texto",
+          obrigatorio: data.obrigatoria ? 1 : 0,
+          ordem: ultimaOrdem + 1,
+        });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/campos-avaliacao-experiencia/template"] });
       setDialogAberto(false);
       setNomePergunta("");
       setObrigatoria(true);
+      setPerguntaEditando(null);
       toast({
         title: "Sucesso!",
-        description: "Pergunta adicionada com sucesso",
+        description: perguntaEditando ? "Pergunta atualizada com sucesso" : "Pergunta adicionada com sucesso",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deletarPerguntaMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest("DELETE", `/api/campos-avaliacao-experiencia/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/campos-avaliacao-experiencia/template"] });
+      setPerguntaExcluindo(null);
+      toast({
+        title: "Sucesso!",
+        description: "Pergunta excluída com sucesso",
       });
     },
     onError: (error: Error) => {
@@ -168,7 +212,14 @@ export default function FormulariosExperiencia({ periodo }: FormulariosExperienc
           </p>
         </div>
         {usuario?.role === "admin" && periodo && (
-          <Dialog open={dialogAberto} onOpenChange={setDialogAberto}>
+          <Dialog open={dialogAberto} onOpenChange={(open) => {
+            setDialogAberto(open);
+            if (!open) {
+              setNomePergunta("");
+              setObrigatoria(true);
+              setPerguntaEditando(null);
+            }
+          }}>
             <DialogTrigger asChild>
               <Button variant="outline" data-testid="button-adicionar-pergunta">
                 <Plus className="w-4 h-4 mr-2" />
@@ -177,9 +228,9 @@ export default function FormulariosExperiencia({ periodo }: FormulariosExperienc
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Adicionar Nova Pergunta</DialogTitle>
+                <DialogTitle>{perguntaEditando ? "Editar Pergunta" : "Adicionar Nova Pergunta"}</DialogTitle>
                 <DialogDescription>
-                  Adicione uma pergunta de texto livre ao formulário de experiência
+                  {perguntaEditando ? "Edite a pergunta do formulário de experiência" : "Adicione uma pergunta de texto livre ao formulário de experiência"}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
@@ -236,7 +287,7 @@ export default function FormulariosExperiencia({ periodo }: FormulariosExperienc
             <h3 className="text-lg font-semibold mb-4">Perguntas Configuradas ({campos.length})</h3>
             <div className="space-y-2">
               {campos.map((campo: any, index: number) => (
-                <div key={campo.id} className="flex items-start gap-3 p-3 rounded-lg border bg-muted/50">
+                <div key={campo.id} className="flex items-start gap-3 p-3 rounded-lg border bg-muted/50 group">
                   <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-sm font-semibold flex-shrink-0">
                     {index + 1}
                   </div>
@@ -257,12 +308,61 @@ export default function FormulariosExperiencia({ periodo }: FormulariosExperienc
                       )}
                     </div>
                   </div>
+                  {usuario?.role === "admin" && (
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8"
+                        onClick={() => {
+                          setPerguntaEditando(campo);
+                          setNomePergunta(campo.nomeCampo);
+                          setObrigatoria(campo.obrigatorio === 1);
+                          setDialogAberto(true);
+                        }}
+                        data-testid={`button-editar-${campo.id}`}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-red-500 hover:text-red-600"
+                        onClick={() => setPerguntaExcluindo(campo)}
+                        data-testid={`button-excluir-${campo.id}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
       )}
+
+      {/* AlertDialog para confirmar exclusão */}
+      <AlertDialog open={!!perguntaExcluindo} onOpenChange={() => setPerguntaExcluindo(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir a pergunta "{perguntaExcluindo?.nomeCampo}"? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancelar-exclusao">Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => perguntaExcluindo && deletarPerguntaMutation.mutate(perguntaExcluindo.id)}
+              className="bg-red-500 hover:bg-red-600"
+              data-testid="button-confirmar-exclusao"
+            >
+              {deletarPerguntaMutation.isPending ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {pendentes.length > 0 && (
         <div>
