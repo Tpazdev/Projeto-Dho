@@ -54,10 +54,30 @@ export const documentosGestor = pgTable("documentos_gestor", {
   observacoes: text("observacoes"),
 });
 
+export const templatesAvaliacaoExperiencia = pgTable("templates_avaliacao_experiencia", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  nome: text("nome").notNull(),
+  descricao: text("descricao"),
+  periodo: text("periodo").notNull(), // "1" ou "2"
+  ativo: integer("ativo").notNull().default(1),
+  dataCriacao: timestamp("data_criacao").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const camposAvaliacaoExperiencia = pgTable("campos_avaliacao_experiencia", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  templateId: integer("template_id").notNull().references(() => templatesAvaliacaoExperiencia.id),
+  nomeCampo: text("nome_campo").notNull(),
+  tipoCampo: text("tipo_campo").notNull(), // "texto", "numero", "escala", "multipla_escolha", "sim_nao"
+  opcoes: text("opcoes").array(), // Para múltipla escolha
+  obrigatorio: integer("obrigatorio").notNull().default(1),
+  ordem: integer("ordem").notNull(),
+});
+
 export const formulariosExperiencia = pgTable("formularios_experiencia", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   funcionarioId: integer("funcionario_id").notNull().references(() => funcionarios.id),
   gestorId: integer("gestor_id").notNull().references(() => gestores.id),
+  templateId: integer("template_id").references(() => templatesAvaliacaoExperiencia.id),
   periodo: text("periodo").notNull().default("1"),
   dataLimite: date("data_limite").notNull(),
   status: text("status").notNull().default("pendente"),
@@ -67,6 +87,15 @@ export const formulariosExperiencia = pgTable("formularios_experiencia", {
   pontosMelhoria: text("pontos_melhoria"),
   recomendacao: text("recomendacao"),
   observacoes: text("observacoes"),
+});
+
+export const respostasAvaliacaoExperiencia = pgTable("respostas_avaliacao_experiencia", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  formularioId: integer("formulario_id").notNull().references(() => formulariosExperiencia.id),
+  campoId: integer("campo_id").notNull().references(() => camposAvaliacaoExperiencia.id),
+  valorTexto: text("valor_texto"),
+  valorNumero: integer("valor_numero"),
+  dataResposta: timestamp("data_resposta").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const pesquisasClima = pgTable("pesquisas_clima", {
@@ -222,7 +251,13 @@ export const insertDocumentoFuncionarioSchema = createInsertSchema(documentosFun
 
 export const insertDocumentoGestorSchema = createInsertSchema(documentosGestor).omit({ id: true });
 
+export const insertTemplateAvaliacaoExperienciaSchema = createInsertSchema(templatesAvaliacaoExperiencia).omit({ id: true, dataCriacao: true });
+
+export const insertCampoAvaliacaoExperienciaSchema = createInsertSchema(camposAvaliacaoExperiencia).omit({ id: true });
+
 export const insertFormularioExperienciaSchema = createInsertSchema(formulariosExperiencia).omit({ id: true });
+
+export const insertRespostaAvaliacaoExperienciaSchema = createInsertSchema(respostasAvaliacaoExperiencia).omit({ id: true, dataResposta: true });
 
 export const insertPesquisaClimaSchema = createInsertSchema(pesquisasClima).omit({ id: true });
 
@@ -266,8 +301,17 @@ export type DocumentoFuncionario = typeof documentosFuncionario.$inferSelect;
 export type InsertDocumentoGestor = z.infer<typeof insertDocumentoGestorSchema>;
 export type DocumentoGestor = typeof documentosGestor.$inferSelect;
 
+export type InsertTemplateAvaliacaoExperiencia = z.infer<typeof insertTemplateAvaliacaoExperienciaSchema>;
+export type TemplateAvaliacaoExperiencia = typeof templatesAvaliacaoExperiencia.$inferSelect;
+
+export type InsertCampoAvaliacaoExperiencia = z.infer<typeof insertCampoAvaliacaoExperienciaSchema>;
+export type CampoAvaliacaoExperiencia = typeof camposAvaliacaoExperiencia.$inferSelect;
+
 export type InsertFormularioExperiencia = z.infer<typeof insertFormularioExperienciaSchema>;
 export type FormularioExperiencia = typeof formulariosExperiencia.$inferSelect;
+
+export type InsertRespostaAvaliacaoExperiencia = z.infer<typeof insertRespostaAvaliacaoExperienciaSchema>;
+export type RespostaAvaliacaoExperiencia = typeof respostasAvaliacaoExperiencia.$inferSelect;
 
 export type InsertPesquisaClima = z.infer<typeof insertPesquisaClimaSchema>;
 export type PesquisaClima = typeof pesquisasClima.$inferSelect;
