@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEmpresaSchema, insertGestorSchema, insertFuncionarioSchema, insertDesligamentoSchema, insertDocumentoFuncionarioSchema, insertDocumentoGestorSchema, insertFormularioExperienciaSchema, insertPesquisaClimaSchema, insertPerguntaClimaSchema, insertRespostaClimaSchema, insertTreinamentoSchema, insertTreinamentoParticipanteSchema, insertPdiSchema, insertPdiMetaSchema, insertPdiCompetenciaSchema, insertPdiAcaoSchema, insertQuestionarioDesligamentoSchema, insertPerguntaDesligamentoSchema, insertRespostaDesligamentoSchema, insertUsuarioSchema } from "@shared/schema";
+import { insertEmpresaSchema, insertGestorSchema, insertFuncionarioSchema, insertDesligamentoSchema, insertDocumentoFuncionarioSchema, insertDocumentoGestorSchema, insertTemplateAvaliacaoExperienciaSchema, insertCampoAvaliacaoExperienciaSchema, insertFormularioExperienciaSchema, insertRespostaAvaliacaoExperienciaSchema, insertPesquisaClimaSchema, insertPerguntaClimaSchema, insertRespostaClimaSchema, insertTreinamentoSchema, insertTreinamentoParticipanteSchema, insertPdiSchema, insertPdiMetaSchema, insertPdiCompetenciaSchema, insertPdiAcaoSchema, insertQuestionarioDesligamentoSchema, insertPerguntaDesligamentoSchema, insertRespostaDesligamentoSchema, insertUsuarioSchema } from "@shared/schema";
 import { hashPassword, comparePassword, generateAccessToken, generateRefreshToken, hashToken, getRefreshTokenExpiry, verifyAccessToken } from "./auth";
 import { requireAuth, requireRole, requireNotAdmin } from "./middleware";
 import { z } from "zod";
@@ -681,6 +681,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(formulario);
     } catch (error) {
       res.status(400).json({ error: "Erro ao atualizar formulário" });
+    }
+  });
+
+  app.get("/api/templates-avaliacao-experiencia", requireAuth, async (req, res) => {
+    try {
+      const templates = await storage.getTemplatesAvaliacaoExperiencia();
+      res.json(templates);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar templates" });
+    }
+  });
+
+  app.get("/api/templates-avaliacao-experiencia/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const template = await storage.getTemplateAvaliacaoExperiencia(id);
+      if (!template) {
+        return res.status(404).json({ error: "Template não encontrado" });
+      }
+      res.json(template);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar template" });
+    }
+  });
+
+  app.get("/api/templates-avaliacao-experiencia/periodo/:periodo", requireAuth, async (req, res) => {
+    try {
+      const periodo = req.params.periodo;
+      const template = await storage.getTemplateAvaliacaoExperienciaByPeriodo(periodo);
+      res.json(template || null);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar template por período" });
+    }
+  });
+
+  app.post("/api/templates-avaliacao-experiencia", requireAuth, async (req, res) => {
+    try {
+      const validated = insertTemplateAvaliacaoExperienciaSchema.parse(req.body);
+      const template = await storage.createTemplateAvaliacaoExperiencia(validated);
+      res.json(template);
+    } catch (error) {
+      res.status(400).json({ error: "Dados inválidos" });
+    }
+  });
+
+  app.patch("/api/templates-avaliacao-experiencia/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const template = await storage.updateTemplateAvaliacaoExperiencia(id, req.body);
+      res.json(template);
+    } catch (error) {
+      res.status(400).json({ error: "Erro ao atualizar template" });
+    }
+  });
+
+  app.delete("/api/templates-avaliacao-experiencia/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteTemplateAvaliacaoExperiencia(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(400).json({ error: "Erro ao deletar template" });
+    }
+  });
+
+  app.get("/api/campos-avaliacao-experiencia/template/:templateId", requireAuth, async (req, res) => {
+    try {
+      const templateId = parseInt(req.params.templateId);
+      const campos = await storage.getCamposByTemplate(templateId);
+      res.json(campos);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar campos" });
+    }
+  });
+
+  app.post("/api/campos-avaliacao-experiencia", requireAuth, async (req, res) => {
+    try {
+      const validated = insertCampoAvaliacaoExperienciaSchema.parse(req.body);
+      const campo = await storage.createCampoAvaliacaoExperiencia(validated);
+      res.json(campo);
+    } catch (error) {
+      res.status(400).json({ error: "Dados inválidos" });
+    }
+  });
+
+  app.patch("/api/campos-avaliacao-experiencia/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const campo = await storage.updateCampoAvaliacaoExperiencia(id, req.body);
+      res.json(campo);
+    } catch (error) {
+      res.status(400).json({ error: "Erro ao atualizar campo" });
+    }
+  });
+
+  app.delete("/api/campos-avaliacao-experiencia/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteCampoAvaliacaoExperiencia(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(400).json({ error: "Erro ao deletar campo" });
+    }
+  });
+
+  app.get("/api/respostas-avaliacao-experiencia/formulario/:formularioId", requireAuth, async (req, res) => {
+    try {
+      const formularioId = parseInt(req.params.formularioId);
+      const respostas = await storage.getRespostasByFormulario(formularioId);
+      res.json(respostas);
+    } catch (error) {
+      res.status(500).json({ error: "Erro ao buscar respostas" });
+    }
+  });
+
+  app.post("/api/respostas-avaliacao-experiencia", requireAuth, async (req, res) => {
+    try {
+      const validated = insertRespostaAvaliacaoExperienciaSchema.parse(req.body);
+      const resposta = await storage.createRespostaAvaliacaoExperiencia(validated);
+      res.json(resposta);
+    } catch (error) {
+      res.status(400).json({ error: "Dados inválidos" });
     }
   });
 
