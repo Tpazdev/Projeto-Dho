@@ -5,7 +5,10 @@ import {
   desligamentos,
   documentosFuncionario,
   documentosGestor,
+  templatesAvaliacaoExperiencia,
+  camposAvaliacaoExperiencia,
   formulariosExperiencia,
+  respostasAvaliacaoExperiencia,
   pesquisasClima,
   perguntasClima,
   respostasClima,
@@ -32,8 +35,14 @@ import {
   type InsertDocumentoFuncionario,
   type DocumentoGestor,
   type InsertDocumentoGestor,
+  type TemplateAvaliacaoExperiencia,
+  type InsertTemplateAvaliacaoExperiencia,
+  type CampoAvaliacaoExperiencia,
+  type InsertCampoAvaliacaoExperiencia,
   type FormularioExperiencia,
   type InsertFormularioExperiencia,
+  type RespostaAvaliacaoExperiencia,
+  type InsertRespostaAvaliacaoExperiencia,
   type PesquisaClima,
   type InsertPesquisaClima,
   type PerguntaClima,
@@ -97,12 +106,28 @@ export interface IStorage {
   getDocumentosByGestor(gestorId: number): Promise<DocumentoGestor[]>;
   deleteDocumentoGestor(id: number): Promise<void>;
 
+  createTemplateAvaliacaoExperiencia(template: InsertTemplateAvaliacaoExperiencia): Promise<TemplateAvaliacaoExperiencia>;
+  getTemplatesAvaliacaoExperiencia(): Promise<TemplateAvaliacaoExperiencia[]>;
+  getTemplateAvaliacaoExperiencia(id: number): Promise<TemplateAvaliacaoExperiencia | undefined>;
+  getTemplateAvaliacaoExperienciaByPeriodo(periodo: string): Promise<TemplateAvaliacaoExperiencia | undefined>;
+  updateTemplateAvaliacaoExperiencia(id: number, data: Partial<InsertTemplateAvaliacaoExperiencia>): Promise<TemplateAvaliacaoExperiencia>;
+  deleteTemplateAvaliacaoExperiencia(id: number): Promise<void>;
+
+  createCampoAvaliacaoExperiencia(campo: InsertCampoAvaliacaoExperiencia): Promise<CampoAvaliacaoExperiencia>;
+  getCamposByTemplate(templateId: number): Promise<CampoAvaliacaoExperiencia[]>;
+  updateCampoAvaliacaoExperiencia(id: number, data: Partial<InsertCampoAvaliacaoExperiencia>): Promise<CampoAvaliacaoExperiencia>;
+  deleteCampoAvaliacaoExperiencia(id: number): Promise<void>;
+
   createFormularioExperiencia(formulario: InsertFormularioExperiencia): Promise<FormularioExperiencia>;
   getFormulariosExperiencia(): Promise<any[]>;
   getFormularioExperiencia(id: number): Promise<FormularioExperiencia | undefined>;
   getFormulariosExperienciaPendentes(): Promise<any[]>;
   getFormulariosExperienciaByGestor(gestorId: number): Promise<any[]>;
   updateFormularioExperiencia(id: number, data: Partial<InsertFormularioExperiencia>): Promise<FormularioExperiencia>;
+
+  createRespostaAvaliacaoExperiencia(resposta: InsertRespostaAvaliacaoExperiencia): Promise<RespostaAvaliacaoExperiencia>;
+  getRespostasByFormulario(formularioId: number): Promise<RespostaAvaliacaoExperiencia[]>;
+  deleteRespostasByFormulario(formularioId: number): Promise<void>;
 
   createPesquisaClima(pesquisa: InsertPesquisaClima): Promise<PesquisaClima>;
   getPesquisasClima(): Promise<PesquisaClima[]>;
@@ -357,6 +382,81 @@ export class DatabaseStorage implements IStorage {
     await db.delete(documentosGestor).where(eq(documentosGestor.id, id));
   }
 
+  async createTemplateAvaliacaoExperiencia(data: InsertTemplateAvaliacaoExperiencia): Promise<TemplateAvaliacaoExperiencia> {
+    const [template] = await db
+      .insert(templatesAvaliacaoExperiencia)
+      .values(data)
+      .returning();
+    return template;
+  }
+
+  async getTemplatesAvaliacaoExperiencia(): Promise<TemplateAvaliacaoExperiencia[]> {
+    return await db.select().from(templatesAvaliacaoExperiencia).orderBy(templatesAvaliacaoExperiencia.dataCriacao);
+  }
+
+  async getTemplateAvaliacaoExperiencia(id: number): Promise<TemplateAvaliacaoExperiencia | undefined> {
+    const [template] = await db
+      .select()
+      .from(templatesAvaliacaoExperiencia)
+      .where(eq(templatesAvaliacaoExperiencia.id, id));
+    return template || undefined;
+  }
+
+  async getTemplateAvaliacaoExperienciaByPeriodo(periodo: string): Promise<TemplateAvaliacaoExperiencia | undefined> {
+    const [template] = await db
+      .select()
+      .from(templatesAvaliacaoExperiencia)
+      .where(and(
+        eq(templatesAvaliacaoExperiencia.periodo, periodo),
+        eq(templatesAvaliacaoExperiencia.ativo, 1)
+      ))
+      .orderBy(templatesAvaliacaoExperiencia.dataCriacao)
+      .limit(1);
+    return template || undefined;
+  }
+
+  async updateTemplateAvaliacaoExperiencia(id: number, data: Partial<InsertTemplateAvaliacaoExperiencia>): Promise<TemplateAvaliacaoExperiencia> {
+    const [updated] = await db
+      .update(templatesAvaliacaoExperiencia)
+      .set(data)
+      .where(eq(templatesAvaliacaoExperiencia.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteTemplateAvaliacaoExperiencia(id: number): Promise<void> {
+    await db.delete(templatesAvaliacaoExperiencia).where(eq(templatesAvaliacaoExperiencia.id, id));
+  }
+
+  async createCampoAvaliacaoExperiencia(data: InsertCampoAvaliacaoExperiencia): Promise<CampoAvaliacaoExperiencia> {
+    const [campo] = await db
+      .insert(camposAvaliacaoExperiencia)
+      .values(data)
+      .returning();
+    return campo;
+  }
+
+  async getCamposByTemplate(templateId: number): Promise<CampoAvaliacaoExperiencia[]> {
+    return await db
+      .select()
+      .from(camposAvaliacaoExperiencia)
+      .where(eq(camposAvaliacaoExperiencia.templateId, templateId))
+      .orderBy(camposAvaliacaoExperiencia.ordem);
+  }
+
+  async updateCampoAvaliacaoExperiencia(id: number, data: Partial<InsertCampoAvaliacaoExperiencia>): Promise<CampoAvaliacaoExperiencia> {
+    const [updated] = await db
+      .update(camposAvaliacaoExperiencia)
+      .set(data)
+      .where(eq(camposAvaliacaoExperiencia.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteCampoAvaliacaoExperiencia(id: number): Promise<void> {
+    await db.delete(camposAvaliacaoExperiencia).where(eq(camposAvaliacaoExperiencia.id, id));
+  }
+
   async createFormularioExperiencia(data: InsertFormularioExperiencia): Promise<FormularioExperiencia> {
     const [formulario] = await db
       .insert(formulariosExperiencia)
@@ -454,6 +554,25 @@ export class DatabaseStorage implements IStorage {
       .where(eq(formulariosExperiencia.id, id))
       .returning();
     return formulario;
+  }
+
+  async createRespostaAvaliacaoExperiencia(data: InsertRespostaAvaliacaoExperiencia): Promise<RespostaAvaliacaoExperiencia> {
+    const [resposta] = await db
+      .insert(respostasAvaliacaoExperiencia)
+      .values(data)
+      .returning();
+    return resposta;
+  }
+
+  async getRespostasByFormulario(formularioId: number): Promise<RespostaAvaliacaoExperiencia[]> {
+    return await db
+      .select()
+      .from(respostasAvaliacaoExperiencia)
+      .where(eq(respostasAvaliacaoExperiencia.formularioId, formularioId));
+  }
+
+  async deleteRespostasByFormulario(formularioId: number): Promise<void> {
+    await db.delete(respostasAvaliacaoExperiencia).where(eq(respostasAvaliacaoExperiencia.formularioId, formularioId));
   }
 
   async createPesquisaClima(data: InsertPesquisaClima): Promise<PesquisaClima> {
