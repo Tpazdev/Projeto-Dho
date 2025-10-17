@@ -79,15 +79,15 @@ export default function QuestionariosPreenchidos({ tipoDesligamento }: Questiona
     dataDesligamento: string;
   } | null>(null);
 
-  // Redirect non-admin users
+  // Redirect non-authorized users (apenas funcionários)
   useEffect(() => {
-    if (usuario && usuario.role !== "admin") {
+    if (usuario && usuario.role !== "admin" && usuario.role !== "gestor") {
       navigate("/dashboard");
     }
   }, [usuario, navigate]);
 
   // Show nothing while checking permissions
-  if (!usuario || usuario.role !== "admin") {
+  if (!usuario || (usuario.role !== "admin" && usuario.role !== "gestor")) {
     return null;
   }
 
@@ -155,9 +155,9 @@ export default function QuestionariosPreenchidos({ tipoDesligamento }: Questiona
       {errorDesligamentosComRespostas && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Erro de Permissão</AlertTitle>
+          <AlertTitle>Erro ao Carregar Dados</AlertTitle>
           <AlertDescription>
-            Você não tem permissão para acessar esta funcionalidade. Apenas administradores podem visualizar questionários preenchidos.
+            Não foi possível carregar os questionários preenchidos. Tente novamente mais tarde.
           </AlertDescription>
         </Alert>
       )}

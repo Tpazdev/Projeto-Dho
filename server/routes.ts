@@ -1414,7 +1414,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/respostas-desligamento/:desligamentoId", requireAuth, requireRole(["admin"]), async (req, res) => {
+  app.get("/api/respostas-desligamento/:desligamentoId", requireAuth, requireRole(["admin", "gestor"]), async (req, res) => {
     try {
       const desligamentoId = parseInt(req.params.desligamentoId);
       const respostas = await storage.getRespostasByDesligamento(desligamentoId);
@@ -1424,7 +1424,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/desligamentos-com-respostas", requireAuth, requireRole(["admin"]), async (req, res) => {
+  app.get("/api/desligamentos-com-respostas", requireAuth, requireRole(["admin", "gestor"]), async (req, res) => {
     try {
       const desligamentosComRespostas = await storage.getDesligamentosComRespostas();
       res.json(desligamentosComRespostas);
