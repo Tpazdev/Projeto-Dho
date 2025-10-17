@@ -339,7 +339,7 @@ export default function Treinamentos() {
               <GraduationCap className="h-16 w-16 text-muted-foreground mb-4 mx-auto" />
               <p className="text-lg text-muted-foreground" data-testid="text-empty-state">
                 {treinamentos.length === 0 
-                  ? "Nenhum treinamento cadastrado"
+                  ? "Em Desenvolvimento"
                   : "Nenhum treinamento encontrado com esse termo de busca"}
               </p>
             </div>
