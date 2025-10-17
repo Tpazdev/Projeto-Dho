@@ -230,6 +230,40 @@ export default function FormulariosExperiencia({ periodo }: FormulariosExperienc
         )}
       </div>
 
+      {periodo && campos.length > 0 && (
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold mb-4">Perguntas Configuradas ({campos.length})</h3>
+            <div className="space-y-2">
+              {campos.map((campo: any, index: number) => (
+                <div key={campo.id} className="flex items-start gap-3 p-3 rounded-lg border bg-muted/50">
+                  <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-sm font-semibold flex-shrink-0">
+                    {index + 1}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium">{campo.nomeCampo}</p>
+                    <div className="flex gap-2 mt-1">
+                      <Badge variant="outline" className="text-xs">
+                        {campo.tipoCampo === 'texto' ? 'Texto Livre' : 
+                         campo.tipoCampo === 'escala' ? 'Escala 1-10' :
+                         campo.tipoCampo === 'sim_nao' ? 'Sim/Não' :
+                         campo.tipoCampo === 'multipla_escolha' ? 'Múltipla Escolha' : 
+                         campo.tipoCampo}
+                      </Badge>
+                      {campo.obrigatorio === 1 && (
+                        <Badge variant="outline" className="text-xs bg-red-500/10 text-red-500 border-red-500/20">
+                          Obrigatória
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {pendentes.length > 0 && (
         <div>
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2" data-testid="text-section-pendentes">

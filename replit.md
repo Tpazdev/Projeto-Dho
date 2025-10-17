@@ -33,8 +33,9 @@ The system uses a PostgreSQL database, managed with Drizzle ORM for type-safe sc
 
 - **User Authentication and Access Control**: Secure JWT-based authentication with role-based access control (Admin, Gestor, Funcionario), refresh token rotation, and robust middleware protection.
 - **Internal Termination Questionnaires**: Platform-based forms with dynamic question rendering, supporting various question types (text, multiple choice, scale, date), and token-based public access for employees.
-- **Experience Evaluation Period Management**: Two distinct evaluation periods (30 and 60 days) for probationary employees, with list/table layouts for pending and filled evaluations.
+- **Experience Evaluation Period Management**: Two distinct evaluation periods (30 and 60 days) for probationary employees, with list/table layouts for pending and filled evaluations. Includes customizable question system with in-page management - admins can add text-based questions directly from the evaluation pages without accessing a separate configuration screen.
 - **Training Effectiveness Evaluation**: Submenu for evaluating completed training programs, tracking participant evaluations, and visual status badges.
+- **Customizable Experience Evaluation Questions**: Database-backed system with templates_avaliacao_experiencia and campos_avaliacao_experiencia tables supporting 5 field types (texto, número, escala 1-10, múltipla escolha, sim/não). Admins can add, edit, and view questions directly within the evaluation period pages via an "Adicionar Pergunta" button.
 
 ## External Dependencies
 
