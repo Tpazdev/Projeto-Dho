@@ -32,10 +32,7 @@ export default function ConfiguracaoFormulariosExperiencia() {
 
   const criarTemplateMutation = useMutation({
     mutationFn: async (data: { nome: string; descricao: string; periodo: string }) => {
-      return await apiRequest(`/api/templates-avaliacao-experiencia`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      return await apiRequest("POST", `/api/templates-avaliacao-experiencia`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/templates-avaliacao-experiencia"] });
@@ -49,15 +46,9 @@ export default function ConfiguracaoFormulariosExperiencia() {
   const criarCampoMutation = useMutation({
     mutationFn: async (data: any) => {
       if (campoEditando) {
-        return await apiRequest(`/api/campos-avaliacao-experiencia/${campoEditando.id}`, {
-          method: "PATCH",
-          body: JSON.stringify(data),
-        });
+        return await apiRequest("PATCH", `/api/campos-avaliacao-experiencia/${campoEditando.id}`, data);
       }
-      return await apiRequest(`/api/campos-avaliacao-experiencia`, {
-        method: "POST",
-        body: JSON.stringify({ ...data, templateId: templateAtual?.id }),
-      });
+      return await apiRequest("POST", `/api/campos-avaliacao-experiencia`, { ...data, templateId: templateAtual?.id });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/campos-avaliacao-experiencia/template", templateAtual?.id] });
@@ -72,9 +63,7 @@ export default function ConfiguracaoFormulariosExperiencia() {
 
   const deletarCampoMutation = useMutation({
     mutationFn: async (id: number) => {
-      return await apiRequest(`/api/campos-avaliacao-experiencia/${id}`, {
-        method: "DELETE",
-      });
+      return await apiRequest("DELETE", `/api/campos-avaliacao-experiencia/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/campos-avaliacao-experiencia/template", templateAtual?.id] });
